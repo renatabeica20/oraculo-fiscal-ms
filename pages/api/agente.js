@@ -118,6 +118,11 @@ TVF em nome do DESTINATÁRIO: quando o remetente não tem IE no MS e o destinat�
 TVF — REGRA GERAL: sujeito passivo (remetente OU destinatário) com IE ativa no MS. Contribuinte tem domicílio tributário identificado, pode ser cobrado posteriormente.
 TA — EXCEÇÃO: sem IE no MS, clandestino, impossível identificar responsável, risco de perecimento ou desaparecimento da prova.
 
+## IDENTIFICAÇÃO DE IE DO MS
+IE do Estado de Mato Grosso do Sul SEMPRE começa com o dígito 28.
+IE que começa com qualquer outro número (ex: 78, 35, 62, 12...) é de outro estado — o contribuinte NÃO tem inscrição estadual no MS.
+Ao analisar IE informada pelo fiscal: se não começar com 28, tratar como contribuinte sem IE no MS para fins de TVF vs TA.
+
 ## ALÍQUOTAS — ART. 41, LEI 1.810/97
 17% — operações internas e importações (art. 41, III, "a"). Aplicar quando origem desconhecida ou não comprovada — cabe ao sujeito passivo demonstrar direito à alíquota interestadual na impugnação.
 12% — operações interestaduais comprovadas (art. 41, I, "a")
@@ -135,10 +140,14 @@ Mercadoria tributada + doc inidônea (operação interna):
 Art. 117, III, "a", item 1 c/c §16, I, "a" = multa de 100% do ICMS devido.
 
 Falta ou irregularidade do MDF-e — Art. 117, IV, "x", 5:
-Multa em UFERMS, progressiva conforme valor da carga:
-— Até 446,99 UFERMS: 25 UFERMS
-— De 447 a 2.499,99 UFERMS: 100 UFERMS
-— A partir de 2.500 UFERMS: 150 UFERMS
+Multa em UFERMS, progressiva conforme valor total dos documentos fiscais (NF-e) vinculados:
+— Até R$ 10.998,00: 10 UFERMS
+— De R$ 10.998,01 até R$ 27.495,00: 25 UFERMS
+— De R$ 27.495,01 até R$ 54.990,00: 50 UFERMS
+— De R$ 54.990,01 até R$ 109.980,00: 100 UFERMS
+— De R$ 109.980,01 até R$ 203.463,00: 150 UFERMS
+— Acima de R$ 203.463,01: 200 UFERMS
+IMPORTANTE: informar apenas o número de UFERMS aplicável conforme a faixa. Não calcular valor em reais — a conversão depende da UFERMS vigente no mês da lavratura, que pode variar.
 Hipóteses: ausência de MDF-e obrigatório (intermunicipal: art. 3º, I, Subanexo XVII; interestadual: art. 3º, II); MDF-e não encerrado quando já em nova viagem; transporte de forma diversa da declarada no MDF-e.
 
 Apenas multa sem ICMS — mercadorias em regime de SUBSTITUIÇÃO TRIBUTÁRIA: o imposto já foi recolhido antecipadamente. A infração existe (inidoneidade documental), o crédito tributário é composto exclusivamente de penalidade, calculada sobre o valor total da operação.
@@ -557,7 +566,9 @@ Estrutura obrigatória em parágrafos corridos:
 3. MERCADORIA: descrição, quantidade, valor declarado ou arbitrado
    EXCEÇÃO MDF-e: quando a infração for "Falta de MDF-e" ou "MDF-e Inidôneo", OMITIR este parágrafo. A base da penalidade são os valores das NF-e vinculadas, não a descrição da mercadoria. Substituir por: identificação das NF-e (chaves de acesso) e valor total dos documentos fiscais.
 4. IRREGULARIDADE + ENQUADRAMENTO: o que está errado + artigo aplicável + sujeito passivo responsável
-5. CRÉDITO TRIBUTÁRIO: para MDF-e usar a tabela de UFERMS do art. 117, IV, "x" — calcular com base no valor total das NF-e vinculadas convertido em UFERMS, aplicar a faixa correta (até 446,99 UFERMS: 25 UFERMS; de 447 a 2.499,99 UFERMS: 100 UFERMS; a partir de 2.500 UFERMS: 150 UFERMS). Para demais infrações: BC, alíquota, ICMS, multa (art. 117), total e reduções do art. 118
+5. CRÉDITO TRIBUTÁRIO:
+   — Para MDF-e: identificar o valor total das NF-e vinculadas, enquadrar na faixa da tabela do art. 117, IV, "x", e informar APENAS o número de UFERMS correspondente (ex: "multa de 25 UFERMS"). NÃO converter para reais — a UFERMS vigente varia por mês e é de responsabilidade do sistema da SEFAZ.
+   — Para demais infrações: BC, alíquota, ICMS, multa (art. 117), total e reduções do art. 118
 
 Regras de redação:
 - Português formal, sem caixa alta excessiva, sem subtítulos, sem negrito — texto corrido
