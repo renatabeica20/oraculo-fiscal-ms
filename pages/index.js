@@ -296,6 +296,82 @@ function BtnVoltar({ onClick }) {
   )
 }
 
+function CampoChavesMdfe({ form, setForm }) {
+  const itens = form.chaves_nf && form.chaves_nf.length > 0 && typeof form.chaves_nf[0] === 'object'
+    ? form.chaves_nf
+    : [{ chave: '', valor: '' }]
+
+  const setItem = (i, campo, val) => {
+    const novos = [...itens]
+    novos[i] = { ...novos[i], [campo]: val }
+    setForm(f => ({ ...f, chaves_nf: novos }))
+  }
+
+  const addItem = () => setForm(f => ({ ...f, chaves_nf: [...itens, { chave: '', valor: '' }] }))
+  const removeItem = (i) => setForm(f => ({ ...f, chaves_nf: itens.filter((_, idx) => idx !== i) }))
+
+  const totalNF = itens.reduce((acc, it) => {
+    const num = parseFloat((it.valor || '').replace(/\./g, '').replace(',', '.'))
+    return acc + (isNaN(num) ? 0 : num)
+  }, 0)
+
+  const totalFormatado = totalNF.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+  return (
+    <div>
+      <label style={labelStyle}>NF-e vinculadas ao MDF-e</label>
+      {itens.map((it, i) => (
+        <div key={i} style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '12px', marginBottom: '10px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.7rem', color: '#5a6a7a' }}>NF-e {i + 1}</span>
+            {itens.length > 1 && (
+              <button onClick={() => removeItem(i)} style={{ background: 'none', border: 'none', color: '#c87070', cursor: 'pointer', fontSize: '0.85rem', padding: '2px 6px' }}>✕</button>
+            )}
+          </div>
+          <Campo label="Chave de acesso (44 dígitos)">
+            <InputComFocus
+              style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.76rem', letterSpacing: '0.03em' }}
+              value={it.chave}
+              onChange={e => setItem(i, 'chave', e.target.value.replace(/\D/g, '').substring(0, 44))}
+              placeholder="44 dígitos da chave de acesso"
+              inputMode="numeric"
+            />
+          </Campo>
+          <Campo label="Valor da NF-e (R$)">
+            <InputComFocus
+              style={inputStyle}
+              value={it.valor}
+              onChange={e => setItem(i, 'valor', mascaraValor(e.target.value))}
+              placeholder="0,00"
+              inputMode="numeric"
+            />
+          </Campo>
+        </div>
+      ))}
+      <button onClick={addItem} style={{
+        background: 'rgba(201,168,76,0.08)', border: '1px dashed rgba(201,168,76,0.3)',
+        borderRadius: '8px', color: '#c9a84c', padding: '10px', cursor: 'pointer',
+        fontFamily: "'DM Sans', sans-serif", fontSize: '0.78rem',
+        width: '100%', marginBottom: '12px'
+      }}>+ Adicionar NF-e</button>
+      {itens.some(it => it.valor) && (
+        <div style={{
+          background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.2)',
+          borderRadius: '8px', padding: '10px 14px',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+        }}>
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#7a9ab8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            Valor total dos documentos fiscais
+          </span>
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.95rem', color: '#c9a84c', fontWeight: 700 }}>
+            R$ {totalFormatado}
+          </span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const INCISOS = [
   { value: 'confeccionada sem AIDF (art. 93, I)', label: 'I — Sem AIDF' },
   { value: 'com fraude comprovada (art. 93, II)', label: 'II — Fraude comprovada' },
@@ -388,82 +464,12 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
                 ))}
               </div>
             </Campo>
-            <Campo label="Chaves das NF-e vinculadas ao MDF-e">
-              {(form.chaves_nf || ['']).map((chave, i) => (
-                <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                  <InputComFocus
-                    style={{ ...inputStyle, flex: 1, fontFamily: 'monospace', fontSize: '0.78rem', letterSpacing: '0.03em' }}
-                    value={chave}
-                    onChange={e => {
-                      const novas = [...(form.chaves_nf || [''])]
-                      novas[i] = e.target.value.replace(/\D/g, '').substring(0, 44)
-                      setForm(f => ({ ...f, chaves_nf: novas }))
-                    }}
-                    placeholder="44 dígitos da chave de acesso da NF-e"
-                    inputMode="numeric"
-                  />
-                  {i === 0 ? (
-                    <button onClick={() => setForm(f => ({ ...f, chaves_nf: [...(f.chaves_nf || ['']), ''] }))}
-                      style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '6px', color: '#c9a84c', padding: '8px 12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', whiteSpace: 'nowrap' }}>
-                      + Chave
-                    </button>
-                  ) : (
-                    <button onClick={() => setForm(f => ({ ...f, chaves_nf: (f.chaves_nf || ['']).filter((_, idx) => idx !== i) }))}
-                      style={{ background: 'none', border: 'none', color: '#c87070', cursor: 'pointer', fontSize: '1rem', padding: '4px 8px' }}>✕</button>
-                  )}
-                </div>
-              ))}
-            </Campo>
-            <Campo label="Valor total dos documentos fiscais (R$)">
-              <InputComFocus
-                style={inputStyle}
-                value={form.valor_total_mdfe || ''}
-                onChange={e => setForm(f => ({ ...f, valor_total_mdfe: mascaraValor(e.target.value) }))}
-                placeholder="0,00"
-                inputMode="numeric"
-              />
-            </Campo>
+            <CampoChavesMdfe form={form} setForm={setForm} />
           </>
         )}
 
         {form.infracao === 'mdfe_inidonio' && (
-          <>
-            <Campo label="Chaves das NF-e vinculadas ao MDF-e">
-              {(form.chaves_nf || ['']).map((chave, i) => (
-                <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                  <InputComFocus
-                    style={{ ...inputStyle, flex: 1, fontFamily: 'monospace', fontSize: '0.78rem', letterSpacing: '0.03em' }}
-                    value={chave}
-                    onChange={e => {
-                      const novas = [...(form.chaves_nf || [''])]
-                      novas[i] = e.target.value.replace(/\D/g, '').substring(0, 44)
-                      setForm(f => ({ ...f, chaves_nf: novas }))
-                    }}
-                    placeholder="44 dígitos da chave de acesso da NF-e"
-                    inputMode="numeric"
-                  />
-                  {i === 0 ? (
-                    <button onClick={() => setForm(f => ({ ...f, chaves_nf: [...(f.chaves_nf || ['']), ''] }))}
-                      style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '6px', color: '#c9a84c', padding: '8px 12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', whiteSpace: 'nowrap' }}>
-                      + Chave
-                    </button>
-                  ) : (
-                    <button onClick={() => setForm(f => ({ ...f, chaves_nf: (f.chaves_nf || ['']).filter((_, idx) => idx !== i) }))}
-                      style={{ background: 'none', border: 'none', color: '#c87070', cursor: 'pointer', fontSize: '1rem', padding: '4px 8px' }}>✕</button>
-                  )}
-                </div>
-              ))}
-            </Campo>
-            <Campo label="Valor total dos documentos fiscais (R$)">
-              <InputComFocus
-                style={inputStyle}
-                value={form.valor_total_mdfe || ''}
-                onChange={e => setForm(f => ({ ...f, valor_total_mdfe: mascaraValor(e.target.value) }))}
-                placeholder="0,00"
-                inputMode="numeric"
-              />
-            </Campo>
-          </>
+          <CampoChavesMdfe form={form} setForm={setForm} />
         )}
 
         {tipo === 'TA' && (
@@ -772,9 +778,16 @@ function montarMensagemTVF(form) {
     infracao = 'MDF-e Inidôneo'
   }
 
+  const itensMdfe = (form.chaves_nf || []).filter(it => typeof it === 'object' ? it.chave : it)
+  const totalMdfe = itensMdfe.reduce((acc, it) => {
+    const num = parseFloat((it.valor || '').replace(/\./g, '').replace(',', '.'))
+    return acc + (isNaN(num) ? 0 : num)
+  }, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
   const dadosMdfe = (form.infracao === 'falta_mdfe' || form.infracao === 'mdfe_inidonio') ? `
-Chaves NF-e vinculadas: ${(form.chaves_nf || []).filter(c => c).join(', ') || 'não informadas'}
-Valor total dos documentos fiscais: R$ ${form.valor_total_mdfe || '0,00'}` : ''
+Documentos fiscais vinculados (${itensMdfe.length} NF-e):
+${itensMdfe.map((it, i) => `  NF-e ${i+1}: Chave ${it.chave || 'não informada'} — Valor: R$ ${it.valor || '0,00'}`).join('\n')}
+Valor total dos documentos fiscais: R$ ${totalMdfe}` : ''
 
   return `GERAR TVF com os seguintes dados:
 Data: ${form.data}
@@ -896,8 +909,7 @@ export default function Home() {
     infracao: 'sem_documento',
     motivo_inidonia: '',
     tipo_mdfe: 'falta_emissao',
-    chaves_nf: [''],
-    valor_total_mdfe: '',
+    chaves_nf: [{ chave: '', valor: '' }],
     obs: ''
   })
   const [formTA, setFormTA] = useState({
@@ -1310,7 +1322,7 @@ export default function Home() {
       setModoOrigem(null)
       setMsgCopiada(null)
       setFormContestacao({ tipo: 'contestacao', numero_doc: '', contribuinte: '', ie_contrib: '', cnpj_contrib: '', destinatario: '', texto_tvf: '', texto_contribuinte: '' })
-      setFormTVF({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', tipo_mdfe: 'falta_emissao', chaves_nf: [''], valor_total_mdfe: '', obs: '' })
+      setFormTVF({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', tipo_mdfe: 'falta_emissao', chaves_nf: [{ chave: '', valor: '' }], obs: '' })
       setFormTA({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', documentos: '', mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', responsavel: 'transportador', obs: '' })
       if (sessaoIdRef.current) {
         supabase
