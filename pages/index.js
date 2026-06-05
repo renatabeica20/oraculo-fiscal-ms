@@ -575,7 +575,7 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
         </Campo>
         <Grid cols={2}>
           <Campo label="IE (Inscrição Estadual)">
-            <InputComFocus style={inputStyle} value={form.ie} onChange={e => setForm(f => ({ ...f, ie: mascaraIE(e.target.value) }))} placeholder="00.000.000-0" />
+            <InputComFocus style={inputStyle} value={form.ie} onChange={e => setForm(f => ({ ...f, ie: e.target.value }))} placeholder="IE do estado de origem" />
           </Campo>
           <Campo label="CNPJ / CPF">
             <InputComFocus style={inputStyle} value={form.cnpj} onChange={e => {
@@ -700,7 +700,7 @@ function FormularioContestacao({ form, setForm, onVoltar, onGerar }) {
         )}
         <Grid cols={2}>
           <Campo label="IE">
-            <InputComFocus style={inputStyle} value={form.ie_contrib} onChange={e => setForm(f => ({ ...f, ie_contrib: mascaraIE(e.target.value) }))} placeholder="00.000.000-0" />
+            <InputComFocus style={inputStyle} value={form.ie_contrib} onChange={e => setForm(f => ({ ...f, ie_contrib: e.target.value }))} placeholder="IE do estado de origem" />
           </Campo>
           <Campo label="CNPJ">
             <InputComFocus style={inputStyle} value={form.cnpj_contrib} onChange={e => setForm(f => ({ ...f, cnpj_contrib: mascaraCNPJ(e.target.value) }))} placeholder="00.000.000/0000-00" />
@@ -791,14 +791,16 @@ Documentos fiscais vinculados (${itensMdfe.length} NF-e):
 ${itensMdfe.map((it, i) => `  NF-e ${i+1}: Chave ${it.chave || 'não informada'} — Valor: R$ ${it.valor || '0,00'}`).join('\n')}
 Valor total dos documentos fiscais: R$ ${totalMdfe}` : ''
 
+  const isMdfe = form.infracao === 'falta_mdfe' || form.infracao === 'mdfe_inidonio'
+  const linhaMercadoria = isMdfe ? '' : `\nMercadoria: ${mercs}`
+
   return `GERAR TVF com os seguintes dados:
 Data: ${form.data}
 Hora: ${form.hora}
 Local: ${form.endereco}, ${form.cidade}/MS
 Placa: ${form.placas.filter(p => p).join(' / ')}
 Motorista: ${form.motorista}${form.cpf ? ` — CPF: ${form.cpf}` : ''}${form.telefone ? ` — Tel: ${form.telefone}` : ''}
-Sujeito passivo: ${form.sujeito}${form.ie ? ` — IE: ${form.ie}` : ' — sem IE no MS'}${form.cnpj ? ` — CNPJ: ${form.cnpj}` : ''}
-Mercadoria: ${mercs}
+Sujeito passivo: ${form.sujeito}${form.ie ? ` — IE: ${form.ie}` : ' — sem IE no MS'}${form.cnpj ? ` — CNPJ: ${form.cnpj}` : ''}${linhaMercadoria}
 Infração: ${infracao}${dadosMdfe}${form.obs ? `
 Observações: ${form.obs}` : ''}`
 }
