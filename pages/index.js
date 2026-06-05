@@ -393,7 +393,9 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
     return { ...f, mercadoria: m }
   })
 
-  const obrigatoriosOk = form.data && form.hora && form.endereco && form.placas?.[0] && form.motorista && form.sujeito && form.mercadoria[0]?.descricao
+  const isMdfe = form.infracao === 'falta_mdfe' || form.infracao === 'mdfe_inidonio'
+  const temChaveMdfe = isMdfe && (form.chaves_nf || []).some(it => typeof it === 'object' ? it.chave : it)
+  const obrigatoriosOk = form.data && form.hora && form.endereco && form.placas?.[0] && form.motorista && form.sujeito && (isMdfe ? temChaveMdfe : form.mercadoria[0]?.descricao)
 
   return (
     <div style={{ maxWidth: '820px', margin: '0 auto', padding: '24px' }}>
@@ -589,8 +591,8 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
         )}
       </div>
 
-      {/* MERCADORIA */}
-      <div style={secaoStyle}>
+      {/* MERCADORIA — oculto para infrações de MDF-e */}
+      {!isMdfe && <div style={secaoStyle}>
         <div style={{ ...secaoTituloStyle, justifyContent: 'space-between' }}>
           <span>📦 Mercadoria</span>
           <button onClick={addMerc} style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '6px', color: '#c9a84c', padding: '4px 12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem' }}>
@@ -621,12 +623,12 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
             </Grid>
           </div>
         ))}
-      </div>
+      </div>}
 
       {/* BOTÃO GERAR */}
       {!obrigatoriosOk && (
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.75rem', color: '#c87070', marginBottom: '12px' }}>
-          ⚠ Preencha os campos obrigatórios: data, hora, endereço, placa, motorista, sujeito passivo e mercadoria
+          ⚠ Preencha os campos obrigatórios: data, hora, endereço, placa, motorista e sujeito passivo{!isMdfe && ', e ao menos um item de mercadoria'}{isMdfe && ', e ao menos uma chave de NF-e'}
         </p>
       )}
 
