@@ -148,7 +148,7 @@ Multa em UFERMS, progressiva conforme valor total dos documentos fiscais (NF-e) 
 — De R$ 109.980,01 até R$ 203.463,00: 150 UFERMS
 — Acima de R$ 203.463,01: 200 UFERMS
 IMPORTANTE: informar apenas o número de UFERMS aplicável conforme a faixa. Não calcular valor em reais — a conversão depende da UFERMS vigente no mês da lavratura, que pode variar.
-Hipóteses: ausência de MDF-e obrigatório (intermunicipal: art. 3º, I, Subanexo XVII; interestadual: art. 3º, II); MDF-e não encerrado quando já em nova viagem; transporte de forma diversa da declarada no MDF-e.
+Hipóteses: ausência de MDF-e obrigatório no transporte intermunicipal (art. 3º, I, Subanexo XVII) e interestadual (art. 3º, II, Subanexo XVII); MDF-e não encerrado quando já em nova viagem; transporte de forma diversa da declarada no MDF-e.
 
 Apenas multa sem ICMS — mercadorias em regime de SUBSTITUIÇÃO TRIBUTÁRIA: o imposto já foi recolhido antecipadamente. A infração existe (inidoneidade documental), o crédito tributário é composto exclusivamente de penalidade, calculada sobre o valor total da operação.
 
@@ -162,6 +162,7 @@ Ovos: redução de BC conforme Subanexo 13 ao Anexo I, art. 1º, XVI. Aplicar me
 ## MDF-e — SUBANEXO XVII AO ANEXO XV, RICMS/MS
 Art. 3º, I — MDF-e obrigatório no transporte intermunicipal de mercadorias.
 Art. 3º, II — MDF-e obrigatório no transporte interestadual de mercadorias.
+REGRA DE REDAÇÃO: ao redigir matéria tributária de MDF-e, SEMPRE citar ambos os artigos e descrever a obrigação como "transporte intermunicipal e interestadual de mercadorias" — nunca apenas um dos dois, pois a obrigação abrange os dois modais.
 Art. 4º, IV — obrigação de encerramento do MDF-e ao término da viagem ou quando da troca do veículo.
 MDF-e NÃO ENCERRADO: viagem anterior ainda aberta quando nova viagem já está autorizada = infração. O transporte ocorre de forma diversa da declarada no MDF-e anterior.
 
