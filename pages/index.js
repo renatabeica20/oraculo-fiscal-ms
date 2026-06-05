@@ -775,7 +775,7 @@ function montarMensagemTVF(form) {
     const tipoMdfe = form.tipo_mdfe === 'falta_emissao' ? 'FALTA DE MANIFESTO'
       : form.tipo_mdfe === 'falta_encerramento' ? 'FALTA DE ENCERRAMENTO DE MANIFESTO'
       : 'ENCERRAMENTO DE MANIFESTO NO CURSO DO TRANSPORTE'
-    infracao = tipoMdfe
+    infracao = `${tipoMdfe} — obrigação de emissão antes do início do transporte intermunicipal e interestadual (art. 3º, I e II, Subanexo XVII ao Anexo XV do RICMS/MS)`
   } else if (form.infracao === 'mdfe_inidonio') {
     infracao = 'MDF-e Inidôneo'
   }
