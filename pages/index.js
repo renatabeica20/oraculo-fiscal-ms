@@ -98,7 +98,7 @@ function formatarRespostas(perguntas) {
 function detectarTipoDocumento(texto) {
   const t = texto.toUpperCase()
   if (t.includes('TERMO DE VERIFICAÇÃO FISCAL') || t.includes('TVF')) return 'TVF'
-  if (t.includes('TERMO DE APREENSÃO') || t.includes(' TA') || t.includes('TA ') || t === 'TA') return 'TA'
+  if (t.includes('TERMO DE APREENSÃO') || t.includes('GERAR TA') || /\bTA\b/.test(t.replace(/DATA|MATÉRIA|ESTADO|SITUAÇÃO|NOTA|MATERIA|MATRICULA|MATRÍCULA|CARTA|CONTESTAÇÃO|CONTESTACAO/g, ''))) return 'TA'
   if (t.includes('AUTO DE LANÇAMENTO') || t.includes('ALIM')) return 'ALIM'
   if (t.includes('CONTESTAÇÃO') || t.includes('IMPUGNAÇÃO') || t.includes('CONTESTACAO')) return 'CONTESTACAO'
   if (t.includes('DESK') || t.includes('PREZADO') || t.includes('ACUSAMOS O RECEBIMENTO')) return 'DESK'
@@ -332,6 +332,167 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
         </div>
       </div>
 
+      {/* INFRAÇÃO — primeiro, pois define o contexto da abordagem */}
+      <div style={secaoStyle}>
+        <div style={secaoTituloStyle}>⚖️ Infração</div>
+        <Campo label="Tipo de infração">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            {[
+              { value: 'sem_documento', label: 'Sem documentação fiscal' },
+              { value: 'inidonia', label: 'Documentação inidônea' },
+              { value: 'falta_mdfe', label: 'Falta de MDF-e' },
+              { value: 'mdfe_inidonio', label: 'MDF-e Inidôneo' }
+            ].map(op => (
+              <button key={op.value} onClick={() => setForm(f => ({ ...f, infracao: op.value }))}
+                style={{
+                  padding: '10px', borderRadius: '8px', cursor: 'pointer',
+                  fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
+                  background: form.infracao === op.value ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
+                  border: form.infracao === op.value ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
+                  color: form.infracao === op.value ? '#c9a84c' : '#5a6a7a'
+                }}>
+                {op.label}
+              </button>
+            ))}
+          </div>
+        </Campo>
+
+        {form.infracao === 'inidonia' && (
+          <Campo label="Motivo da inidoneidade (art. 93)">
+            <select style={{ ...inputStyle, cursor: 'pointer' }} value={form.motivo_inidonia} onChange={set('motivo_inidonia')}>
+              <option value="">Selecione o inciso...</option>
+              {INCISOS.map(inc => <option key={inc.value} value={inc.value}>{inc.label}</option>)}
+            </select>
+          </Campo>
+        )}
+
+        {form.infracao === 'falta_mdfe' && (
+          <>
+            <Campo label="Tipo de ocorrência">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {[
+                  { value: 'falta_emissao', label: 'Falta de emissão antes do início do transporte' },
+                  { value: 'falta_encerramento', label: 'Falta de encerramento após conclusão do transporte' },
+                  { value: 'encerramento_antecipado', label: 'Encerramento no curso do transporte' }
+                ].map(op => (
+                  <button key={op.value} onClick={() => setForm(f => ({ ...f, tipo_mdfe: op.value }))}
+                    style={{
+                      padding: '10px', borderRadius: '8px', cursor: 'pointer', textAlign: 'left',
+                      fontFamily: "'DM Sans', sans-serif", fontSize: '0.8rem',
+                      background: form.tipo_mdfe === op.value ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
+                      border: form.tipo_mdfe === op.value ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
+                      color: form.tipo_mdfe === op.value ? '#c9a84c' : '#5a6a7a'
+                    }}>
+                    {op.label}
+                  </button>
+                ))}
+              </div>
+            </Campo>
+            <Campo label="Chaves das NF-e vinculadas ao MDF-e">
+              {(form.chaves_nf || ['']).map((chave, i) => (
+                <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                  <InputComFocus
+                    style={{ ...inputStyle, flex: 1, fontFamily: 'monospace', fontSize: '0.78rem', letterSpacing: '0.03em' }}
+                    value={chave}
+                    onChange={e => {
+                      const novas = [...(form.chaves_nf || [''])]
+                      novas[i] = e.target.value.replace(/\D/g, '').substring(0, 44)
+                      setForm(f => ({ ...f, chaves_nf: novas }))
+                    }}
+                    placeholder="44 dígitos da chave de acesso da NF-e"
+                    inputMode="numeric"
+                  />
+                  {i === 0 ? (
+                    <button onClick={() => setForm(f => ({ ...f, chaves_nf: [...(f.chaves_nf || ['']), ''] }))}
+                      style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '6px', color: '#c9a84c', padding: '8px 12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', whiteSpace: 'nowrap' }}>
+                      + Chave
+                    </button>
+                  ) : (
+                    <button onClick={() => setForm(f => ({ ...f, chaves_nf: (f.chaves_nf || ['']).filter((_, idx) => idx !== i) }))}
+                      style={{ background: 'none', border: 'none', color: '#c87070', cursor: 'pointer', fontSize: '1rem', padding: '4px 8px' }}>✕</button>
+                  )}
+                </div>
+              ))}
+            </Campo>
+            <Campo label="Valor total dos documentos fiscais (R$)">
+              <InputComFocus
+                style={inputStyle}
+                value={form.valor_total_mdfe || ''}
+                onChange={e => setForm(f => ({ ...f, valor_total_mdfe: mascaraValor(e.target.value) }))}
+                placeholder="0,00"
+                inputMode="numeric"
+              />
+            </Campo>
+          </>
+        )}
+
+        {form.infracao === 'mdfe_inidonio' && (
+          <>
+            <Campo label="Chaves das NF-e vinculadas ao MDF-e">
+              {(form.chaves_nf || ['']).map((chave, i) => (
+                <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                  <InputComFocus
+                    style={{ ...inputStyle, flex: 1, fontFamily: 'monospace', fontSize: '0.78rem', letterSpacing: '0.03em' }}
+                    value={chave}
+                    onChange={e => {
+                      const novas = [...(form.chaves_nf || [''])]
+                      novas[i] = e.target.value.replace(/\D/g, '').substring(0, 44)
+                      setForm(f => ({ ...f, chaves_nf: novas }))
+                    }}
+                    placeholder="44 dígitos da chave de acesso da NF-e"
+                    inputMode="numeric"
+                  />
+                  {i === 0 ? (
+                    <button onClick={() => setForm(f => ({ ...f, chaves_nf: [...(f.chaves_nf || ['']), ''] }))}
+                      style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '6px', color: '#c9a84c', padding: '8px 12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', whiteSpace: 'nowrap' }}>
+                      + Chave
+                    </button>
+                  ) : (
+                    <button onClick={() => setForm(f => ({ ...f, chaves_nf: (f.chaves_nf || ['']).filter((_, idx) => idx !== i) }))}
+                      style={{ background: 'none', border: 'none', color: '#c87070', cursor: 'pointer', fontSize: '1rem', padding: '4px 8px' }}>✕</button>
+                  )}
+                </div>
+              ))}
+            </Campo>
+            <Campo label="Valor total dos documentos fiscais (R$)">
+              <InputComFocus
+                style={inputStyle}
+                value={form.valor_total_mdfe || ''}
+                onChange={e => setForm(f => ({ ...f, valor_total_mdfe: mascaraValor(e.target.value) }))}
+                placeholder="0,00"
+                inputMode="numeric"
+              />
+            </Campo>
+          </>
+        )}
+
+        {tipo === 'TA' && (
+          <Campo label="Responsável tributário">
+            <div style={{ display: 'flex', gap: '10px' }}>
+              {[
+                { value: 'transportador', label: 'Transportador (art. 46, I)' },
+                { value: 'destinatario', label: 'Destinatário (art. 45, II)' }
+              ].map(op => (
+                <button key={op.value} onClick={() => setForm(f => ({ ...f, responsavel: op.value }))}
+                  style={{
+                    flex: 1, padding: '10px', borderRadius: '8px', cursor: 'pointer',
+                    fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
+                    background: form.responsavel === op.value ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
+                    border: form.responsavel === op.value ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
+                    color: form.responsavel === op.value ? '#c9a84c' : '#5a6a7a'
+                  }}>
+                  {op.label}
+                </button>
+              ))}
+            </div>
+          </Campo>
+        )}
+
+        <Campo label="Observações adicionais">
+          <TextareaComFocus style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }} value={form.obs} onChange={set('obs')} placeholder="Detalhes relevantes da abordagem, declarações do motorista, registros fotográficos..." />
+        </Campo>
+      </div>
+
       {/* ABORDAGEM */}
       <div style={secaoStyle}>
         <div style={secaoTituloStyle}>📍 Abordagem</div>
@@ -354,7 +515,6 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
       {/* VEÍCULO E CONDUTOR */}
       <div style={secaoStyle}>
         <div style={secaoTituloStyle}>🚛 Veículo e condutor</div>
-        {/* Campo de placas — múltiplas para carreta */}
         <div style={{ marginBottom: '12px' }}>
           <label style={labelStyle}>Placa(s) *</label>
           {form.placas.map((placa, i) => (
@@ -455,65 +615,6 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
             </Grid>
           </div>
         ))}
-      </div>
-
-      {/* INFRAÇÃO */}
-      <div style={secaoStyle}>
-        <div style={secaoTituloStyle}>⚖️ Infração</div>
-        <Campo label="Tipo de infração">
-          <div style={{ display: 'flex', gap: '10px' }}>
-            {[
-              { value: 'sem_documento', label: 'Sem documentação fiscal' },
-              { value: 'inidonia', label: 'Documentação inidônea' }
-            ].map(op => (
-              <button key={op.value} onClick={() => setForm(f => ({ ...f, infracao: op.value }))}
-                style={{
-                  flex: 1, padding: '10px', borderRadius: '8px', cursor: 'pointer',
-                  fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
-                  background: form.infracao === op.value ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
-                  border: form.infracao === op.value ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                  color: form.infracao === op.value ? '#c9a84c' : '#5a6a7a'
-                }}>
-                {op.label}
-              </button>
-            ))}
-          </div>
-        </Campo>
-
-        {form.infracao === 'inidonia' && (
-          <Campo label="Motivo da inidoneidade (art. 93)">
-            <select style={{ ...inputStyle, cursor: 'pointer' }} value={form.motivo_inidonia} onChange={set('motivo_inidonia')}>
-              <option value="">Selecione o inciso...</option>
-              {INCISOS.map(inc => <option key={inc.value} value={inc.value}>{inc.label}</option>)}
-            </select>
-          </Campo>
-        )}
-
-        {tipo === 'TA' && (
-          <Campo label="Responsável tributário">
-            <div style={{ display: 'flex', gap: '10px' }}>
-              {[
-                { value: 'transportador', label: 'Transportador (art. 46, I)' },
-                { value: 'destinatario', label: 'Destinatário (art. 45, II)' }
-              ].map(op => (
-                <button key={op.value} onClick={() => setForm(f => ({ ...f, responsavel: op.value }))}
-                  style={{
-                    flex: 1, padding: '10px', borderRadius: '8px', cursor: 'pointer',
-                    fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
-                    background: form.responsavel === op.value ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
-                    border: form.responsavel === op.value ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                    color: form.responsavel === op.value ? '#c9a84c' : '#5a6a7a'
-                  }}>
-                  {op.label}
-                </button>
-              ))}
-            </div>
-          </Campo>
-        )}
-
-        <Campo label="Observações adicionais">
-          <TextareaComFocus style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }} value={form.obs} onChange={set('obs')} placeholder="Detalhes relevantes da abordagem, declarações do motorista, registros fotográficos..." />
-        </Campo>
       </div>
 
       {/* BOTÃO GERAR */}
@@ -657,9 +758,23 @@ function montarMensagemTVF(form) {
     `${m.quantidade} ${m.unidade} de ${m.descricao}${m.valor ? ` avaliado(s) em R$ ${m.valor} cada` : ''}`
   ).join('; ')
 
-  const infracao = form.infracao === 'sem_documento'
-    ? 'mercadoria desacompanhada de documentação fiscal'
-    : `documentação fiscal inidônea — ${form.motivo_inidonia}`
+  let infracao = ''
+  if (form.infracao === 'sem_documento') {
+    infracao = 'mercadoria desacompanhada de documentação fiscal'
+  } else if (form.infracao === 'inidonia') {
+    infracao = `documentação fiscal inidônea — ${form.motivo_inidonia}`
+  } else if (form.infracao === 'falta_mdfe') {
+    const tipoMdfe = form.tipo_mdfe === 'falta_emissao' ? 'FALTA DE MANIFESTO'
+      : form.tipo_mdfe === 'falta_encerramento' ? 'FALTA DE ENCERRAMENTO DE MANIFESTO'
+      : 'ENCERRAMENTO DE MANIFESTO NO CURSO DO TRANSPORTE'
+    infracao = tipoMdfe
+  } else if (form.infracao === 'mdfe_inidonio') {
+    infracao = 'MDF-e Inidôneo'
+  }
+
+  const dadosMdfe = (form.infracao === 'falta_mdfe' || form.infracao === 'mdfe_inidonio') ? `
+Chaves NF-e vinculadas: ${(form.chaves_nf || []).filter(c => c).join(', ') || 'não informadas'}
+Valor total dos documentos fiscais: R$ ${form.valor_total_mdfe || '0,00'}` : ''
 
   return `GERAR TVF com os seguintes dados:
 Data: ${form.data}
@@ -669,7 +784,7 @@ Placa: ${form.placas.filter(p => p).join(' / ')}
 Motorista: ${form.motorista}${form.cpf ? ` — CPF: ${form.cpf}` : ''}${form.telefone ? ` — Tel: ${form.telefone}` : ''}
 Sujeito passivo: ${form.sujeito}${form.ie ? ` — IE: ${form.ie}` : ' — sem IE no MS'}${form.cnpj ? ` — CNPJ: ${form.cnpj}` : ''}
 Mercadoria: ${mercs}
-Infração: ${infracao}${form.obs ? `
+Infração: ${infracao}${dadosMdfe}${form.obs ? `
 Observações: ${form.obs}` : ''}`
 }
 
@@ -780,6 +895,9 @@ export default function Home() {
     mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }],
     infracao: 'sem_documento',
     motivo_inidonia: '',
+    tipo_mdfe: 'falta_emissao',
+    chaves_nf: [''],
+    valor_total_mdfe: '',
     obs: ''
   })
   const [formTA, setFormTA] = useState({
@@ -1192,7 +1310,7 @@ export default function Home() {
       setModoOrigem(null)
       setMsgCopiada(null)
       setFormContestacao({ tipo: 'contestacao', numero_doc: '', contribuinte: '', ie_contrib: '', cnpj_contrib: '', destinatario: '', texto_tvf: '', texto_contribuinte: '' })
-      setFormTVF({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', obs: '' })
+      setFormTVF({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', tipo_mdfe: 'falta_emissao', chaves_nf: [''], valor_total_mdfe: '', obs: '' })
       setFormTA({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', documentos: '', mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', responsavel: 'transportador', obs: '' })
       if (sessaoIdRef.current) {
         supabase
