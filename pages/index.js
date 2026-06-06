@@ -315,10 +315,12 @@ const CIDADES_MS = [
 function CampoCidade({ value, onChange }) {
   const [sugestoes, setSugestoes] = useState([])
   const [aberto, setAberto] = useState(false)
+  const [focusIdx, setFocusIdx] = useState(-1)
 
   const handleChange = (e) => {
     const v = e.target.value
     onChange(v)
+    setFocusIdx(-1)
     if (v.length >= 2) {
       const filtradas = CIDADES_MS.filter(c =>
         c.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
@@ -336,6 +338,24 @@ function CampoCidade({ value, onChange }) {
     onChange(cidade)
     setSugestoes([])
     setAberto(false)
+    setFocusIdx(-1)
+  }
+
+  const handleKeyDown = (e) => {
+    if (!aberto || sugestoes.length === 0) return
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setFocusIdx(i => Math.min(i + 1, sugestoes.length - 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setFocusIdx(i => Math.max(i - 1, 0))
+    } else if (e.key === 'Enter' && focusIdx >= 0) {
+      e.preventDefault()
+      selecionar(sugestoes[focusIdx])
+    } else if (e.key === 'Escape') {
+      setAberto(false)
+      setFocusIdx(-1)
+    }
   }
 
   return (
@@ -345,8 +365,10 @@ function CampoCidade({ value, onChange }) {
           style={{ ...inputStyle, flex: 1 }}
           value={value}
           onChange={handleChange}
-          onBlur={() => setTimeout(() => setAberto(false), 150)}
+          onKeyDown={handleKeyDown}
+          onBlur={() => setTimeout(() => { setAberto(false); setFocusIdx(-1) }, 150)}
           placeholder="Digite a cidade..."
+          autoComplete="off"
         />
         <div style={{
           padding: '10px 12px', background: 'rgba(255,255,255,0.08)',
@@ -362,16 +384,20 @@ function CampoCidade({ value, onChange }) {
           borderRadius: '8px', marginTop: '4px',
           boxShadow: '0 8px 24px rgba(0,0,0,0.4)', overflow: 'hidden'
         }}>
-          {sugestoes.map(c => (
-            <button key={c} onMouseDown={() => selecionar(c)} style={{
-              display: 'block', width: '100%', textAlign: 'left',
-              padding: '10px 14px', background: 'transparent', border: 'none',
-              borderBottom: '1px solid rgba(255,255,255,0.05)',
-              fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
-              color: '#c8c0b0', cursor: 'pointer'
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(201,168,76,0.1)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          {sugestoes.map((c, idx) => (
+            <button key={c} onMouseDown={() => selecionar(c)}
+              style={{
+                display: 'block', width: '100%', textAlign: 'left',
+                padding: '10px 14px', border: 'none',
+                borderBottom: idx < sugestoes.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+                cursor: 'pointer',
+                background: focusIdx === idx ? 'rgba(201,168,76,0.15)' : 'transparent',
+                color: focusIdx === idx ? '#c9a84c' : '#c8c0b0',
+                transition: 'background 0.1s'
+              }}
+              onMouseEnter={() => setFocusIdx(idx)}
+              onMouseLeave={() => setFocusIdx(-1)}
             >{c}</button>
           ))}
         </div>
