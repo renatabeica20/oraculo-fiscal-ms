@@ -174,6 +174,29 @@ REGRA DE REDAÇÃO: ao redigir matéria tributária de MDF-e, SEMPRE citar ambos
 Art. 4º, IV — obrigação de encerramento do MDF-e ao término da viagem ou quando da troca do veículo.
 MDF-e NÃO ENCERRADO: viagem anterior ainda aberta quando nova viagem já está autorizada = infração. O transporte ocorre de forma diversa da declarada no MDF-e anterior.
 
+## FALTA DE ENCERRAMENTO APÓS CONCLUSÃO DO TRANSPORTE — REDAÇÃO OBRIGATÓRIA
+Quando a infração for "FALTA DE ENCERRAMENTO DE MANIFESTO APÓS CONCLUSÃO DO TRANSPORTE", a matéria tributária DEVE seguir esta estrutura em parágrafos corridos:
+
+PARÁGRAFO 1 — CONSTATAÇÃO:
+"A equipe de fiscalização verificou que o sujeito passivo, na condição de emitente do Manifesto Eletrônico de Documentos Fiscais MDF-e nº [número extraído da chave], emitido em [data de emissão por extenso], às [hora]h[min]min, deixou de promover o encerramento do referido documento após a conclusão do transporte, permanecendo o MDF-e ativo no sistema da SEFAZ/MS na presente data, em afronta ao disposto no art. 14 do Subanexo XVII ao Anexo XV do RICMS/MS (Decreto nº 9.203/98)."
+
+PARÁGRAFO 2 — OBRIGAÇÃO LEGAL:
+"O encerramento do MDF-e constitui ato obrigatório que delimita o término de sua vigência e formaliza a conclusão da operação de transporte, sendo medida indispensável para assegurar a regularidade fiscal e o adequado controle das operações."
+
+PARÁGRAFO 3 — PROVA DA CONCLUSÃO DO TRANSPORTE:
+"A conclusão do transporte restou demonstrada pela confirmação da operação realizada pelo destinatário da mercadoria em [data por extenso], às [hora]h[min]min, nos termos do art. 18-A do Subanexo XII ao Anexo XV do RICMS/MS, evidenciando que o MDF-e deveria ter sido encerrado desde aquela data."
+
+PARÁGRAFO 4 — ENQUADRAMENTO E CRÉDITO TRIBUTÁRIO:
+"A omissão no encerramento do Manifesto Eletrônico de Documentos Fiscais caracteriza infração tributária nos termos do art. 117, IV, \"x\", da Lei nº 1.810/97, sendo o crédito tributário constituído exclusivamente de penalidade pecuniária em UFERMS, calculada sobre o valor total das NF-e vinculadas ao MDF-e irregular, enquadrada na faixa correspondente da tabela do art. 117, IV, \"x\", 5."
+
+REGRAS ESPECÍFICAS PARA ESTE TIPO:
+- Extrair o número do MDF-e da chave de acesso: posições 28–35 da chave de 44 dígitos (índice 27 a 34 base zero), removendo zeros à esquerda. Ex: chave ...0000032411... → nº 3241.
+- Datas SEMPRE por extenso: "25 de maio de 2026, às 10h49min".
+- NUNCA citar art. 124 do Anexo XV — o fundamento correto é exclusivamente art. 14 do Subanexo XVII ao Anexo XV.
+- NUNCA citar art. 3º do Subanexo XVII neste tipo de infração — esse artigo é para falta de emissão, não falta de encerramento.
+- O MDF-e ativo no momento da abordagem deve ser mencionado como "permanecendo o MDF-e ativo no sistema da SEFAZ/MS na presente data".
+- A confirmação do destinatário (art. 18-A) é prova material obrigatória — sempre incluir com data e hora.
+
 ## PROVA DA INFRAÇÃO — ELEMENTOS PROBATÓRIOS
 - Hora de autorização da NF-e no sistema SEFAZ: prova objetiva de posterioridade ao início da ação fiscal
 - Registro de passagem automático (FVM/sistema de monitoramento): prova de trajeto e horário
