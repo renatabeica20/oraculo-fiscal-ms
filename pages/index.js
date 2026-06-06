@@ -2278,7 +2278,7 @@ export default function Home() {
                   style={{
                     background: 'linear-gradient(180deg, #0e1620 0%, #0a1018 100%)',
                     border: `1px solid rgba(255,255,255,0.06)`,
-                    borderTop: `3px solid ${modo.cor}`,
+                    borderTop: '3px solid rgba(201,168,76,0.6)',
                     borderRadius: '12px',
                     padding: '24px 20px',
                     cursor: 'pointer',
@@ -2286,8 +2286,8 @@ export default function Home() {
                     transition: 'all 0.2s',
                     boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = modo.cor; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderTopColor = modo.cor; e.currentTarget.style.transform = 'translateY(0)' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.9)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(201,168,76,0.15)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.3)'; e.currentTarget.style.borderTopColor = 'rgba(201,168,76,0.6)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)' }}
                 >
                   <div style={{ fontSize: '1.8rem', marginBottom: '12px' }}>{modo.icone}</div>
                   <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.1rem', color: '#c8c0b0', fontWeight: 700, marginBottom: '8px' }}>
