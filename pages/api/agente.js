@@ -190,7 +190,7 @@ PARÁGRAFO 4 — ENQUADRAMENTO E CRÉDITO TRIBUTÁRIO:
 "A omissão no encerramento do Manifesto Eletrônico de Documentos Fiscais caracteriza infração tributária nos termos do art. 117, IV, \"x\", da Lei nº 1.810/97, sendo o crédito tributário constituído exclusivamente de penalidade pecuniária em UFERMS, calculada sobre o valor total das NF-e vinculadas ao MDF-e irregular, enquadrada na faixa correspondente da tabela do art. 117, IV, \"x\", 5."
 
 REGRAS ESPECÍFICAS PARA ESTE TIPO:
-- Extrair o número do MDF-e da chave de acesso: posições 28–35 da chave de 44 dígitos (índice 27 a 34 base zero), removendo zeros à esquerda. Ex: chave ...0000032411... → nº 3241.
+- Extrair o número do MDF-e da chave de acesso: posições 27–34 da chave de 44 dígitos (índice 26 a 33 base zero), removendo zeros à esquerda. Ex: chave ...00003241... → nº 3241.
 - Datas SEMPRE por extenso: "25 de maio de 2026, às 10h49min".
 - NUNCA citar art. 124 do Anexo XV — o fundamento correto é exclusivamente art. 14 do Subanexo XVII ao Anexo XV.
 - NUNCA citar art. 3º do Subanexo XVII neste tipo de infração — esse artigo é para falta de emissão, não falta de encerramento.
