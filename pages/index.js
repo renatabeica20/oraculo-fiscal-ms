@@ -1321,6 +1321,7 @@ export default function Home() {
   const [carregandoHistorico, setCarregandoHistorico] = useState(false)
   const [datasExpandidas, setDatasExpandidas] = useState({})
   const [docVisualizando, setDocVisualizando] = useState(null)
+  const [docCopiado, setDocCopiado] = useState(null) // id do doc copiado
   const chatRef = useRef(null)
   const inputRef = useRef(null)
   const fileRef = useRef(null)
@@ -1926,13 +1927,19 @@ export default function Home() {
                                   const el = document.createElement('textarea')
                                   el.value = texto; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el)
                                 }
+                                setDocCopiado(doc.id)
+                                setTimeout(() => setDocCopiado(null), 2000)
                               }} style={{
-                                flex: 1, background: 'rgba(80,144,208,0.08)', color: '#5090d0',
-                                border: '1px solid rgba(80,144,208,0.2)', borderRadius: '7px',
-                                padding: '6px 8px', fontFamily: "'DM Sans', sans-serif",
-                                fontSize: '0.7rem', fontWeight: 500, cursor: 'pointer'
+                                flex: 1,
+                                background: docCopiado === doc.id ? 'rgba(80,200,120,0.12)' : 'rgba(80,144,208,0.08)',
+                                color: docCopiado === doc.id ? '#50c878' : '#5090d0',
+                                border: docCopiado === doc.id ? '1px solid rgba(80,200,120,0.3)' : '1px solid rgba(80,144,208,0.2)',
+                                borderRadius: '7px', padding: '6px 8px',
+                                fontFamily: "'DM Sans', sans-serif",
+                                fontSize: '0.7rem', fontWeight: 500, cursor: 'pointer',
+                                transition: 'all 0.2s'
                               }}>
-                                📋 Copiar
+                                {docCopiado === doc.id ? '✓ Copiado' : '📋 Copiar'}
                               </button>
                               <button onClick={() => setConfirmarExclusao(doc)} style={{
                                 background: 'transparent', border: '1px solid rgba(200,80,80,0.2)',
