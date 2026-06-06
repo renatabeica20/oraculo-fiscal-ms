@@ -819,6 +819,50 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
         <Campo label="Cidade">
           <CampoCidade value={form.cidade} onChange={v => setForm(f => ({ ...f, cidade: v }))} />
         </Campo>
+
+        {isMdfe && (
+          <>
+            <div style={{ marginTop: '4px', marginBottom: '4px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '12px' }}>
+              <label style={{ ...labelStyle, color: '#c9a84c' }}>Origem e destino do transporte</label>
+            </div>
+            <Grid cols={2}>
+              <Campo label="Município de origem">
+                <InputComFocus
+                  style={inputStyle}
+                  value={form.origem_municipio || ''}
+                  onChange={e => setForm(f => ({ ...f, origem_municipio: e.target.value }))}
+                  placeholder="Ex: Dourados"
+                />
+              </Campo>
+              <Campo label="UF de origem">
+                <InputComFocus
+                  style={inputStyle}
+                  value={form.origem_uf || ''}
+                  onChange={e => setForm(f => ({ ...f, origem_uf: e.target.value.toUpperCase().substring(0, 2) }))}
+                  placeholder="Ex: MS"
+                />
+              </Campo>
+            </Grid>
+            <Grid cols={2}>
+              <Campo label="Município de destino">
+                <InputComFocus
+                  style={inputStyle}
+                  value={form.destino_municipio || ''}
+                  onChange={e => setForm(f => ({ ...f, destino_municipio: e.target.value }))}
+                  placeholder="Ex: Campo Grande"
+                />
+              </Campo>
+              <Campo label="UF de destino">
+                <InputComFocus
+                  style={inputStyle}
+                  value={form.destino_uf || ''}
+                  onChange={e => setForm(f => ({ ...f, destino_uf: e.target.value.toUpperCase().substring(0, 2) }))}
+                  placeholder="Ex: MS"
+                />
+              </Campo>
+            </Grid>
+          </>
+        )}
       </div>
 
       {/* VEÍCULO E CONDUTOR */}
@@ -1110,6 +1154,7 @@ Data: ${form.data}
 Hora: ${form.hora}
 Local: ${form.endereco}, ${form.cidade}/MS
 Placa: ${form.placas.filter(p => p).join(' / ')}
+${isMdfe && (form.origem_municipio || form.destino_municipio) ? `Origem: ${form.origem_municipio || 'não informado'}/${form.origem_uf || '?'} → Destino: ${form.destino_municipio || 'não informado'}/${form.destino_uf || '?'}` : ''}
 Motorista: ${form.motorista}${form.cpf ? ` — CPF: ${form.cpf}` : ''}${form.telefone ? ` — Tel: ${form.telefone}` : ''}
 Sujeito passivo: ${form.sujeito}${form.ie ? ` — IE: ${form.ie}` : ' — sem IE no MS'}${form.cnpj ? ` — CNPJ: ${form.cnpj}` : ''}${linhaMercadoria}
 Infração: ${infracao}${dadosMdfe}${dadosNFVencida}${form.obs ? `
@@ -1226,6 +1271,7 @@ export default function Home() {
     tipo_mdfe: 'falta_emissao',
     chaves_nf: [{ chave: '', valor: '' }],
     danfes: [{ chave: '', emissao: '', saida: '', valor: '' }],
+    origem_municipio: '', origem_uf: 'MS', destino_municipio: '', destino_uf: '',
     obs: ''
   })
   const [formTA, setFormTA] = useState({
@@ -1638,7 +1684,7 @@ export default function Home() {
       setModoOrigem(null)
       setMsgCopiada(null)
       setFormContestacao({ tipo: 'contestacao', numero_doc: '', contribuinte: '', ie_contrib: '', cnpj_contrib: '', destinatario: '', texto_tvf: '', texto_contribuinte: '' })
-      setFormTVF({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', mercadoria: [{ descricao: '', quantidade: '', unidade: '', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', tipo_mdfe: 'falta_emissao', chaves_nf: [{ chave: '', valor: '' }], danfes: [{ chave: '', emissao: '', saida: '', valor: '' }], obs: '' })
+      setFormTVF({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', mercadoria: [{ descricao: '', quantidade: '', unidade: '', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', tipo_mdfe: 'falta_emissao', chaves_nf: [{ chave: '', valor: '' }], danfes: [{ chave: '', emissao: '', saida: '', valor: '' }], origem_municipio: '', origem_uf: 'MS', destino_municipio: '', destino_uf: '', obs: '' })
       setFormTA({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', documentos: '', mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', responsavel: 'transportador', obs: '' })
       if (sessaoIdRef.current) {
         supabase
