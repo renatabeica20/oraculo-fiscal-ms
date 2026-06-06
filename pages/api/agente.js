@@ -162,7 +162,7 @@ Ovos: redução de BC conforme Subanexo 13 ao Anexo I, art. 1º, XVI. Aplicar me
 ## MDF-e — SUBANEXO XVII AO ANEXO XV, RICMS/MS
 Art. 3º, I — MDF-e obrigatório no transporte intermunicipal de mercadorias.
 Art. 3º, II — MDF-e obrigatório no transporte interestadual de mercadorias.
-REGRA DE REDAÇÃO: ao redigir matéria tributária de MDF-e, SEMPRE citar ambos os artigos e descrever a obrigação como "transporte intermunicipal e interestadual de mercadorias" — nunca apenas um dos dois, pois a obrigação abrange os dois modais.
+REGRA DE REDAÇÃO: ao redigir matéria tributária de MDF-e, SEMPRE citar ambos os artigos e descrever a obrigação como "transporte interestadual ou intermunicipal de mercadorias" — nunca apenas um dos dois, pois a obrigação abrange os dois modais.
 Art. 4º, IV — obrigação de encerramento do MDF-e ao término da viagem ou quando da troca do veículo.
 MDF-e NÃO ENCERRADO: viagem anterior ainda aberta quando nova viagem já está autorizada = infração. O transporte ocorre de forma diversa da declarada no MDF-e anterior.
 
