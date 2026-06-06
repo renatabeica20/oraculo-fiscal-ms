@@ -555,7 +555,7 @@ function CampoEncerramento({ form, setForm }) {
   const extrairNumeroMdfe = (chave) => {
     const digits = (chave || '').replace(/\D/g, '')
     if (digits.length < 35) return ''
-    return String(parseInt(digits.substring(27, 35), 10))
+    return String(parseInt(digits.substring(26, 34), 10))
   }
 
   const numeroMdfe = extrairNumeroMdfe(form.chave_mdfe)
@@ -1278,7 +1278,7 @@ function montarMensagemTVF(form) {
   const extrairNumeroMdfe = (chave) => {
     const digits = (chave || '').replace(/\D/g, '')
     if (digits.length < 35) return null
-    return String(parseInt(digits.substring(27, 35), 10))
+    return String(parseInt(digits.substring(26, 34), 10))
   }
   const dadosEncerramento = (form.infracao === 'falta_mdfe' && form.tipo_mdfe === 'falta_encerramento' && form.chave_mdfe) ? `
 MDF-e irregular:
