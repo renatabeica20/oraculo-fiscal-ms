@@ -380,6 +380,123 @@ function CampoCidade({ value, onChange }) {
   )
 }
 
+function MenuExpansivel({ label, opcoes, valorSelecionado, aberto, onToggle, onSelecionar }) {
+  const [focusIdx, setFocusIdx] = useState(-1)
+  const itemRefs = useRef([])
+
+  const handleKeyDown = (e) => {
+    if (!aberto) {
+      if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        onToggle()
+        setFocusIdx(0)
+      }
+      return
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      const next = Math.min(focusIdx + 1, opcoes.length - 1)
+      setFocusIdx(next)
+      itemRefs.current[next]?.focus()
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      const prev = Math.max(focusIdx - 1, 0)
+      setFocusIdx(prev)
+      itemRefs.current[prev]?.focus()
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      onToggle()
+      setFocusIdx(-1)
+    }
+  }
+
+  const handleItemKey = (e, op, idx) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      onSelecionar(op.value)
+      setFocusIdx(-1)
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      const next = Math.min(idx + 1, opcoes.length - 1)
+      setFocusIdx(next)
+      itemRefs.current[next]?.focus()
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (idx === 0) { onToggle(); setFocusIdx(-1); return }
+      const prev = idx - 1
+      setFocusIdx(prev)
+      itemRefs.current[prev]?.focus()
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      onToggle()
+      setFocusIdx(-1)
+    }
+  }
+
+  const labelSelecionado = opcoes.find(o => o.value === valorSelecionado)?.label
+
+  return (
+    <div>
+      <button
+        onClick={onToggle}
+        onKeyDown={handleKeyDown}
+        aria-expanded={aberto}
+        aria-haspopup="listbox"
+        style={{
+          width: '100%', padding: '12px 16px',
+          borderRadius: aberto ? '8px 8px 0 0' : '8px',
+          cursor: 'pointer', textAlign: 'left',
+          fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+          background: valorSelecionado ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
+          border: valorSelecionado ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
+          borderBottom: aberto ? '1px solid rgba(201,168,76,0.15)' : undefined,
+          color: valorSelecionado ? '#c9a84c' : '#c8c0b0',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          outline: 'none'
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <span>{label}</span>
+          {labelSelecionado && !aberto && (
+            <span style={{ fontSize: '0.72rem', color: '#c9a84c', opacity: 0.85 }}>{labelSelecionado}</span>
+          )}
+        </div>
+        <span style={{ fontSize: '0.75rem', opacity: 0.7, flexShrink: 0 }}>{aberto ? '▲' : '▼'}</span>
+      </button>
+      {aberto && (
+        <div role="listbox" style={{
+          border: '1px solid rgba(201,168,76,0.4)', borderTop: 'none',
+          borderRadius: '0 0 8px 8px', overflow: 'hidden'
+        }}>
+          {opcoes.map((op, idx) => (
+            <button
+              key={op.value}
+              ref={el => itemRefs.current[idx] = el}
+              role="option"
+              aria-selected={valorSelecionado === op.value}
+              onClick={() => { onSelecionar(op.value); setFocusIdx(-1) }}
+              onKeyDown={e => handleItemKey(e, op, idx)}
+              style={{
+                display: 'block', width: '100%', padding: '10px 18px',
+                textAlign: 'left', cursor: 'pointer', border: 'none',
+                borderBottom: idx < opcoes.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
+                background: valorSelecionado === op.value ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.02)',
+                color: valorSelecionado === op.value ? '#c9a84c' : '#c8c0b0',
+                outline: 'none'
+              }}
+              onFocus={e => e.currentTarget.style.background = 'rgba(201,168,76,0.08)'}
+              onBlur={e => e.currentTarget.style.background = valorSelecionado === op.value ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.02)'}
+            >
+              {op.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function CampoChavesMdfe({ form, setForm }) {
   const itens = form.chaves_nf && form.chaves_nf.length > 0 && typeof form.chaves_nf[0] === 'object'
     ? form.chaves_nf
@@ -597,115 +714,35 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
               <span>Sem documentação fiscal</span>
             </button>
 
-            {/* Documentação inidônea — expansível */}
-            <div>
-              <button onClick={() => setForm(f => {
-                  if (f.infracao === 'inidonia') return { ...f, infracao: null, motivo_inidonia: '' }
-                  return { ...f, infracao: 'inidonia', motivo_inidonia: '' }
-                })}
-                style={{
-                  width: '100%', padding: '12px 16px',
-                  borderRadius: (form.infracao === 'inidonia' && !form.motivo_inidonia) ? '8px 8px 0 0' : '8px',
-                  cursor: 'pointer', textAlign: 'left',
-                  fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
-                  background: form.infracao === 'inidonia' ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
-                  border: form.infracao === 'inidonia' ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                  borderBottom: (form.infracao === 'inidonia' && !form.motivo_inidonia) ? '1px solid rgba(201,168,76,0.15)' : undefined,
-                  color: form.infracao === 'inidonia' ? '#c9a84c' : '#c8c0b0',
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  <span>Documentação inidônea</span>
-                  {form.infracao === 'inidonia' && form.motivo_inidonia && (
-                    <span style={{ fontSize: '0.72rem', color: '#c9a84c', opacity: 0.85 }}>
-                      {INCISOS.find(i => i.value === form.motivo_inidonia)?.label || form.motivo_inidonia}
-                    </span>
-                  )}
-                </div>
-                <span style={{ fontSize: '0.75rem', opacity: 0.7, flexShrink: 0 }}>
-                  {form.infracao === 'inidonia' && !form.motivo_inidonia ? '▲' : '▼'}
-                </span>
-              </button>
-              {form.infracao === 'inidonia' && !form.motivo_inidonia && (
-                <div style={{
-                  border: '1px solid rgba(201,168,76,0.4)', borderTop: 'none',
-                  borderRadius: '0 0 8px 8px', overflow: 'hidden'
-                }}>
-                  {INCISOS.map((inc, idx) => (
-                    <button key={inc.value} onClick={() => setForm(f => ({ ...f, motivo_inidonia: inc.value }))}
-                      style={{
-                        display: 'block', width: '100%', padding: '10px 18px',
-                        textAlign: 'left', cursor: 'pointer', border: 'none',
-                        borderBottom: idx < INCISOS.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                        fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
-                        background: form.motivo_inidonia === inc.value ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.02)',
-                        color: form.motivo_inidonia === inc.value ? '#c9a84c' : '#c8c0b0'
-                      }}>
-                      {inc.label}
-                    </button>
-                  ))}
-                </div>
+            {/* Documentação inidônea — expansível com teclado */}
+            <MenuExpansivel
+              label="Documentação inidônea"
+              opcoes={INCISOS}
+              valorSelecionado={form.infracao === 'inidonia' ? form.motivo_inidonia : ''}
+              aberto={form.infracao === 'inidonia' && !form.motivo_inidonia}
+              onToggle={() => setForm(f => f.infracao === 'inidonia'
+                ? { ...f, infracao: null, motivo_inidonia: '' }
+                : { ...f, infracao: 'inidonia', motivo_inidonia: '' }
               )}
-            </div>
+              onSelecionar={val => setForm(f => ({ ...f, infracao: 'inidonia', motivo_inidonia: val }))}
+            />
 
-            {/* Falta de MDF-e — expansível */}
-            <div>
-              <button onClick={() => setForm(f => {
-                  if (f.infracao === 'falta_mdfe') return { ...f, infracao: null }
-                  return { ...f, infracao: 'falta_mdfe', tipo_mdfe: '' }
-                })}
-                style={{
-                  width: '100%', padding: '12px 16px',
-                  borderRadius: (form.infracao === 'falta_mdfe' && !form.tipo_mdfe) ? '8px 8px 0 0' : '8px',
-                  cursor: 'pointer', textAlign: 'left',
-                  fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
-                  background: form.infracao === 'falta_mdfe' ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
-                  border: form.infracao === 'falta_mdfe' ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                  borderBottom: (form.infracao === 'falta_mdfe' && !form.tipo_mdfe) ? '1px solid rgba(201,168,76,0.15)' : undefined,
-                  color: form.infracao === 'falta_mdfe' ? '#c9a84c' : '#c8c0b0',
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  <span>Falta de MDF-e</span>
-                  {form.infracao === 'falta_mdfe' && form.tipo_mdfe && (
-                    <span style={{ fontSize: '0.72rem', color: '#c9a84c', opacity: 0.85 }}>
-                      {{
-                        falta_emissao: 'Falta de emissão antes do início do transporte',
-                        falta_encerramento: 'Falta de encerramento após conclusão do transporte',
-                        encerramento_antecipado: 'Encerramento no curso do transporte'
-                      }[form.tipo_mdfe] || form.tipo_mdfe}
-                    </span>
-                  )}
-                </div>
-                <span style={{ fontSize: '0.75rem', opacity: 0.7, flexShrink: 0 }}>
-                  {form.infracao === 'falta_mdfe' && !form.tipo_mdfe ? '▲' : '▼'}
-                </span>
-              </button>
-              {form.infracao === 'falta_mdfe' && !form.tipo_mdfe && (
-                <div style={{
-                  border: '1px solid rgba(201,168,76,0.4)', borderTop: 'none',
-                  borderRadius: '0 0 8px 8px', overflow: 'hidden'
-                }}>
-                  {[
-                    { value: 'falta_emissao', label: 'Falta de emissão antes do início do transporte' },
-                    { value: 'falta_encerramento', label: 'Falta de encerramento após conclusão do transporte' },
-                    { value: 'encerramento_antecipado', label: 'Encerramento no curso do transporte' }
-                  ].map((op, idx, arr) => (
-                    <button key={op.value} onClick={() => setForm(f => ({ ...f, tipo_mdfe: op.value }))}
-                      style={{
-                        display: 'block', width: '100%', padding: '10px 18px',
-                        textAlign: 'left', cursor: 'pointer', border: 'none',
-                        borderBottom: idx < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                        fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
-                        background: form.tipo_mdfe === op.value ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.02)',
-                        color: form.tipo_mdfe === op.value ? '#c9a84c' : '#c8c0b0'
-                      }}>
-                      {op.label}
-                    </button>
-                  ))}
-                </div>
+            {/* Falta de MDF-e — expansível com teclado */}
+            <MenuExpansivel
+              label="Falta de MDF-e"
+              opcoes={[
+                { value: 'falta_emissao', label: 'Falta de emissão antes do início do transporte' },
+                { value: 'falta_encerramento', label: 'Falta de encerramento após conclusão do transporte' },
+                { value: 'encerramento_antecipado', label: 'Encerramento no curso do transporte' }
+              ]}
+              valorSelecionado={form.infracao === 'falta_mdfe' ? form.tipo_mdfe : ''}
+              aberto={form.infracao === 'falta_mdfe' && !form.tipo_mdfe}
+              onToggle={() => setForm(f => f.infracao === 'falta_mdfe'
+                ? { ...f, infracao: null, tipo_mdfe: '' }
+                : { ...f, infracao: 'falta_mdfe', tipo_mdfe: '' }
               )}
-            </div>
+              onSelecionar={val => setForm(f => ({ ...f, infracao: 'falta_mdfe', tipo_mdfe: val }))}
+            />
 
           </div>
         </Campo>
