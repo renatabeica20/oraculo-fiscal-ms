@@ -636,6 +636,68 @@ function CampoEncerramento({ form, setForm }) {
   )
 }
 
+function CampoEncerramentoAntecipado({ form, setForm }) {
+  const extrairNumeroMdfe = (chave) => {
+    const digits = (chave || '').replace(/\D/g, '')
+    if (digits.length < 35) return ''
+    return String(parseInt(digits.substring(26, 34), 10))
+  }
+
+  const numeroMdfe = extrairNumeroMdfe(form.chave_mdfe)
+
+  return (
+    <div style={{ marginBottom: '8px' }}>
+      <div style={{ marginBottom: '8px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '12px' }}>
+        <label style={{ ...labelStyle, color: '#c9a84c' }}>MDF-e irregular</label>
+      </div>
+
+      <Campo label="Chave de acesso do MDF-e (44 dígitos)">
+        <InputComFocus
+          style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.76rem', letterSpacing: '0.03em' }}
+          value={form.chave_mdfe || ''}
+          onChange={e => setForm(f => ({ ...f, chave_mdfe: e.target.value.replace(/\D/g, '').substring(0, 44) }))}
+          placeholder="44 dígitos — cole a chave aqui"
+          inputMode="numeric"
+        />
+        {numeroMdfe && (
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#7a9ab8', marginTop: '4px' }}>
+            MDF-e nº {numeroMdfe} identificado
+          </div>
+        )}
+      </Campo>
+
+      <Grid cols={2}>
+        <Campo label="Data de emissão do MDF-e">
+          <InputComFocus type="date" style={{ ...inputStyle, colorScheme: 'dark' }}
+            value={form.mdfe_emissao_data || ''}
+            onChange={e => setForm(f => ({ ...f, mdfe_emissao_data: e.target.value }))} />
+        </Campo>
+        <Campo label="Hora de emissão">
+          <InputComFocus type="time" style={{ ...inputStyle, colorScheme: 'dark' }}
+            value={form.mdfe_emissao_hora || ''}
+            onChange={e => setForm(f => ({ ...f, mdfe_emissao_hora: e.target.value }))} />
+        </Campo>
+      </Grid>
+
+      <div style={{ marginTop: '12px', marginBottom: '4px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '12px' }}>
+        <label style={{ ...labelStyle, color: '#7a9ab8' }}>Encerramento antecipado</label>
+      </div>
+      <Grid cols={2}>
+        <Campo label="Data do encerramento">
+          <InputComFocus type="date" style={{ ...inputStyle, colorScheme: 'dark' }}
+            value={form.mdfe_encerramento_data || ''}
+            onChange={e => setForm(f => ({ ...f, mdfe_encerramento_data: e.target.value }))} />
+        </Campo>
+        <Campo label="Hora do encerramento">
+          <InputComFocus type="time" style={{ ...inputStyle, colorScheme: 'dark' }}
+            value={form.mdfe_encerramento_hora || ''}
+            onChange={e => setForm(f => ({ ...f, mdfe_encerramento_hora: e.target.value }))} />
+        </Campo>
+      </Grid>
+    </div>
+  )
+}
+
 function CampoChavesMdfe({ form, setForm }) {
   const itens = form.chaves_nf && form.chaves_nf.length > 0 && typeof form.chaves_nf[0] === 'object'
     ? form.chaves_nf
@@ -894,6 +956,9 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
 
         {form.infracao === 'falta_mdfe' && form.tipo_mdfe === 'falta_encerramento' && (
           <CampoEncerramento form={form} setForm={setForm} />
+        )}
+        {form.infracao === 'falta_mdfe' && form.tipo_mdfe === 'encerramento_antecipado' && (
+          <CampoEncerramentoAntecipado form={form} setForm={setForm} />
         )}
         {form.infracao === 'falta_mdfe' && form.tipo_mdfe && (
           <CampoChavesMdfe form={form} setForm={setForm} />
@@ -1291,6 +1356,15 @@ MDF-e irregular:
   MDF-e ativo no momento da abordagem: ${form.mdfe_ativo ? 'SIM' : 'NÃO informado'}${form.mdfe_confirmacao_data ? `
   Confirmação do destinatário (art. 18-A): ${form.mdfe_confirmacao_data} às ${form.mdfe_confirmacao_hora || 'hora não informada'}` : ''}` : ''
 
+  const dadosEncerramentoAntecipado = (form.infracao === 'falta_mdfe' && form.tipo_mdfe === 'encerramento_antecipado' && form.chave_mdfe) ? `
+MDF-e irregular:
+  Chave de acesso: ${form.chave_mdfe}
+  Número: ${extrairNumeroMdfe(form.chave_mdfe) || 'a apurar'}
+  Data de emissão: ${form.mdfe_emissao_data || 'não informada'}
+  Hora de emissão: ${form.mdfe_emissao_hora || 'não informada'}
+  Data do encerramento antecipado: ${form.mdfe_encerramento_data || 'não informada'}
+  Hora do encerramento antecipado: ${form.mdfe_encerramento_hora || 'não informada'}` : ''
+
   const dadosMdfe = (form.infracao === 'falta_mdfe' || form.infracao === 'mdfe_inidonio') ? `
 Documentos fiscais vinculados (${itensMdfe.length} NF-e):
 ${itensMdfe.map((it, i) => `  NF-e ${i+1}: Chave ${it.chave || 'não informada'} — Valor: R$ ${it.valor || '0,00'}`).join('\n')}
@@ -1315,7 +1389,7 @@ Placa: ${form.placas.filter(p => p).join(' / ')}
 ${isMdfe && (form.origem_municipio || form.destino_municipio) ? `Origem: ${form.origem_municipio || 'não informado'}/${form.origem_uf || '?'} → Destino: ${form.destino_municipio || 'não informado'}/${form.destino_uf || '?'}` : ''}
 Motorista: ${form.motorista}${form.cpf ? ` — CPF: ${form.cpf}` : ''}${form.telefone ? ` — Tel: ${form.telefone}` : ''}
 Sujeito passivo: ${form.sujeito}${form.ie ? ` — IE: ${form.ie}` : ' — sem IE no MS'}${form.cnpj ? ` — CNPJ: ${form.cnpj}` : ''}${linhaMercadoria}
-Infração: ${infracao}${dadosEncerramento}${dadosMdfe}${dadosNFVencida}${form.obs ? `
+Infração: ${infracao}${dadosEncerramento}${dadosEncerramentoAntecipado}${dadosMdfe}${dadosNFVencida}${form.obs ? `
 Observações: ${form.obs}` : ''}`
 }
 
@@ -1432,6 +1506,7 @@ export default function Home() {
     origem_municipio: '', origem_uf: 'MS', destino_municipio: '', destino_uf: '',
     chave_mdfe: '', mdfe_emissao_data: '', mdfe_emissao_hora: '',
     mdfe_ativo: false, mdfe_confirmacao_data: '', mdfe_confirmacao_hora: '',
+    mdfe_encerramento_data: '', mdfe_encerramento_hora: '',
     obs: ''
   })
   const [formTA, setFormTA] = useState({
@@ -1850,7 +1925,7 @@ export default function Home() {
       setModoOrigem(null)
       setMsgCopiada(null)
       setFormContestacao({ tipo: 'contestacao', numero_doc: '', contribuinte: '', ie_contrib: '', cnpj_contrib: '', destinatario: '', texto_tvf: '', texto_contribuinte: '' })
-      setFormTVF({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', mercadoria: [{ descricao: '', quantidade: '', unidade: '', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', tipo_mdfe: 'falta_emissao', chaves_nf: [{ chave: '', valor: '' }], danfes: [{ chave: '', emissao: '', saida: '', valor: '' }], origem_municipio: '', origem_uf: 'MS', destino_municipio: '', destino_uf: '', obs: '' })
+      setFormTVF({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', mercadoria: [{ descricao: '', quantidade: '', unidade: '', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', tipo_mdfe: 'falta_emissao', chaves_nf: [{ chave: '', valor: '' }], danfes: [{ chave: '', emissao: '', saida: '', valor: '' }], origem_municipio: '', origem_uf: 'MS', destino_municipio: '', destino_uf: '', chave_mdfe: '', mdfe_emissao_data: '', mdfe_emissao_hora: '', mdfe_ativo: false, mdfe_confirmacao_data: '', mdfe_confirmacao_hora: '', mdfe_encerramento_data: '', mdfe_encerramento_hora: '', obs: '' })
       setFormTA({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', documentos: '', mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', responsavel: 'transportador', obs: '' })
       if (sessaoIdRef.current) {
         supabase
