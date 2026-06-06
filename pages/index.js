@@ -933,12 +933,16 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
             <InputComFocus type="time" style={{ ...inputStyle, colorScheme: 'dark' }} value={form.hora} onChange={set('hora')} />
           </Campo>
         </Grid>
-        <Campo label="Endereço completo *">
-          <InputComFocus style={inputStyle} value={form.endereco} onChange={set('endereco')} placeholder="Rua, número, bairro" />
-        </Campo>
-        <Campo label="Cidade">
-          <CampoCidade value={form.cidade} onChange={v => setForm(f => ({ ...f, cidade: v }))} />
-        </Campo>
+        {form.tipo_mdfe !== 'falta_encerramento' && (
+          <>
+            <Campo label="Endereço completo *">
+              <InputComFocus style={inputStyle} value={form.endereco} onChange={set('endereco')} placeholder="Rua, número, bairro" />
+            </Campo>
+            <Campo label="Cidade">
+              <CampoCidade value={form.cidade} onChange={v => setForm(f => ({ ...f, cidade: v }))} />
+            </Campo>
+          </>
+        )}
 
         {isMdfe && (
           <>
@@ -1037,7 +1041,20 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
         </Campo>
         <Grid cols={2}>
           <Campo label="IE (Inscrição Estadual)">
-            <InputComFocus style={inputStyle} value={form.ie} onChange={e => setForm(f => ({ ...f, ie: e.target.value }))} placeholder="IE do estado de origem" />
+            <InputComFocus style={inputStyle} value={form.ie} onChange={e => {
+              const raw = e.target.value.replace(/\D/g, '')
+              if (raw.startsWith('28')) {
+                // Máscara MS: 28.XXX.XXX-XX (11 dígitos)
+                const n = raw.substring(0, 11)
+                let masked = n
+                if (n.length > 9) masked = n.replace(/(\d{2})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4')
+                else if (n.length > 6) masked = n.replace(/(\d{2})(\d{3})(\d{1,3})/, '$1.$2.$3')
+                else if (n.length > 3) masked = n.replace(/(\d{2})(\d{1,3})/, '$1.$2')
+                setForm(f => ({ ...f, ie: masked }))
+              } else {
+                setForm(f => ({ ...f, ie: e.target.value }))
+              }
+            }} placeholder="IE do estado de origem" />
           </Campo>
           <Campo label="CNPJ / CPF">
             <InputComFocus style={inputStyle} value={form.cnpj} onChange={e => {
