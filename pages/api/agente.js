@@ -177,8 +177,8 @@ MDF-e NÃO ENCERRADO: viagem anterior ainda aberta quando nova viagem já está 
 ## FALTA DE ENCERRAMENTO APÓS CONCLUSÃO DO TRANSPORTE — REDAÇÃO OBRIGATÓRIA
 Quando a infração for "FALTA DE ENCERRAMENTO DE MANIFESTO APÓS CONCLUSÃO DO TRANSPORTE", a matéria tributária DEVE seguir esta estrutura em parágrafos corridos:
 
-PARÁGRAFO 1 — CONSTATAÇÃO:
-"A equipe de fiscalização verificou que o sujeito passivo, na condição de emitente do Manifesto Eletrônico de Documentos Fiscais MDF-e nº [número extraído da chave], emitido em [data de emissão por extenso], às [hora]h[min]min, deixou de promover o encerramento do referido documento após a conclusão do transporte, permanecendo o MDF-e ativo no sistema da SEFAZ/MS na presente data, em afronta ao disposto no art. 14 do Subanexo XVII ao Anexo XV do RICMS/MS (Decreto nº 9.203/98)."
+PARÁGRAFO 1 — CONSTATAÇÃO (via FVM — sem abordagem física):
+"Em [data por extenso], às [hora]h[min]min, a equipe de fiscalização verificou, por meio do sistema de Fiscalização Virtual de Mercadorias (FVM), que o sujeito passivo, na condição de emitente do Manifesto Eletrônico de Documentos Fiscais MDF-e nº [número extraído da chave], emitido em [data de emissão por extenso], às [hora de emissão]h[min]min, deixou de promover o encerramento do referido documento após a conclusão do transporte, com origem em [município de origem]/[UF] e destino a [município de destino]/[UF], permanecendo o MDF-e ativo no sistema da SEFAZ/MS na presente data, em afronta ao disposto no art. 14 do Subanexo XVII ao Anexo XV do RICMS/MS (Decreto nº 9.203/98)."
 
 PARÁGRAFO 2 — OBRIGAÇÃO LEGAL:
 "O encerramento do MDF-e constitui ato obrigatório que delimita o término de sua vigência e formaliza a conclusão da operação de transporte, sendo medida indispensável para assegurar a regularidade fiscal e o adequado controle das operações."
@@ -196,6 +196,9 @@ REGRAS ESPECÍFICAS PARA ESTE TIPO:
 - NUNCA citar art. 3º do Subanexo XVII neste tipo de infração — esse artigo é para falta de emissão, não falta de encerramento.
 - O MDF-e ativo no momento da abordagem deve ser mencionado como "permanecendo o MDF-e ativo no sistema da SEFAZ/MS na presente data".
 - A confirmação do destinatário (art. 18-A) é prova material obrigatória — sempre incluir com data e hora.
+- NUNCA usar "procedeu à abordagem" ou "abordagem" neste tipo — a verificação é remota, via FVM. Usar sempre "verificou, por meio do sistema de Fiscalização Virtual de Mercadorias (FVM)".
+- Origem e destino do transporte (extraídos do MDF-e consultado no FVM) devem constar no parágrafo 1 — formato: "com origem em [município]/[UF] e destino a [município]/[UF]".
+- A data e hora do parágrafo 1 são as da verificação no FVM (data/hora da abordagem informada no formulário), não a da emissão do MDF-e.
 
 ## PROVA DA INFRAÇÃO — ELEMENTOS PROBATÓRIOS
 - Hora de autorização da NF-e no sistema SEFAZ: prova objetiva de posterioridade ao início da ação fiscal
