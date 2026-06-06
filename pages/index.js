@@ -823,9 +823,6 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
           </Campo>
         )}
 
-        <Campo label="Observações adicionais">
-          <TextareaComFocus style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }} value={form.obs} onChange={set('obs')} placeholder="Detalhes relevantes da abordagem, declarações do motorista, registros fotográficos..." />
-        </Campo>
       </div>
 
       {/* ABORDAGEM */}
@@ -1906,25 +1903,41 @@ export default function Home() {
                             ) : (
                               <p
                                 onClick={() => setEditandoNome({ id: doc.id, valor: doc.autuado || '' })}
-                                title="Clique para editar"
-                                style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', color: '#a8a090', margin: '0 0 10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'pointer', borderBottom: '1px dashed rgba(255,255,255,0.1)', paddingBottom: '2px' }}
+                                title="Clique para editar o nome"
+                                style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem', color: '#c8c0b0', fontWeight: 600, margin: '0 0 10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'pointer', borderBottom: '1px dashed rgba(255,255,255,0.1)', paddingBottom: '4px' }}
                               >
-                                {doc.autuado || <span style={{ color: '#3a4a5a', fontStyle: 'italic' }}>+ Adicionar identificação</span>}
+                                {doc.autuado || <span style={{ color: '#3a4a5a', fontStyle: 'italic', fontWeight: 400 }}>+ Adicionar sujeito passivo</span>}
                               </p>
                             )}
-                            <div style={{ display: 'flex', gap: '8px' }}>
+                            <div style={{ display: 'flex', gap: '6px' }}>
                               <button onClick={() => setDocVisualizando(doc)} style={{
-                                flex: 1, background: 'rgba(201,168,76,0.1)', color: '#c9a84c',
+                                flex: 1, background: 'rgba(201,168,76,0.08)', color: '#c9a84c',
                                 border: '1px solid rgba(201,168,76,0.2)', borderRadius: '7px',
-                                padding: '7px 10px', fontFamily: "'DM Sans', sans-serif",
-                                fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer'
+                                padding: '6px 8px', fontFamily: "'DM Sans', sans-serif",
+                                fontSize: '0.7rem', fontWeight: 500, cursor: 'pointer'
                               }}>
-                                👁 Ver documento
+                                👁 Ver
+                              </button>
+                              <button onClick={async () => {
+                                const texto = doc.materia_tributaria || ''
+                                try {
+                                  await navigator.clipboard.writeText(texto)
+                                } catch {
+                                  const el = document.createElement('textarea')
+                                  el.value = texto; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el)
+                                }
+                              }} style={{
+                                flex: 1, background: 'rgba(80,144,208,0.08)', color: '#5090d0',
+                                border: '1px solid rgba(80,144,208,0.2)', borderRadius: '7px',
+                                padding: '6px 8px', fontFamily: "'DM Sans', sans-serif",
+                                fontSize: '0.7rem', fontWeight: 500, cursor: 'pointer'
+                              }}>
+                                📋 Copiar
                               </button>
                               <button onClick={() => setConfirmarExclusao(doc)} style={{
                                 background: 'transparent', border: '1px solid rgba(200,80,80,0.2)',
-                                borderRadius: '7px', color: '#c87070', padding: '7px 10px',
-                                fontSize: '0.85rem', cursor: 'pointer', flexShrink: 0
+                                borderRadius: '7px', color: '#c87070', padding: '6px 8px',
+                                fontSize: '0.78rem', cursor: 'pointer', flexShrink: 0
                               }}>🗑</button>
                             </div>
                           </div>
