@@ -106,8 +106,17 @@ function detectarTipoDocumento(texto) {
 }
 
 function extrairAutuado(texto) {
-  const match = texto.match(/(?:autuado|contribuinte|sujeito passivo|empresa)[:\s]+([A-ZÁÉÍÓÚÂÊÎÔÛÃÕÇ\s]+(?:LTDA|ME|SA|EIRELI|EPP)?)/i)
-  return match ? match[1].trim().substring(0, 60) : null
+  if (!texto) return null
+  // Padrão 1: "sujeito passivo responsável: Nome" ou "sujeito passivo: Nome"
+  let m = texto.match(/sujeito passivo(?:\s+respons[aá]vel)?(?:\s+pela infra[çc][aã]o)?[^:]*:\s*([A-ZÁÉÍÓÚÂÊÎÔÛÃÕÇ][A-ZÁÉÍÓÚÂÊÎÔÛÃÕÇa-záéíóúâêîôûãõç\s]+(?:LTDA|ME|SA|EIRELI|EPP|LTDA\.)?)/i)
+  if (m) return m[1].trim().replace(/[,.]$/, '').substring(0, 80)
+  // Padrão 2: "é Nome LTDA" ou "é Nome, inscrita"
+  m = texto.match(/(?:é|responsável é|passivo é)\s+([A-ZÁÉÍÓÚÂÊÎÔÛÃÕÇ][A-ZÁÉÍÓÚÂÊÎÔÛÃÕÇa-záéíóúâêîôûãõç\s]+(?:LTDA|ME|SA|EIRELI|EPP|LTDA\.)?)/i)
+  if (m) return m[1].trim().replace(/[,.]$/, '').substring(0, 80)
+  // Padrão 3: "autuado|contribuinte|empresa: Nome"
+  m = texto.match(/(?:autuado|contribuinte|empresa)[:\s]+([A-ZÁÉÍÓÚÂÊÎÔÛÃÕÇ\s]+(?:LTDA|ME|SA|EIRELI|EPP)?)/i)
+  if (m) return m[1].trim().substring(0, 80)
+  return null
 }
 
 function extrairFato(texto) {
@@ -1682,10 +1691,15 @@ export default function Home() {
     if (fiscal) {
       const tipo = tipoEscolhido || detectarTipoDocumento(textoCopiar) || 'TVF'
       const ehDefesa = ['DESK', 'CONTESTACAO'].includes(tipo)
+      // Fallback: usar sujeito do formulário se extração falhou
+      const sujeitoForm = modoOrigem === 'tvf' ? formTVF.sujeito : modoOrigem === 'ta' ? formTA.sujeito : ''
+      const autuadoFinal = ehDefesa
+        ? (labelSalvar || popupSalvar.autuado || null)
+        : (popupSalvar.autuado || sujeitoForm || null)
       await supabase.from('historico_documentos').upsert({
         fiscal_id: fiscal.id,
         tipo,
-        autuado: ehDefesa ? (labelSalvar || popupSalvar.autuado || null) : popupSalvar.autuado,
+        autuado: autuadoFinal,
         infracao: ehDefesa ? null : (labelSalvar.replace(tipo, '').replace(/^[\s\-]+|[\s\-]+$/g, '') || null),
         materia_tributaria: textoCopiar,
         conversa: historico.slice(-10)
