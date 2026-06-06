@@ -582,74 +582,110 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
       <div style={secaoStyle}>
         <div style={secaoTituloStyle}>⚖️ Infração</div>
         <Campo label="Tipo de infração">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            {[
-              { value: 'sem_documento', label: 'Sem documentação fiscal' },
-              { value: 'inidonia', label: 'Documentação inidônea' },
-              { value: 'falta_mdfe', label: 'Falta de MDF-e' }
-            ].map(op => (
-              <button key={op.value} onClick={() => setForm(f => ({ ...f, infracao: op.value }))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+
+            {/* Sem documentação fiscal */}
+            <button onClick={() => setForm(f => ({ ...f, infracao: f.infracao === 'sem_documento' ? null : 'sem_documento', motivo_inidonia: '', tipo_mdfe: 'falta_emissao' }))}
+              style={{
+                padding: '12px 16px', borderRadius: '8px', cursor: 'pointer', textAlign: 'left',
+                fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+                background: form.infracao === 'sem_documento' ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
+                border: form.infracao === 'sem_documento' ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
+                color: form.infracao === 'sem_documento' ? '#c9a84c' : '#c8c0b0',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+              }}>
+              <span>Sem documentação fiscal</span>
+            </button>
+
+            {/* Documentação inidônea — expansível */}
+            <div>
+              <button onClick={() => setForm(f => ({ ...f, infracao: f.infracao === 'inidonia' ? null : 'inidonia', motivo_inidonia: '' }))}
                 style={{
-                  padding: '10px', borderRadius: '8px', cursor: 'pointer',
-                  fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
-                  background: form.infracao === op.value ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
-                  border: form.infracao === op.value ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                  color: form.infracao === op.value ? '#c9a84c' : '#5a6a7a'
+                  width: '100%', padding: '12px 16px', borderRadius: form.infracao === 'inidonia' ? '8px 8px 0 0' : '8px',
+                  cursor: 'pointer', textAlign: 'left',
+                  fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+                  background: form.infracao === 'inidonia' ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
+                  border: form.infracao === 'inidonia' ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
+                  borderBottom: form.infracao === 'inidonia' ? '1px solid rgba(201,168,76,0.15)' : undefined,
+                  color: form.infracao === 'inidonia' ? '#c9a84c' : '#c8c0b0',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                 }}>
-                {op.label}
+                <span>Documentação inidônea</span>
+                <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>{form.infracao === 'inidonia' ? '▲' : '▼'}</span>
               </button>
-            ))}
+              {form.infracao === 'inidonia' && (
+                <div style={{
+                  border: '1px solid rgba(201,168,76,0.4)', borderTop: 'none',
+                  borderRadius: '0 0 8px 8px', overflow: 'hidden'
+                }}>
+                  {INCISOS.map((inc, idx) => (
+                    <button key={inc.value} onClick={() => setForm(f => ({ ...f, motivo_inidonia: inc.value }))}
+                      style={{
+                        display: 'block', width: '100%', padding: '10px 18px',
+                        textAlign: 'left', cursor: 'pointer', border: 'none',
+                        borderBottom: idx < INCISOS.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                        fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
+                        background: form.motivo_inidonia === inc.value ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.02)',
+                        color: form.motivo_inidonia === inc.value ? '#c9a84c' : '#c8c0b0'
+                      }}>
+                      {inc.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Falta de MDF-e — expansível */}
+            <div>
+              <button onClick={() => setForm(f => ({ ...f, infracao: f.infracao === 'falta_mdfe' ? null : 'falta_mdfe', tipo_mdfe: 'falta_emissao' }))}
+                style={{
+                  width: '100%', padding: '12px 16px', borderRadius: form.infracao === 'falta_mdfe' ? '8px 8px 0 0' : '8px',
+                  cursor: 'pointer', textAlign: 'left',
+                  fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+                  background: form.infracao === 'falta_mdfe' ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
+                  border: form.infracao === 'falta_mdfe' ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
+                  borderBottom: form.infracao === 'falta_mdfe' ? '1px solid rgba(201,168,76,0.15)' : undefined,
+                  color: form.infracao === 'falta_mdfe' ? '#c9a84c' : '#c8c0b0',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                }}>
+                <span>Falta de MDF-e</span>
+                <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>{form.infracao === 'falta_mdfe' ? '▲' : '▼'}</span>
+              </button>
+              {form.infracao === 'falta_mdfe' && (
+                <div style={{
+                  border: '1px solid rgba(201,168,76,0.4)', borderTop: 'none',
+                  borderRadius: '0 0 8px 8px', overflow: 'hidden'
+                }}>
+                  {[
+                    { value: 'falta_emissao', label: 'Falta de emissão antes do início do transporte' },
+                    { value: 'falta_encerramento', label: 'Falta de encerramento após conclusão do transporte' },
+                    { value: 'encerramento_antecipado', label: 'Encerramento no curso do transporte' }
+                  ].map((op, idx, arr) => (
+                    <button key={op.value} onClick={() => setForm(f => ({ ...f, tipo_mdfe: op.value }))}
+                      style={{
+                        display: 'block', width: '100%', padding: '10px 18px',
+                        textAlign: 'left', cursor: 'pointer', border: 'none',
+                        borderBottom: idx < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                        fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
+                        background: form.tipo_mdfe === op.value ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.02)',
+                        color: form.tipo_mdfe === op.value ? '#c9a84c' : '#c8c0b0'
+                      }}>
+                      {op.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
           </div>
         </Campo>
-
-        {form.infracao === 'inidonia' && (
-          <Campo label="Motivo da inidoneidade (art. 93)">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {INCISOS.map(inc => (
-                <button key={inc.value} onClick={() => setForm(f => ({ ...f, motivo_inidonia: inc.value }))}
-                  style={{
-                    padding: '10px 14px', borderRadius: '8px', cursor: 'pointer', textAlign: 'left',
-                    fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
-                    background: form.motivo_inidonia === inc.value ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
-                    border: form.motivo_inidonia === inc.value ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                    color: form.motivo_inidonia === inc.value ? '#c9a84c' : '#c8c0b0'
-                  }}>
-                  {inc.label}
-                </button>
-              ))}
-            </div>
-          </Campo>
-        )}
 
         {form.infracao === 'inidonia' && form.motivo_inidonia === 'fora do prazo de validade (art. 93, VII)' && (
           <CampoDanfes form={form} setForm={setForm} />
         )}
 
         {form.infracao === 'falta_mdfe' && (
-          <>
-            <Campo label="Tipo de ocorrência">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {[
-                  { value: 'falta_emissao', label: 'Falta de emissão antes do início do transporte' },
-                  { value: 'falta_encerramento', label: 'Falta de encerramento após conclusão do transporte' },
-                  { value: 'encerramento_antecipado', label: 'Encerramento no curso do transporte' },
-                  { value: 'mdfe_inidonio', label: 'MDF-e Inidôneo' }
-                ].map(op => (
-                  <button key={op.value} onClick={() => setForm(f => ({ ...f, tipo_mdfe: op.value }))}
-                    style={{
-                      padding: '10px', borderRadius: '8px', cursor: 'pointer', textAlign: 'left',
-                      fontFamily: "'DM Sans', sans-serif", fontSize: '0.8rem',
-                      background: form.tipo_mdfe === op.value ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
-                      border: form.tipo_mdfe === op.value ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                      color: form.tipo_mdfe === op.value ? '#c9a84c' : '#5a6a7a'
-                    }}>
-                    {op.label}
-                  </button>
-                ))}
-              </div>
-            </Campo>
-            <CampoChavesMdfe form={form} setForm={setForm} />
-          </>
+          <CampoChavesMdfe form={form} setForm={setForm} />
         )}
 
 
