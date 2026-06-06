@@ -1990,30 +1990,7 @@ export default function Home() {
             <div style={{ overflowY: 'auto', padding: '24px', fontSize: '0.88rem', lineHeight: 1.7, color: '#1a2332', whiteSpace: 'pre-wrap' }}>
               {docVisualizando.materia_tributaria}
             </div>
-            {/* Botões */}
-            <div style={{ padding: '16px 24px', borderTop: '1px solid #e3e9f1', display: 'flex', gap: '10px' }}>
-              <button
-                onClick={() => usarComoBase(docVisualizando)}
-                style={{
-                  flex: 1, background: 'linear-gradient(135deg, #1a4a8a, #0d2f5e)',
-                  color: '#fff', border: 'none', borderRadius: '9px', padding: '12px',
-                  fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer',
-                  letterSpacing: '0.04em'
-                }}
-              >
-                ↩ Usar como base
-              </button>
-              <button
-                onClick={() => { navigator.clipboard.writeText(docVisualizando.materia_tributaria); setDocVisualizando(null) }}
-                style={{
-                  background: '#f0f4f8', color: '#0d2f5e', border: '1px solid #c3d0e0',
-                  borderRadius: '9px', padding: '12px 20px', fontSize: '0.85rem',
-                  fontWeight: 600, cursor: 'pointer'
-                }}
-              >
-                📋 Copiar
-              </button>
-            </div>
+
           </div>
         </div>
       )}
