@@ -1696,8 +1696,24 @@ export default function Home() {
     setLabelSalvar('')
     setTipoEscolhido('')
     setMsgCopiada(idxSalvo ?? null)
-    // Chat continua aberto — o fiscal encerra manualmente quando quiser
-    setTimeout(() => setMsgCopiada(null), 2000)
+    // Encerrar chat e resetar formulários após salvar
+    setTimeout(() => {
+      setMensagens([])
+      setHistorico([])
+      setRespostasAtivas({})
+      setModoAtivo(null)
+      setModoOrigem(null)
+      setMsgCopiada(null)
+      setFormContestacao({ tipo: 'contestacao', numero_doc: '', contribuinte: '', ie_contrib: '', cnpj_contrib: '', destinatario: '', texto_tvf: '', texto_contribuinte: '' })
+      setFormTVF({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', mercadoria: [{ descricao: '', quantidade: '', unidade: '', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', tipo_mdfe: 'falta_emissao', chaves_nf: [{ chave: '', valor: '' }], danfes: [{ chave: '', emissao: '', saida: '', valor: '' }], origem_municipio: '', origem_uf: 'MS', destino_municipio: '', destino_uf: '', obs: '' })
+      setFormTA({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', documentos: '', mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', responsavel: 'transportador', obs: '' })
+      if (sessaoIdRef.current) {
+        supabase
+          .from('sessoes_chat')
+          .update({ mensagens: [], historico: [], atualizado_em: new Date().toISOString() })
+          .eq('id', sessaoIdRef.current)
+      }
+    }, 400)
   }
 
   const [editandoNome, setEditandoNome] = useState(null) // { id, valor }
