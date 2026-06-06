@@ -1691,11 +1691,14 @@ export default function Home() {
     if (fiscal) {
       const tipo = tipoEscolhido || detectarTipoDocumento(textoCopiar) || 'TVF'
       const ehDefesa = ['DESK', 'CONTESTACAO'].includes(tipo)
-      // Fallback: usar sujeito do formulário se extração falhou
-      const sujeitoForm = modoOrigem === 'tvf' ? formTVF.sujeito : modoOrigem === 'ta' ? formTA.sujeito : ''
+      // Fonte primária: sujeito digitado no formulário; fallback: extração do texto
+      const sujeitoForm = modoOrigem === 'tvf' ? formTVF.sujeito
+        : modoOrigem === 'ta' ? formTA.sujeito
+        : modoOrigem === 'contestacao' || modoOrigem === 'desk' ? formContestacao.contribuinte
+        : ''
       const autuadoFinal = ehDefesa
-        ? (labelSalvar || popupSalvar.autuado || null)
-        : (popupSalvar.autuado || sujeitoForm || null)
+        ? (labelSalvar || sujeitoForm || popupSalvar.autuado || null)
+        : (sujeitoForm || popupSalvar.autuado || null)
       await supabase.from('historico_documentos').upsert({
         fiscal_id: fiscal.id,
         tipo,
