@@ -909,7 +909,7 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
 
       {/* INFRAÇÃO — primeiro, pois define o contexto da abordagem */}
       <div style={secaoStyle}>
-        <div style={secaoTituloStyle}>⚖️ Infração</div>
+        <div style={secaoTituloStyle}><span style={{ color: '#c9a84c', fontSize: '0.7rem', marginRight: '8px' }}>◆</span>Infração</div>
         <Campo label="Tipo de infração">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
 
@@ -918,10 +918,10 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
               style={{
                 padding: '14px 18px', borderRadius: '9px', cursor: 'pointer', textAlign: 'left',
                 fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem', fontWeight: form.infracao === 'sem_documento' ? 600 : 500,
-                background: form.infracao === 'sem_documento' ? 'linear-gradient(135deg, rgba(201,168,76,0.22), rgba(201,168,76,0.08))' : 'rgba(10,16,24,0.5)',
-                border: form.infracao === 'sem_documento' ? '1px solid rgba(201,168,76,0.55)' : '1px solid rgba(255,255,255,0.06)',
-                color: form.infracao === 'sem_documento' ? '#e8d090' : '#a0a8b0',
-                boxShadow: form.infracao === 'sem_documento' ? '0 4px 16px rgba(201,168,76,0.18), inset 0 1px 0 rgba(255,255,255,0.08)' : 'inset 0 1px 0 rgba(255,255,255,0.02)',
+                background: form.infracao === 'sem_documento' ? 'linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.1))' : 'rgba(10,16,24,0.5)',
+                border: form.infracao === 'sem_documento' ? '1px solid rgba(201,168,76,0.5)' : '1px solid rgba(255,255,255,0.06)',
+                color: form.infracao === 'sem_documento' ? '#c9a84c' : '#a0a8b0',
+                boxShadow: form.infracao === 'sem_documento' ? '0 0 12px rgba(201,168,76,0.15)' : 'inset 0 1px 0 rgba(255,255,255,0.02)',
                 transition: 'all 0.25s ease',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center'
               }}>
@@ -988,10 +988,10 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
                     flex: 1, padding: '13px 14px', borderRadius: '9px', cursor: 'pointer',
                     fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
                     fontWeight: form.responsavel === op.value ? 600 : 500,
-                    background: form.responsavel === op.value ? 'linear-gradient(135deg, rgba(201,168,76,0.22), rgba(201,168,76,0.08))' : 'rgba(10,16,24,0.5)',
-                    border: form.responsavel === op.value ? '1px solid rgba(201,168,76,0.55)' : '1px solid rgba(255,255,255,0.06)',
-                    color: form.responsavel === op.value ? '#e8d090' : '#7a8a9a',
-                    boxShadow: form.responsavel === op.value ? '0 4px 16px rgba(201,168,76,0.18), inset 0 1px 0 rgba(255,255,255,0.08)' : 'inset 0 1px 0 rgba(255,255,255,0.02)',
+                    background: form.responsavel === op.value ? 'linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.1))' : 'rgba(10,16,24,0.5)',
+                    border: form.responsavel === op.value ? '1px solid rgba(201,168,76,0.5)' : '1px solid rgba(255,255,255,0.06)',
+                    color: form.responsavel === op.value ? '#c9a84c' : '#7a8a9a',
+                    boxShadow: form.responsavel === op.value ? '0 0 12px rgba(201,168,76,0.15)' : 'inset 0 1px 0 rgba(255,255,255,0.02)',
                     transition: 'all 0.25s ease'
                   }}>
                   {op.label}
@@ -1005,7 +1005,7 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
 
       {/* ABORDAGEM */}
       <div style={secaoStyle}>
-        <div style={secaoTituloStyle}>📍 Abordagem</div>
+        <div style={secaoTituloStyle}><span style={{ color: '#c9a84c', fontSize: '0.7rem', marginRight: '8px' }}>◆</span>Abordagem</div>
         <Grid cols={2}>
           <Campo label="Data *">
             <InputComFocus type="date" style={{ ...inputStyle, colorScheme: 'dark' }} value={form.data} onChange={set('data')} />
@@ -1072,7 +1072,7 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
 
       {/* VEÍCULO E CONDUTOR */}
       <div style={secaoStyle}>
-        <div style={secaoTituloStyle}>🚛 Veículo e condutor</div>
+        <div style={secaoTituloStyle}><span style={{ color: '#c9a84c', fontSize: '0.7rem', marginRight: '8px' }}>◆</span>Veículo e condutor</div>
         <div style={{ marginBottom: '12px' }}>
           <label style={labelStyle}>Placa(s) *</label>
           {form.placas.map((placa, i) => (
@@ -1116,7 +1116,7 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
 
       {/* SUJEITO PASSIVO */}
       <div style={secaoStyle}>
-        <div style={secaoTituloStyle}>🏢 Sujeito passivo</div>
+        <div style={secaoTituloStyle}><span style={{ color: '#c9a84c', fontSize: '0.7rem', marginRight: '8px' }}>◆</span>Sujeito passivo</div>
         <Campo label="Nome / Razão social *">
           <InputComFocus style={inputStyle} value={form.sujeito} onChange={set('sujeito')} placeholder="Nome ou razão social" />
         </Campo>
@@ -1161,7 +1161,7 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
       {/* MERCADORIA — oculto para MDF-e e NF vencida */}
       {!semMercadoria && <div style={secaoStyle}>
         <div style={{ ...secaoTituloStyle, justifyContent: 'space-between' }}>
-          <span>📦 Mercadoria</span>
+          <span><span style={{ color: '#c9a84c', fontSize: '0.7rem', marginRight: '8px' }}>◆</span>Mercadoria</span>
           <button onClick={addMerc} style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '6px', color: '#c9a84c', padding: '4px 12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem' }}>
             + Item
           </button>
@@ -1201,19 +1201,20 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
 
       <button onClick={onGerar} disabled={!obrigatoriosOk} style={{
         width: '100%', padding: '17px',
-        background: obrigatoriosOk ? 'linear-gradient(135deg, #d4b658 0%, #c9a84c 50%, #a88a3c 100%)' : 'rgba(10,16,24,0.4)',
-        color: obrigatoriosOk ? '#0d1218' : '#7a8a9a',
-        border: obrigatoriosOk ? '1px solid rgba(201,168,76,0.7)' : '1.5px dashed rgba(201,168,76,0.28)',
+        background: obrigatoriosOk ? 'linear-gradient(135deg, #b8902a 0%, #c9a84c 50%, #b8902a 100%)' : 'transparent',
+        backgroundSize: '200% 100%',
+        color: obrigatoriosOk ? '#0d0f12' : '#3a4a5a',
+        border: obrigatoriosOk ? 'none' : '1px dashed rgba(201,168,76,0.25)',
         borderRadius: '11px',
         fontFamily: "'DM Sans', sans-serif",
         fontSize: '0.92rem', fontWeight: 700,
         cursor: obrigatoriosOk ? 'pointer' : 'not-allowed',
-        letterSpacing: '0.18em', textTransform: 'uppercase',
-        boxShadow: obrigatoriosOk ? '0 10px 32px rgba(201,168,76,0.4), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.2)' : 'none',
+        letterSpacing: '0.12em', textTransform: 'uppercase',
+        boxShadow: obrigatoriosOk ? '0 8px 28px rgba(201,168,76,0.35)' : 'none',
         transition: 'all 0.3s ease'
       }}
-      onMouseEnter={e => { if(obrigatoriosOk){ e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 14px 40px rgba(201,168,76,0.55), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.2)' } }}
-      onMouseLeave={e => { if(obrigatoriosOk){ e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='0 10px 32px rgba(201,168,76,0.4), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.2)' } }}
+      onMouseEnter={e => { if(obrigatoriosOk){ e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 12px 36px rgba(201,168,76,0.5)' } }}
+      onMouseLeave={e => { if(obrigatoriosOk){ e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='0 8px 28px rgba(201,168,76,0.35)' } }}
       >
         ✓ Gerar matéria tributária
       </button>
@@ -1246,9 +1247,10 @@ function FormularioContestacao({ form, setForm, onVoltar, onGerar }) {
               style={{
                 flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer',
                 fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
-                background: form.tipo === op.value ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
-                border: form.tipo === op.value ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                color: form.tipo === op.value ? '#c9a84c' : '#5a6a7a'
+                background: form.tipo === op.value ? 'linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.1))' : 'rgba(255,255,255,0.03)',
+                border: form.tipo === op.value ? '1px solid rgba(201,168,76,0.5)' : '1px solid rgba(255,255,255,0.07)',
+                color: form.tipo === op.value ? '#c9a84c' : '#5a6a7a',
+                boxShadow: form.tipo === op.value ? '0 0 12px rgba(201,168,76,0.15)' : 'none'
               }}>
               {op.label}
             </button>
@@ -1257,7 +1259,7 @@ function FormularioContestacao({ form, setForm, onVoltar, onGerar }) {
       </div>
 
       <div style={secaoStyle}>
-        <div style={secaoTituloStyle}>📄 Identificação</div>
+        <div style={secaoTituloStyle}><span style={{ color: '#c9a84c', fontSize: '0.7rem', marginRight: '8px' }}>◆</span>Identificação</div>
         <Campo label={form.tipo === 'contestacao' ? 'Número do ALIM *' : 'Número do TVF/TA *'}>
           <InputComFocus style={inputStyle} value={form.numero_doc} onChange={set('numero_doc')} placeholder={form.tipo === 'contestacao' ? 'Ex: 11.592-M' : 'Ex: 001024099'} />
         </Campo>
@@ -1281,7 +1283,7 @@ function FormularioContestacao({ form, setForm, onVoltar, onGerar }) {
 
       {/* Texto do TVF/TA */}
       <div style={secaoStyle}>
-        <div style={secaoTituloStyle}>📄 TVF / TA original (opcional)</div>
+        <div style={secaoTituloStyle}><span style={{ color: '#c9a84c', fontSize: '0.7rem', marginRight: '8px' }}>◆</span>TVF / TA original (opcional)</div>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.78rem', color: '#4a5a6a', marginBottom: '12px' }}>
           Cole aqui o texto do TVF ou TA autuado. O Oráculo terá acesso completo aos fatos e fundamentação para gerar uma resposta mais precisa.
         </p>
@@ -1294,7 +1296,7 @@ function FormularioContestacao({ form, setForm, onVoltar, onGerar }) {
       </div>
 
       <div style={secaoStyle}>
-        <div style={secaoTituloStyle}>📝 Texto do contribuinte</div>
+        <div style={secaoTituloStyle}><span style={{ color: '#c9a84c', fontSize: '0.7rem', marginRight: '8px' }}>◆</span>Texto do contribuinte</div>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.78rem', color: '#4a5a6a', marginBottom: '12px' }}>
           Cole aqui o texto da impugnação ou reclamação do contribuinte. O Oráculo vai gerar a resposta em defesa do fisco, rebatendo os argumentos ponto a ponto.
         </p>
@@ -1510,7 +1512,7 @@ export default function Home() {
   const [msgCopiada, setMsgCopiada] = useState(null) // índice da mensagem copiada
   const [modoAtivo, setModoAtivo] = useState(null) // null | 'consulta' | 'tvf' | 'ta' | 'contestacao'
   const [modoOrigem, setModoOrigem] = useState(null) // guarda o modo do formulário original
-  const [bannerFechado, setBannerFechado] = useState(false)
+  const [bannerFechado, setBannerFechado] = useState(true)
   const [formTVF, setFormTVF] = useState({
     data: '', hora: '', endereco: '', cidade: 'Campo Grande',
     placas: [''], motorista: '', cpf: '', telefone: '',
