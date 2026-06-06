@@ -70,3 +70,9 @@ img {
 * {
   -webkit-tap-highlight-color: transparent;
 }
+input[type="checkbox"] { accent-color: #c9a84c; }
+
+::selection {
+  background: rgba(201,168,76,0.25);
+  color: #e8e0d0;
+}

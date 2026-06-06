@@ -189,7 +189,7 @@ export default function Admin() {
       <header className={styles.header}>
         <div className={styles.headerContent}>
           <div className={styles.logo} style={{ background: 'transparent', boxShadow: 'none', width: 'auto', height: 'auto', padding: 0 }}>
-            <img src="/logo.png" alt="Oráculo Fiscal MS" style={{ width: '48px', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))' }} />
+            <img src="/logo.png" alt="Oráculo Fiscal MS" style={{ width: '52px', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 4px 18px rgba(201,168,76,0.45)) drop-shadow(0 2px 6px rgba(0,0,0,0.4))' }} />
           </div>
           <div>
             <h1 className={styles.titulo}>Administração — Oráculo Fiscal MS</h1>
@@ -526,6 +526,354 @@ export default function Admin() {
             {erro && <p className={styles.erro}>{erro}</p>}
           </div>
         )}
+
+      <style jsx global>{`
+        /* === Admin premium overrides === */
+        body { background: #080d14 !important; }
+
+        [class*="Admin_page"] {
+          background:
+            radial-gradient(900px 600px at 85% -10%, rgba(201,168,76,0.06), transparent 60%),
+            radial-gradient(700px 500px at -10% 110%, rgba(201,168,76,0.04), transparent 60%),
+            #080d14 !important;
+          min-height: 100vh;
+        }
+
+        /* HEADER */
+        [class*="Admin_header"] {
+          background: linear-gradient(180deg, rgba(14,22,32,0.95) 0%, rgba(10,16,24,0.85) 100%) !important;
+          border-bottom: 1px solid rgba(201,168,76,0.18) !important;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 -1px 0 rgba(201,168,76,0.08) !important;
+          position: relative;
+        }
+        [class*="Admin_header"]::after {
+          content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(201,168,76,0.6), transparent);
+        }
+        [class*="Admin_titulo"] {
+          font-family: 'Cormorant Garamond', serif !important;
+          font-size: 1.85rem !important;
+          font-weight: 600 !important;
+          letter-spacing: 0.01em !important;
+          color: #e8e0d0 !important;
+          text-shadow: 0 2px 18px rgba(201,168,76,0.22);
+          margin: 0 !important;
+        }
+        [class*="Admin_subtitulo"] {
+          font-family: 'DM Sans', sans-serif !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.22em !important;
+          font-size: 0.68rem !important;
+          color: #8a9aab !important;
+          margin-top: 4px !important;
+        }
+
+        /* HEADER buttons */
+        [class*="Admin_btnVoltar"], [class*="Admin_btnSair"] {
+          font-family: 'DM Sans', sans-serif !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.14em !important;
+          font-size: 0.72rem !important;
+          font-weight: 600 !important;
+          padding: 9px 18px !important;
+          border-radius: 8px !important;
+          transition: all 0.22s ease !important;
+        }
+        [class*="Admin_btnVoltar"] {
+          background: rgba(201,168,76,0.08) !important;
+          border: 1px solid rgba(201,168,76,0.35) !important;
+          color: #c9a84c !important;
+        }
+        [class*="Admin_btnVoltar"]:hover {
+          background: rgba(201,168,76,0.16) !important;
+          border-color: rgba(201,168,76,0.6) !important;
+          box-shadow: 0 6px 18px rgba(201,168,76,0.18);
+        }
+        [class*="Admin_btnSair"] {
+          background: transparent !important;
+          border: 1px solid rgba(255,255,255,0.1) !important;
+          color: #8a9aab !important;
+        }
+        [class*="Admin_btnSair"]:hover {
+          border-color: rgba(255,80,80,0.4) !important;
+          color: #ff8080 !important;
+        }
+
+        /* ABAS */
+        [class*="Admin_abas"] {
+          border-bottom: 1px solid rgba(201,168,76,0.12) !important;
+          gap: 4px !important;
+          margin-bottom: 28px !important;
+        }
+        [class*="Admin_aba"]:not([class*="abaAtiva"]) {
+          background: transparent !important;
+          color: #5a6a7a !important;
+          font-family: 'DM Sans', sans-serif !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.14em !important;
+          font-size: 0.74rem !important;
+          font-weight: 600 !important;
+          padding: 12px 18px !important;
+          border: none !important;
+          border-bottom: 2px solid transparent !important;
+          border-radius: 0 !important;
+          transition: all 0.22s ease !important;
+        }
+        [class*="Admin_aba"]:not([class*="abaAtiva"]):hover {
+          color: #a8b8c8 !important;
+          background: rgba(201,168,76,0.04) !important;
+        }
+        [class*="Admin_abaAtiva"] {
+          background: linear-gradient(180deg, transparent 0%, rgba(201,168,76,0.08) 100%) !important;
+          color: #c9a84c !important;
+          font-family: 'DM Sans', sans-serif !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.14em !important;
+          font-size: 0.74rem !important;
+          font-weight: 700 !important;
+          padding: 12px 18px !important;
+          border: none !important;
+          border-bottom: 2px solid #c9a84c !important;
+          border-radius: 0 !important;
+          box-shadow: 0 4px 14px rgba(201,168,76,0.12), inset 0 -2px 0 rgba(201,168,76,0.4) !important;
+          text-shadow: 0 0 12px rgba(201,168,76,0.4);
+        }
+
+        /* CARD */
+        [class*="Admin_card"] {
+          background:
+            linear-gradient(135deg, rgba(14,22,32,0.7) 0%, rgba(10,16,24,0.5) 100%) !important;
+          border: 1px solid rgba(201,168,76,0.14) !important;
+          border-top: 2px solid rgba(201,168,76,0.5) !important;
+          border-radius: 14px !important;
+          padding: 28px !important;
+          box-shadow:
+            0 8px 28px rgba(0,0,0,0.35),
+            inset 0 1px 0 rgba(201,168,76,0.08) !important;
+          position: relative;
+        }
+
+        [class*="Admin_cardTitulo"] {
+          font-family: 'Cormorant Garamond', serif !important;
+          font-size: 1.5rem !important;
+          font-weight: 600 !important;
+          color: #e8e0d0 !important;
+          margin: 0 0 22px !important;
+          padding-bottom: 14px !important;
+          border-bottom: 1px solid rgba(201,168,76,0.14) !important;
+          letter-spacing: 0.01em !important;
+        }
+        [class*="Admin_cardTitulo"]::before {
+          content: '◆';
+          color: #c9a84c;
+          font-size: 0.7rem;
+          margin-right: 12px;
+          vertical-align: middle;
+          opacity: 0.85;
+        }
+
+        /* TABELA */
+        [class*="Admin_tabela"] {
+          width: 100%;
+          border-collapse: separate !important;
+          border-spacing: 0 !important;
+        }
+        [class*="Admin_tabela"] thead th {
+          font-family: 'DM Sans', sans-serif !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.16em !important;
+          font-size: 0.7rem !important;
+          font-weight: 700 !important;
+          color: #8a9aab !important;
+          padding: 14px 16px !important;
+          background: rgba(201,168,76,0.04) !important;
+          border-bottom: 1px solid rgba(201,168,76,0.22) !important;
+          text-align: left !important;
+        }
+        [class*="Admin_tabela"] tbody td {
+          padding: 14px 16px !important;
+          border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+          color: #d8dde3 !important;
+          font-family: 'DM Sans', sans-serif !important;
+          font-size: 0.88rem !important;
+          transition: all 0.22s ease;
+        }
+        [class*="Admin_tabela"] tbody tr {
+          transition: all 0.22s ease;
+        }
+        [class*="Admin_tabela"] tbody tr:hover td {
+          background: rgba(201,168,76,0.05) !important;
+          color: #f0e8d8 !important;
+          box-shadow: inset 0 0 24px rgba(201,168,76,0.04);
+        }
+        [class*="Admin_inativo"] td {
+          opacity: 0.55;
+        }
+
+        /* BADGES */
+        [class*="Admin_badge"] {
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 6px !important;
+          padding: 5px 12px !important;
+          border-radius: 999px !important;
+          font-family: 'DM Sans', sans-serif !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.14em !important;
+          font-size: 0.68rem !important;
+          font-weight: 700 !important;
+        }
+        [class*="Admin_badgeAtivo"] {
+          background: rgba(74,222,128,0.1) !important;
+          border: 1px solid rgba(74,222,128,0.35) !important;
+          color: #6ee7a3 !important;
+        }
+        [class*="Admin_badgeAtivo"]::before {
+          content: ''; width: 6px; height: 6px; border-radius: 50%;
+          background: #4ade80;
+          box-shadow: 0 0 8px #4ade80;
+          animation: admPulse 1.8s ease-in-out infinite;
+        }
+        [class*="Admin_badgeInativo"] {
+          background: rgba(150,160,170,0.06) !important;
+          border: 1px solid rgba(150,160,170,0.25) !important;
+          color: #8a9aab !important;
+        }
+        [class*="Admin_badgeInativo"]::before {
+          content: ''; width: 6px; height: 6px; border-radius: 50%;
+          background: #5a6a7a;
+        }
+        @keyframes admPulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(1.3); }
+        }
+
+        /* BTN AÇÃO */
+        [class*="Admin_btnAcao"] {
+          font-family: 'DM Sans', sans-serif !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.12em !important;
+          font-size: 0.7rem !important;
+          font-weight: 700 !important;
+          padding: 7px 14px !important;
+          border-radius: 7px !important;
+          transition: all 0.22s ease !important;
+          cursor: pointer !important;
+        }
+        [class*="Admin_btnDesativar"] {
+          background: rgba(248,113,113,0.08) !important;
+          border: 1px solid rgba(248,113,113,0.35) !important;
+          color: #f87171 !important;
+        }
+        [class*="Admin_btnDesativar"]:hover {
+          background: rgba(248,113,113,0.16) !important;
+          border-color: rgba(248,113,113,0.6) !important;
+          box-shadow: 0 4px 14px rgba(248,113,113,0.2);
+          transform: translateY(-1px);
+        }
+        [class*="Admin_btnAtivar"] {
+          background: rgba(74,222,128,0.08) !important;
+          border: 1px solid rgba(74,222,128,0.35) !important;
+          color: #6ee7a3 !important;
+        }
+        [class*="Admin_btnAtivar"]:hover {
+          background: rgba(74,222,128,0.16) !important;
+          border-color: rgba(74,222,128,0.6) !important;
+          box-shadow: 0 4px 14px rgba(74,222,128,0.2);
+          transform: translateY(-1px);
+        }
+
+        /* FORM */
+        [class*="Admin_label"] {
+          font-family: 'DM Sans', sans-serif !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.16em !important;
+          font-size: 0.7rem !important;
+          font-weight: 600 !important;
+          color: #8a9aab !important;
+          display: block !important;
+          margin-bottom: 8px !important;
+        }
+        [class*="Admin_input"] {
+          background: rgba(14,22,32,0.55) !important;
+          border: 1px solid rgba(201,168,76,0.22) !important;
+          border-radius: 9px !important;
+          padding: 13px 16px !important;
+          color: #e8e0d0 !important;
+          font-family: 'DM Sans', sans-serif !important;
+          font-size: 0.92rem !important;
+          width: 100% !important;
+          box-shadow: inset 0 1px 2px rgba(0,0,0,0.25) !important;
+          transition: all 0.25s ease !important;
+        }
+        [class*="Admin_input"]:focus {
+          outline: none !important;
+          border-color: rgba(201,168,76,0.6) !important;
+          background: rgba(14,22,32,0.85) !important;
+          box-shadow:
+            inset 0 1px 2px rgba(0,0,0,0.25),
+            0 0 0 4px rgba(201,168,76,0.08),
+            0 0 20px rgba(201,168,76,0.18) !important;
+        }
+        [class*="Admin_dica"] {
+          font-family: 'DM Sans', sans-serif !important;
+          font-size: 0.78rem !important;
+          color: #6a7a8a !important;
+          margin-top: 8px !important;
+        }
+        [class*="Admin_btnSalvar"] {
+          background: linear-gradient(135deg, #b8902a 0%, #c9a84c 50%, #b8902a 100%) !important;
+          background-size: 200% 100% !important;
+          border: none !important;
+          color: #0d0f12 !important;
+          font-family: 'DM Sans', sans-serif !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.16em !important;
+          font-size: 0.82rem !important;
+          font-weight: 700 !important;
+          padding: 14px 28px !important;
+          border-radius: 9px !important;
+          box-shadow: 0 8px 28px rgba(201,168,76,0.35), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+          cursor: pointer !important;
+          transition: all 0.25s ease !important;
+        }
+        [class*="Admin_btnSalvar"]:hover:not(:disabled) {
+          background-position: 100% 0 !important;
+          transform: translateY(-2px) !important;
+          box-shadow: 0 12px 36px rgba(201,168,76,0.45), inset 0 1px 0 rgba(255,255,255,0.25) !important;
+        }
+        [class*="Admin_btnSalvar"]:disabled {
+          opacity: 0.55 !important;
+          cursor: not-allowed !important;
+        }
+
+        [class*="Admin_vazio"] {
+          text-align: center !important;
+          color: #6a7a8a !important;
+          font-family: 'DM Sans', sans-serif !important;
+          padding: 32px !important;
+          font-style: italic !important;
+        }
+        [class*="Admin_erro"] {
+          color: #f87171 !important;
+          font-family: 'DM Sans', sans-serif !important;
+          font-size: 0.86rem !important;
+          padding: 12px 16px !important;
+          background: rgba(248,113,113,0.08) !important;
+          border-left: 3px solid #f87171 !important;
+          border-radius: 6px !important;
+        }
+        [class*="Admin_sucesso"] {
+          color: #6ee7a3 !important;
+          font-family: 'DM Sans', sans-serif !important;
+          font-size: 0.86rem !important;
+          padding: 12px 16px !important;
+          background: rgba(74,222,128,0.08) !important;
+          border-left: 3px solid #4ade80 !important;
+          border-radius: 6px !important;
+        }
+      `}</style>
+
       </div>
     </div>
   )

@@ -212,35 +212,44 @@ function mascaraTelefone(v) {
 }
 
 const inputStyle = {
-  width: '100%', padding: '10px 14px',
-  background: 'rgba(255,255,255,0.08)',
-  border: '1px solid rgba(201,168,76,0.35)',
-  borderRadius: '8px', fontSize: '0.9rem',
+  width: '100%', padding: '13px 16px',
+  background: 'rgba(14,22,32,0.55)',
+  border: '1px solid rgba(201,168,76,0.22)',
+  borderRadius: '9px', fontSize: '0.9rem',
   color: '#e8e0d0', outline: 'none',
   fontFamily: "'DM Sans', sans-serif",
-  boxSizing: 'border-box', transition: 'border-color 0.2s'
+  boxSizing: 'border-box',
+  transition: 'all 0.25s ease',
+  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.25)'
 }
 
 const labelStyle = {
   fontFamily: "'DM Sans', sans-serif",
-  fontSize: '0.68rem', color: '#7a9ab8',
-  textTransform: 'uppercase', letterSpacing: '0.08em',
-  display: 'block', marginBottom: '5px'
+  fontSize: '0.66rem', color: '#8a9aab',
+  textTransform: 'uppercase', letterSpacing: '0.16em',
+  display: 'block', marginBottom: '8px',
+  fontWeight: 600
 }
 
 const secaoStyle = {
-  background: 'rgba(255,255,255,0.02)',
-  border: '1px solid rgba(255,255,255,0.05)',
-  borderRadius: '10px', padding: '20px',
-  marginBottom: '16px'
+  background: 'linear-gradient(160deg, rgba(14,22,32,0.65) 0%, rgba(10,16,24,0.45) 100%)',
+  border: '1px solid rgba(201,168,76,0.12)',
+  borderTop: '2px solid rgba(201,168,76,0.45)',
+  borderRadius: '12px', padding: '24px 22px',
+  marginBottom: '22px',
+  boxShadow: '0 6px 22px rgba(0,0,0,0.32), inset 0 1px 0 rgba(201,168,76,0.06)',
+  position: 'relative'
 }
 
 const secaoTituloStyle = {
   fontFamily: "'DM Sans', sans-serif",
-  fontSize: '0.7rem', color: '#c9a84c',
-  textTransform: 'uppercase', letterSpacing: '0.12em',
-  marginBottom: '16px', display: 'flex',
-  alignItems: 'center', gap: '8px'
+  fontSize: '0.76rem', color: '#c9a84c',
+  textTransform: 'uppercase', letterSpacing: '0.22em',
+  marginBottom: '20px', paddingBottom: '14px',
+  display: 'flex', alignItems: 'center', gap: '12px',
+  fontWeight: 700,
+  borderBottom: '1px solid rgba(201,168,76,0.12)',
+  textShadow: '0 1px 8px rgba(201,168,76,0.25)'
 }
 
 function InputComFocus({ style, ...props }) {
@@ -250,9 +259,9 @@ function InputComFocus({ style, ...props }) {
       {...props}
       style={{
         ...style,
-        border: focused ? '1.5px solid rgba(201,168,76,0.85)' : (style?.border || '1px solid rgba(201,168,76,0.35)'),
-        boxShadow: focused ? '0 0 0 3px rgba(201,168,76,0.12)' : 'none',
-        background: focused ? 'rgba(255,255,255,0.11)' : (style?.background || 'rgba(255,255,255,0.08)'),
+        border: focused ? '1px solid rgba(201,168,76,0.75)' : (style?.border || '1px solid rgba(201,168,76,0.22)'),
+        boxShadow: focused ? 'inset 0 1px 2px rgba(0,0,0,0.25), 0 0 0 4px rgba(201,168,76,0.14), 0 0 20px rgba(201,168,76,0.18)' : (style?.boxShadow || 'inset 0 1px 2px rgba(0,0,0,0.25)'),
+        background: focused ? 'rgba(14,22,32,0.85)' : (style?.background || 'rgba(14,22,32,0.55)'),
       }}
       onFocus={e => { setFocused(true); props.onFocus?.(e) }}
       onBlur={e => { setFocused(false); props.onBlur?.(e) }}
@@ -267,9 +276,9 @@ function TextareaComFocus({ style, ...props }) {
       {...props}
       style={{
         ...style,
-        border: focused ? '1.5px solid rgba(201,168,76,0.85)' : (style?.border || '1px solid rgba(201,168,76,0.35)'),
-        boxShadow: focused ? '0 0 0 3px rgba(201,168,76,0.12)' : 'none',
-        background: focused ? 'rgba(255,255,255,0.11)' : (style?.background || 'rgba(255,255,255,0.08)'),
+        border: focused ? '1px solid rgba(201,168,76,0.75)' : (style?.border || '1px solid rgba(201,168,76,0.22)'),
+        boxShadow: focused ? 'inset 0 1px 2px rgba(0,0,0,0.25), 0 0 0 4px rgba(201,168,76,0.14), 0 0 20px rgba(201,168,76,0.18)' : (style?.boxShadow || 'inset 0 1px 2px rgba(0,0,0,0.25)'),
+        background: focused ? 'rgba(14,22,32,0.85)' : (style?.background || 'rgba(14,22,32,0.55)'),
       }}
       onFocus={e => { setFocused(true); props.onFocus?.(e) }}
       onBlur={e => { setFocused(false); props.onBlur?.(e) }}
@@ -900,18 +909,20 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
 
       {/* INFRAÇÃO — primeiro, pois define o contexto da abordagem */}
       <div style={secaoStyle}>
-        <div style={secaoTituloStyle}>⚖️ Infração</div>
+        <div style={secaoTituloStyle}><span style={{ color: '#c9a84c', fontSize: '0.7rem', marginRight: '8px' }}>◆</span>Infração</div>
         <Campo label="Tipo de infração">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
 
             {/* Sem documentação fiscal */}
             <button onClick={() => setForm(f => ({ ...f, infracao: f.infracao === 'sem_documento' ? null : 'sem_documento', motivo_inidonia: '', tipo_mdfe: 'falta_emissao' }))}
               style={{
-                padding: '12px 16px', borderRadius: '8px', cursor: 'pointer', textAlign: 'left',
-                fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
-                background: form.infracao === 'sem_documento' ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
-                border: form.infracao === 'sem_documento' ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                color: form.infracao === 'sem_documento' ? '#c9a84c' : '#c8c0b0',
+                padding: '14px 18px', borderRadius: '9px', cursor: 'pointer', textAlign: 'left',
+                fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem', fontWeight: form.infracao === 'sem_documento' ? 600 : 500,
+                background: form.infracao === 'sem_documento' ? 'linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.1))' : 'rgba(10,16,24,0.5)',
+                border: form.infracao === 'sem_documento' ? '1px solid rgba(201,168,76,0.5)' : '1px solid rgba(255,255,255,0.06)',
+                color: form.infracao === 'sem_documento' ? '#c9a84c' : '#a0a8b0',
+                boxShadow: form.infracao === 'sem_documento' ? '0 0 12px rgba(201,168,76,0.15)' : 'inset 0 1px 0 rgba(255,255,255,0.02)',
+                transition: 'all 0.25s ease',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center'
               }}>
               <span>Sem documentação fiscal</span>
@@ -974,11 +985,14 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
               ].map(op => (
                 <button key={op.value} onClick={() => setForm(f => ({ ...f, responsavel: op.value }))}
                   style={{
-                    flex: 1, padding: '10px', borderRadius: '8px', cursor: 'pointer',
+                    flex: 1, padding: '13px 14px', borderRadius: '9px', cursor: 'pointer',
                     fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
-                    background: form.responsavel === op.value ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
-                    border: form.responsavel === op.value ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                    color: form.responsavel === op.value ? '#c9a84c' : '#5a6a7a'
+                    fontWeight: form.responsavel === op.value ? 600 : 500,
+                    background: form.responsavel === op.value ? 'linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.1))' : 'rgba(10,16,24,0.5)',
+                    border: form.responsavel === op.value ? '1px solid rgba(201,168,76,0.5)' : '1px solid rgba(255,255,255,0.06)',
+                    color: form.responsavel === op.value ? '#c9a84c' : '#7a8a9a',
+                    boxShadow: form.responsavel === op.value ? '0 0 12px rgba(201,168,76,0.15)' : 'inset 0 1px 0 rgba(255,255,255,0.02)',
+                    transition: 'all 0.25s ease'
                   }}>
                   {op.label}
                 </button>
@@ -991,7 +1005,7 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
 
       {/* ABORDAGEM */}
       <div style={secaoStyle}>
-        <div style={secaoTituloStyle}>📍 Abordagem</div>
+        <div style={secaoTituloStyle}><span style={{ color: '#c9a84c', fontSize: '0.7rem', marginRight: '8px' }}>◆</span>Abordagem</div>
         <Grid cols={2}>
           <Campo label="Data *">
             <InputComFocus type="date" style={{ ...inputStyle, colorScheme: 'dark' }} value={form.data} onChange={set('data')} />
@@ -1058,7 +1072,7 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
 
       {/* VEÍCULO E CONDUTOR */}
       <div style={secaoStyle}>
-        <div style={secaoTituloStyle}>🚛 Veículo e condutor</div>
+        <div style={secaoTituloStyle}><span style={{ color: '#c9a84c', fontSize: '0.7rem', marginRight: '8px' }}>◆</span>Veículo e condutor</div>
         <div style={{ marginBottom: '12px' }}>
           <label style={labelStyle}>Placa(s) *</label>
           {form.placas.map((placa, i) => (
@@ -1102,7 +1116,7 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
 
       {/* SUJEITO PASSIVO */}
       <div style={secaoStyle}>
-        <div style={secaoTituloStyle}>🏢 Sujeito passivo</div>
+        <div style={secaoTituloStyle}><span style={{ color: '#c9a84c', fontSize: '0.7rem', marginRight: '8px' }}>◆</span>Sujeito passivo</div>
         <Campo label="Nome / Razão social *">
           <InputComFocus style={inputStyle} value={form.sujeito} onChange={set('sujeito')} placeholder="Nome ou razão social" />
         </Campo>
@@ -1147,7 +1161,7 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
       {/* MERCADORIA — oculto para MDF-e e NF vencida */}
       {!semMercadoria && <div style={secaoStyle}>
         <div style={{ ...secaoTituloStyle, justifyContent: 'space-between' }}>
-          <span>📦 Mercadoria</span>
+          <span><span style={{ color: '#c9a84c', fontSize: '0.7rem', marginRight: '8px' }}>◆</span>Mercadoria</span>
           <button onClick={addMerc} style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '6px', color: '#c9a84c', padding: '4px 12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem' }}>
             + Item
           </button>
@@ -1186,17 +1200,22 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
       )}
 
       <button onClick={onGerar} disabled={!obrigatoriosOk} style={{
-        width: '100%', padding: '15px',
-        background: obrigatoriosOk ? 'linear-gradient(135deg, #b8902a, #c9a84c)' : 'rgba(255,255,255,0.05)',
+        width: '100%', padding: '17px',
+        background: obrigatoriosOk ? 'linear-gradient(135deg, #b8902a 0%, #c9a84c 50%, #b8902a 100%)' : 'transparent',
+        backgroundSize: '200% 100%',
         color: obrigatoriosOk ? '#0d0f12' : '#3a4a5a',
-        border: 'none', borderRadius: '10px',
+        border: obrigatoriosOk ? 'none' : '1px dashed rgba(201,168,76,0.25)',
+        borderRadius: '11px',
         fontFamily: "'DM Sans', sans-serif",
         fontSize: '0.92rem', fontWeight: 700,
         cursor: obrigatoriosOk ? 'pointer' : 'not-allowed',
-        letterSpacing: '0.06em', textTransform: 'uppercase',
-        boxShadow: obrigatoriosOk ? '0 8px 24px rgba(180,140,40,0.25)' : 'none',
-        transition: 'all 0.2s'
-      }}>
+        letterSpacing: '0.12em', textTransform: 'uppercase',
+        boxShadow: obrigatoriosOk ? '0 8px 28px rgba(201,168,76,0.35)' : 'none',
+        transition: 'all 0.3s ease'
+      }}
+      onMouseEnter={e => { if(obrigatoriosOk){ e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 12px 36px rgba(201,168,76,0.5)' } }}
+      onMouseLeave={e => { if(obrigatoriosOk){ e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='0 8px 28px rgba(201,168,76,0.35)' } }}
+      >
         ✓ Gerar matéria tributária
       </button>
     </div>
@@ -1228,9 +1247,10 @@ function FormularioContestacao({ form, setForm, onVoltar, onGerar }) {
               style={{
                 flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer',
                 fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
-                background: form.tipo === op.value ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
-                border: form.tipo === op.value ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                color: form.tipo === op.value ? '#c9a84c' : '#5a6a7a'
+                background: form.tipo === op.value ? 'linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.1))' : 'rgba(255,255,255,0.03)',
+                border: form.tipo === op.value ? '1px solid rgba(201,168,76,0.5)' : '1px solid rgba(255,255,255,0.07)',
+                color: form.tipo === op.value ? '#c9a84c' : '#5a6a7a',
+                boxShadow: form.tipo === op.value ? '0 0 12px rgba(201,168,76,0.15)' : 'none'
               }}>
               {op.label}
             </button>
@@ -1239,7 +1259,7 @@ function FormularioContestacao({ form, setForm, onVoltar, onGerar }) {
       </div>
 
       <div style={secaoStyle}>
-        <div style={secaoTituloStyle}>📄 Identificação</div>
+        <div style={secaoTituloStyle}><span style={{ color: '#c9a84c', fontSize: '0.7rem', marginRight: '8px' }}>◆</span>Identificação</div>
         <Campo label={form.tipo === 'contestacao' ? 'Número do ALIM *' : 'Número do TVF/TA *'}>
           <InputComFocus style={inputStyle} value={form.numero_doc} onChange={set('numero_doc')} placeholder={form.tipo === 'contestacao' ? 'Ex: 11.592-M' : 'Ex: 001024099'} />
         </Campo>
@@ -1263,7 +1283,7 @@ function FormularioContestacao({ form, setForm, onVoltar, onGerar }) {
 
       {/* Texto do TVF/TA */}
       <div style={secaoStyle}>
-        <div style={secaoTituloStyle}>📄 TVF / TA original (opcional)</div>
+        <div style={secaoTituloStyle}><span style={{ color: '#c9a84c', fontSize: '0.7rem', marginRight: '8px' }}>◆</span>TVF / TA original (opcional)</div>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.78rem', color: '#4a5a6a', marginBottom: '12px' }}>
           Cole aqui o texto do TVF ou TA autuado. O Oráculo terá acesso completo aos fatos e fundamentação para gerar uma resposta mais precisa.
         </p>
@@ -1276,7 +1296,7 @@ function FormularioContestacao({ form, setForm, onVoltar, onGerar }) {
       </div>
 
       <div style={secaoStyle}>
-        <div style={secaoTituloStyle}>📝 Texto do contribuinte</div>
+        <div style={secaoTituloStyle}><span style={{ color: '#c9a84c', fontSize: '0.7rem', marginRight: '8px' }}>◆</span>Texto do contribuinte</div>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.78rem', color: '#4a5a6a', marginBottom: '12px' }}>
           Cole aqui o texto da impugnação ou reclamação do contribuinte. O Oráculo vai gerar a resposta em defesa do fisco, rebatendo os argumentos ponto a ponto.
         </p>
@@ -1492,7 +1512,7 @@ export default function Home() {
   const [msgCopiada, setMsgCopiada] = useState(null) // índice da mensagem copiada
   const [modoAtivo, setModoAtivo] = useState(null) // null | 'consulta' | 'tvf' | 'ta' | 'contestacao'
   const [modoOrigem, setModoOrigem] = useState(null) // guarda o modo do formulário original
-  const [bannerFechado, setBannerFechado] = useState(false)
+  const [bannerFechado, setBannerFechado] = useState(true)
   const [formTVF, setFormTVF] = useState({
     data: '', hora: '', endereco: '', cidade: 'Campo Grande',
     placas: [''], motorista: '', cpf: '', telefone: '',
@@ -2028,7 +2048,7 @@ export default function Home() {
             <div className={styles.painel} onClick={e => e.stopPropagation()}>
               <div className={styles.painelHeader}>
                 <button onClick={() => setPainelHistorico(false)} style={{background:'transparent',border:'none',color:'#c9a84c',fontSize:'1.4rem',cursor:'pointer',padding:'8px 12px',minWidth:'44px',minHeight:'44px',display:'flex',alignItems:'center',justifyContent:'center'}}>←</button>
-                <h2 className={styles.painelTitulo}>📋 Histórico de Documentos</h2>
+                <h2 className={styles.painelTitulo} style={{fontFamily:"'Cormorant Garamond', Georgia, serif", fontSize:"1.5rem", letterSpacing:"0.01em", color:"#e8e0d0", textShadow:"0 1px 8px rgba(201,168,76,0.2)"}}>📋 Histórico de Documentos</h2>
               </div>
 
               {/* Abas */}
@@ -2080,17 +2100,21 @@ export default function Home() {
                         const { bg, cor, borda } = corTipo(doc.tipo)
                         return (
                           <div key={doc.id} style={{
-                            background: 'rgba(255,255,255,0.02)',
-                            border: '1px solid rgba(255,255,255,0.05)',
-                            borderRadius: '10px', padding: '12px 14px',
-                            marginBottom: '8px'
+                            background: 'linear-gradient(160deg, rgba(14,22,32,0.6), rgba(10,16,24,0.4))',
+                            border: '1px solid rgba(201,168,76,0.12)',
+                            borderLeft: '2px solid rgba(201,168,76,0.4)',
+                            borderRadius: '10px', padding: '14px 16px',
+                            marginBottom: '10px',
+                            boxShadow: '0 2px 10px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.02)',
+                            transition: 'all 0.2s ease'
                           }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                               <span style={{
                                 background: bg, color: cor, border: `1px solid ${borda}`,
-                                borderRadius: '6px', padding: '3px 10px',
-                                fontFamily: "'DM Sans', sans-serif", fontSize: '0.7rem', fontWeight: 600,
-                                letterSpacing: '0.06em'
+                                borderRadius: '4px', padding: '4px 12px',
+                                fontFamily: "'DM Sans', sans-serif", fontSize: '0.68rem', fontWeight: 700,
+                                letterSpacing: '0.12em', textTransform: 'uppercase',
+                                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)'
                               }}>
                                 {doc.tipo}{doc.infracao ? ` · ${doc.infracao}` : ''}
                               </span>
@@ -2216,9 +2240,9 @@ export default function Home() {
       )}
 
       {/* HEADER */}
-      <header className={styles.header}>
+      <header className={styles.header} style={{borderBottom:"1px solid rgba(201,168,76,0.28)", boxShadow:"0 1px 0 rgba(201,168,76,0.18), 0 4px 24px rgba(0,0,0,0.4)"}}>
         <div className={styles.headerContent}>
-          <div className={styles.logo} style={{background:"transparent",boxShadow:"none",width:"auto",height:"auto",padding:0}}><img src={`data:image/png;base64,${LOGO_B64}`} alt="Oráculo Fiscal MS" style={{width:"52px",height:"auto",objectFit:"contain",filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.3))"}} /></div>
+          <div className={styles.logo} style={{background:"transparent",boxShadow:"none",width:"auto",height:"auto",padding:0}}><img src={`data:image/png;base64,${LOGO_B64}`} alt="Oráculo Fiscal MS" style={{width:"52px",height:"auto",objectFit:"contain",filter:"drop-shadow(0 2px 12px rgba(201,168,76,0.45)) drop-shadow(0 1px 4px rgba(0,0,0,0.4))"}} /></div>
           <div className={styles.headerTexto} style={{textAlign:"center"}}>
             <h1 className={styles.titulo}>Oráculo Fiscal MS</h1>
             <p className={styles.subtitulo}>Especialista em legislação tributária do Estado de Mato Grosso do Sul</p>
@@ -2235,7 +2259,7 @@ export default function Home() {
           )}
           <div className={styles.headerUsuario}>
             <button className={styles.btnHistorico} onClick={abrirHistorico} title="Histórico de documentos">📋</button>
-            <span className={styles.nomeUsuario} style={{fontFamily:"Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",fontWeight:500,letterSpacing:"0.01em"}}>Olá, Fiscal {fiscal.nome}</span>
+            <span className={styles.nomeUsuario} style={{fontFamily:"Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",fontWeight:600,letterSpacing:"0.01em",color:"#d8d0c0"}}>Olá, Fiscal {fiscal.nome}</span>
             {fiscal.cargo === 'Administrador' && (
               <button className={styles.btnAdmin} onClick={() => router.push('/admin')}>Admin</button>
             )}
@@ -2248,11 +2272,12 @@ export default function Home() {
       <div className={styles.chat} ref={chatRef}>
         {mensagens.length === 0 && !modoAtivo && (
           <div style={{ maxWidth: '820px', margin: '32px auto', padding: '0 24px', position: 'relative' }}>
-            <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-              <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.6rem', color: '#c9a84c', fontWeight: 700, marginBottom: '8px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '2rem', color: '#c9a84c', fontWeight: 700, marginBottom: '14px', letterSpacing: '0.01em', textShadow: '0 2px 18px rgba(201,168,76,0.25)' }}>
                 Oráculo Fiscal MS
               </h2>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', color: '#4a5a6a', letterSpacing: '0.04em' }}>
+              <div aria-hidden style={{ width: '64px', height: '1px', margin: '0 auto 14px', background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.6), transparent)' }} />
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.88rem', color: '#8a9aab', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 500 }}>
                 Selecione o que deseja fazer
               </p>
             </div>
@@ -2276,24 +2301,33 @@ export default function Home() {
                     }
                   }}
                   style={{
-                    background: 'linear-gradient(180deg, #0e1620 0%, #0a1018 100%)',
-                    border: `1px solid rgba(255,255,255,0.06)`,
-                    borderTop: `3px solid ${modo.cor}`,
-                    borderRadius: '12px',
-                    padding: '24px 20px',
+                    position: 'relative',
+                    background: 'linear-gradient(160deg, #0e1a28 0%, #0a1218 100%)',
+                    border: '1px solid rgba(201,168,76,0.18)',
+                    borderRadius: '14px',
+                    padding: '28px 24px',
                     cursor: 'pointer',
                     textAlign: 'left',
-                    transition: 'all 0.2s',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+                    transition: 'all 0.25s ease',
+                    boxShadow: '0 6px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(201,168,76,0.08)',
+                    overflow: 'hidden'
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = modo.cor; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderTopColor = modo.cor; e.currentTarget.style.transform = 'translateY(0)' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.55)'; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(201,168,76,0.15), inset 0 1px 0 rgba(201,168,76,0.18)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.18)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(201,168,76,0.08)' }}
                 >
-                  <div style={{ fontSize: '1.8rem', marginBottom: '12px' }}>{modo.icone}</div>
-                  <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.1rem', color: '#c8c0b0', fontWeight: 700, marginBottom: '8px' }}>
+                  <div aria-hidden style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.85), transparent)' }} />
+                  <div style={{
+                    width: '52px', height: '52px', borderRadius: '50%',
+                    background: 'radial-gradient(circle at 30% 30%, rgba(201,168,76,0.22), rgba(201,168,76,0.06) 70%)',
+                    border: '1px solid rgba(201,168,76,0.28)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '1.8rem', marginBottom: '18px',
+                    boxShadow: 'inset 0 1px 0 rgba(201,168,76,0.15), 0 4px 14px rgba(201,168,76,0.1)'
+                  }}>{modo.icone}</div>
+                  <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.4rem', color: '#e8e0d0', fontWeight: 700, marginBottom: '10px', letterSpacing: '0.005em' }}>
                     {modo.titulo}
                   </div>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.78rem', color: '#4a5a6a', lineHeight: 1.6 }}>
+                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', color: '#7a8a9a', lineHeight: 1.65 }}>
                     {modo.desc}
                   </div>
                 </button>
@@ -2468,16 +2502,16 @@ export default function Home() {
             {msg.tipo === 'user' ? (
               <div>
                 <div className={styles.msgUserLabel}>{fiscal.nome}</div>
-                <div className={styles.bubble}>
+                <div className={styles.bubble} style={{ background: 'linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.04))', border: '1px solid rgba(201,168,76,0.32)', boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(201,168,76,0.1)' }}>
                   <span style={{ whiteSpace: 'pre-wrap', fontSize: `${fontSize}px` }}>{msg.texto}</span>
                 </div>
               </div>
             ) : (
               <>
-                <div className={styles.avatar} style={{background:"transparent",boxShadow:"none",overflow:"visible"}}><img src={`data:image/png;base64,${LOGO_B64}`} alt="OF" style={{width:"38px",height:"auto",objectFit:"contain",filter:"drop-shadow(0 1px 4px rgba(0,0,0,0.4))"}} /></div>
+                <div className={styles.avatar} style={{background:"radial-gradient(circle at 30% 30%, rgba(201,168,76,0.28), rgba(201,168,76,0.06) 70%)",boxShadow:"inset 0 1px 0 rgba(201,168,76,0.2), 0 4px 14px rgba(201,168,76,0.18)",border:"1px solid rgba(201,168,76,0.35)",overflow:"visible"}}><img src={`data:image/png;base64,${LOGO_B64}`} alt="OF" style={{width:"38px",height:"auto",objectFit:"contain",filter:"drop-shadow(0 1px 4px rgba(0,0,0,0.5))"}} /></div>
                 <div className={styles.msgAgentInner}>
                   <div className={styles.msgAgentLabel}>⚖ Oráculo Fiscal MS</div>
-                  <div className={`${styles.bubble} ${msg.erro ? styles.bubbleErro : ''}`} style={{ fontSize: `${fontSize}px` }}>
+                  <div className={`${styles.bubble} ${msg.erro ? styles.bubbleErro : ''}`} style={{ fontSize: `${fontSize}px`, borderLeft: '4px solid rgba(201,168,76,0.55)', background: 'linear-gradient(180deg, rgba(14,22,32,0.85), rgba(10,16,24,0.95))', boxShadow: '0 4px 18px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.03)' }}>
                     {msg.trechos > 0 && <div className={styles.contextoBar}>📚 {msg.trechos} trechos da legislação consultados</div>}
                     {respostasAtivas[msgIdx] ? (
                       <div className={styles.formulario}>
@@ -2520,7 +2554,7 @@ export default function Home() {
 
         {carregando && (
           <div className={`${styles.msg} ${styles.msgAgent}`}>
-            <div className={styles.avatar} style={{background:"transparent",boxShadow:"none",overflow:"visible"}}><img src={`data:image/png;base64,${LOGO_B64}`} alt="OF" style={{width:"38px",height:"auto",objectFit:"contain",filter:"drop-shadow(0 1px 4px rgba(0,0,0,0.4))"}} /></div>
+            <div className={styles.avatar} style={{background:"radial-gradient(circle at 30% 30%, rgba(201,168,76,0.28), rgba(201,168,76,0.06) 70%)",boxShadow:"inset 0 1px 0 rgba(201,168,76,0.2), 0 4px 14px rgba(201,168,76,0.18)",border:"1px solid rgba(201,168,76,0.35)",overflow:"visible"}}><img src={`data:image/png;base64,${LOGO_B64}`} alt="OF" style={{width:"38px",height:"auto",objectFit:"contain",filter:"drop-shadow(0 1px 4px rgba(0,0,0,0.5))"}} /></div>
             <div className={styles.bubble}>
               <div className={styles.typing}><span></span><span></span><span></span></div>
             </div>
@@ -2529,7 +2563,7 @@ export default function Home() {
       </div>
 
       {/* ÁREA DE INPUT — oculto nos formulários */}
-      <div className={styles.inputArea} style={{ display: modoAtivo && modoAtivo !== 'consulta' && mensagens.length === 0 ? 'none' : undefined }}>
+      <div className={styles.inputArea} style={{ display: modoAtivo && modoAtivo !== 'consulta' && mensagens.length === 0 ? 'none' : undefined, background: 'linear-gradient(180deg, rgba(10,16,24,0.6), rgba(8,13,20,0.95))', borderTop: '1px solid rgba(201,168,76,0.18)', boxShadow: '0 -4px 24px rgba(0,0,0,0.3)' }}>
         {imagens.length > 0 && (
           <div className={styles.imagensPreview}>
             {imagens.map((img, i) => (
@@ -2548,6 +2582,7 @@ export default function Home() {
           <textarea
             ref={inputRef}
             className={styles.textarea}
+            style={{border:"1px solid rgba(201,168,76,0.18)", background:"rgba(14,22,32,0.6)", boxShadow:"inset 0 1px 2px rgba(0,0,0,0.3)"}}
             value={input}
             onChange={e => { setInput(e.target.value); e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
             onKeyDown={tecla}
@@ -2558,7 +2593,7 @@ export default function Home() {
             autoCorrect="on"
             autoCapitalize="sentences"
           />
-          <button className={styles.btnEnviar} onClick={() => enviar()} disabled={carregando || (!input.trim() && imagens.length === 0)}>
+          <button className={styles.btnEnviar} onClick={() => enviar()} disabled={carregando || (!input.trim() && imagens.length === 0)} style={{background:"linear-gradient(135deg, #c9a84c, #a88a3c)", boxShadow:"0 4px 16px rgba(201,168,76,0.35), inset 0 1px 0 rgba(255,255,255,0.18)", border:"1px solid rgba(201,168,76,0.6)"}}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="22" y1="2" x2="11" y2="13"></line>
               <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
