@@ -599,21 +599,34 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
 
             {/* Documentação inidônea — expansível */}
             <div>
-              <button onClick={() => setForm(f => ({ ...f, infracao: f.infracao === 'inidonia' ? null : 'inidonia', motivo_inidonia: '' }))}
+              <button onClick={() => setForm(f => {
+                  if (f.infracao === 'inidonia') return { ...f, infracao: null, motivo_inidonia: '' }
+                  return { ...f, infracao: 'inidonia', motivo_inidonia: '' }
+                })}
                 style={{
-                  width: '100%', padding: '12px 16px', borderRadius: form.infracao === 'inidonia' ? '8px 8px 0 0' : '8px',
+                  width: '100%', padding: '12px 16px',
+                  borderRadius: (form.infracao === 'inidonia' && !form.motivo_inidonia) ? '8px 8px 0 0' : '8px',
                   cursor: 'pointer', textAlign: 'left',
                   fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
                   background: form.infracao === 'inidonia' ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
                   border: form.infracao === 'inidonia' ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                  borderBottom: form.infracao === 'inidonia' ? '1px solid rgba(201,168,76,0.15)' : undefined,
+                  borderBottom: (form.infracao === 'inidonia' && !form.motivo_inidonia) ? '1px solid rgba(201,168,76,0.15)' : undefined,
                   color: form.infracao === 'inidonia' ? '#c9a84c' : '#c8c0b0',
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                 }}>
-                <span>Documentação inidônea</span>
-                <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>{form.infracao === 'inidonia' ? '▲' : '▼'}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span>Documentação inidônea</span>
+                  {form.infracao === 'inidonia' && form.motivo_inidonia && (
+                    <span style={{ fontSize: '0.72rem', color: '#c9a84c', opacity: 0.85 }}>
+                      {INCISOS.find(i => i.value === form.motivo_inidonia)?.label || form.motivo_inidonia}
+                    </span>
+                  )}
+                </div>
+                <span style={{ fontSize: '0.75rem', opacity: 0.7, flexShrink: 0 }}>
+                  {form.infracao === 'inidonia' && !form.motivo_inidonia ? '▲' : '▼'}
+                </span>
               </button>
-              {form.infracao === 'inidonia' && (
+              {form.infracao === 'inidonia' && !form.motivo_inidonia && (
                 <div style={{
                   border: '1px solid rgba(201,168,76,0.4)', borderTop: 'none',
                   borderRadius: '0 0 8px 8px', overflow: 'hidden'
@@ -637,21 +650,38 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
 
             {/* Falta de MDF-e — expansível */}
             <div>
-              <button onClick={() => setForm(f => ({ ...f, infracao: f.infracao === 'falta_mdfe' ? null : 'falta_mdfe', tipo_mdfe: 'falta_emissao' }))}
+              <button onClick={() => setForm(f => {
+                  if (f.infracao === 'falta_mdfe') return { ...f, infracao: null }
+                  return { ...f, infracao: 'falta_mdfe', tipo_mdfe: '' }
+                })}
                 style={{
-                  width: '100%', padding: '12px 16px', borderRadius: form.infracao === 'falta_mdfe' ? '8px 8px 0 0' : '8px',
+                  width: '100%', padding: '12px 16px',
+                  borderRadius: (form.infracao === 'falta_mdfe' && !form.tipo_mdfe) ? '8px 8px 0 0' : '8px',
                   cursor: 'pointer', textAlign: 'left',
                   fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
                   background: form.infracao === 'falta_mdfe' ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
                   border: form.infracao === 'falta_mdfe' ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                  borderBottom: form.infracao === 'falta_mdfe' ? '1px solid rgba(201,168,76,0.15)' : undefined,
+                  borderBottom: (form.infracao === 'falta_mdfe' && !form.tipo_mdfe) ? '1px solid rgba(201,168,76,0.15)' : undefined,
                   color: form.infracao === 'falta_mdfe' ? '#c9a84c' : '#c8c0b0',
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                 }}>
-                <span>Falta de MDF-e</span>
-                <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>{form.infracao === 'falta_mdfe' ? '▲' : '▼'}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span>Falta de MDF-e</span>
+                  {form.infracao === 'falta_mdfe' && form.tipo_mdfe && (
+                    <span style={{ fontSize: '0.72rem', color: '#c9a84c', opacity: 0.85 }}>
+                      {{
+                        falta_emissao: 'Falta de emissão antes do início do transporte',
+                        falta_encerramento: 'Falta de encerramento após conclusão do transporte',
+                        encerramento_antecipado: 'Encerramento no curso do transporte'
+                      }[form.tipo_mdfe] || form.tipo_mdfe}
+                    </span>
+                  )}
+                </div>
+                <span style={{ fontSize: '0.75rem', opacity: 0.7, flexShrink: 0 }}>
+                  {form.infracao === 'falta_mdfe' && !form.tipo_mdfe ? '▲' : '▼'}
+                </span>
               </button>
-              {form.infracao === 'falta_mdfe' && (
+              {form.infracao === 'falta_mdfe' && !form.tipo_mdfe && (
                 <div style={{
                   border: '1px solid rgba(201,168,76,0.4)', borderTop: 'none',
                   borderRadius: '0 0 8px 8px', overflow: 'hidden'
@@ -684,7 +714,7 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
           <CampoDanfes form={form} setForm={setForm} />
         )}
 
-        {form.infracao === 'falta_mdfe' && (
+        {form.infracao === 'falta_mdfe' && form.tipo_mdfe && (
           <CampoChavesMdfe form={form} setForm={setForm} />
         )}
 
