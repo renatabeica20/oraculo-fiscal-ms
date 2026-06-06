@@ -174,6 +174,30 @@ REGRA DE REDAÇÃO: ao redigir matéria tributária de MDF-e, SEMPRE citar ambos
 Art. 4º, IV — obrigação de encerramento do MDF-e ao término da viagem ou quando da troca do veículo.
 MDF-e NÃO ENCERRADO: viagem anterior ainda aberta quando nova viagem já está autorizada = infração. O transporte ocorre de forma diversa da declarada no MDF-e anterior.
 
+## ENCERRAMENTO ANTECIPADO NO CURSO DO TRANSPORTE — REDAÇÃO OBRIGATÓRIA
+Quando a infração for "ENCERRAMENTO DE MANIFESTO NO CURSO DO TRANSPORTE", a matéria tributária DEVE seguir esta estrutura em parágrafos corridos:
+
+PARÁGRAFO 1 — ABORDAGEM FÍSICA (padrão TVF):
+"Em [data por extenso], às [hora]h[min]min, a equipe de fiscalização procedeu à abordagem do [conjunto de veículos / veículo] de placa(s) [placas], conduzido por [motorista], CPF [CPF], na [endereço], município de [cidade]/MS."
+
+PARÁGRAFO 2 — CONSTATAÇÃO:
+"A equipe de fiscalização verificou que o sujeito passivo, na condição de emitente do Manifesto Eletrônico de Documentos Fiscais MDF-e nº [número extraído da chave], emitido em [data de emissão por extenso], às [hora]h[min]min, incorreu em infração à legislação tributária ao promover o encerramento do referido documento fiscal em [data do encerramento por extenso], às [hora]h[min]min, antes da conclusão da operação de transporte, em desacordo com o disposto no art. 14, I, do Subanexo XVII ao Anexo XV do RICMS/MS (Decreto nº 9.203/98)."
+
+PARÁGRAFO 3 — CONSEQUÊNCIA JURÍDICA:
+"O encerramento antecipado do MDF-e descaracteriza a regularidade do documento fiscal, equiparando-se à ausência de manifesto válido para acobertar a operação, comprometendo o controle fiscal exercido pelo Fisco sobre a circulação de mercadorias."
+
+PARÁGRAFO 4 — ENQUADRAMENTO E CRÉDITO TRIBUTÁRIO:
+"A omissão caracteriza infração tributária nos termos do art. 117, IV, \"x\", da Lei nº 1.810/97, sendo o crédito tributário constituído exclusivamente de penalidade pecuniária em UFERMS, calculada sobre o valor total das NF-e vinculadas ao MDF-e irregular, enquadrada na faixa correspondente da tabela do art. 117, IV, \"x\", 5."
+
+REGRAS ESPECÍFICAS PARA ESTE TIPO:
+- Extrair o número do MDF-e da chave: posições 27–34 da chave de 44 dígitos (índice 26 a 33 base zero), removendo zeros à esquerda.
+- Datas SEMPRE por extenso: "5 de junho de 2026, às 16h59min".
+- NUNCA citar art. 124 do Anexo XV — fundamento correto é exclusivamente art. 14, I, do Subanexo XVII ao Anexo XV.
+- NUNCA citar art. 3º do Subanexo XVII — esse artigo é para falta de emissão.
+- Este tipo tem abordagem física — usar "procedeu à abordagem" normalmente no parágrafo 1.
+- Data e hora do encerramento antecipado devem constar expressamente no parágrafo 2.
+- NÃO mencionar confirmação de destinatário (art. 18-A) — exclusivo do tipo falta de encerramento após conclusão.
+
 ## FALTA DE ENCERRAMENTO APÓS CONCLUSÃO DO TRANSPORTE — REDAÇÃO OBRIGATÓRIA
 Quando a infração for "FALTA DE ENCERRAMENTO DE MANIFESTO APÓS CONCLUSÃO DO TRANSPORTE", a matéria tributária DEVE seguir esta estrutura em parágrafos corridos:
 
