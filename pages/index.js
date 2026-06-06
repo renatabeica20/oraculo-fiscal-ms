@@ -551,6 +551,91 @@ function MenuExpansivel({ label, opcoes, valorSelecionado, aberto, onToggle, onS
   )
 }
 
+function CampoEncerramento({ form, setForm }) {
+  const extrairNumeroMdfe = (chave) => {
+    const digits = (chave || '').replace(/\D/g, '')
+    if (digits.length < 35) return ''
+    return String(parseInt(digits.substring(27, 35), 10))
+  }
+
+  const numeroMdfe = extrairNumeroMdfe(form.chave_mdfe)
+
+  return (
+    <div style={{ marginBottom: '8px' }}>
+      <div style={{ marginBottom: '8px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '12px' }}>
+        <label style={{ ...labelStyle, color: '#c9a84c' }}>MDF-e irregular</label>
+      </div>
+
+      <Campo label="Chave de acesso do MDF-e (44 dígitos)">
+        <InputComFocus
+          style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.76rem', letterSpacing: '0.03em' }}
+          value={form.chave_mdfe || ''}
+          onChange={e => setForm(f => ({ ...f, chave_mdfe: e.target.value.replace(/\D/g, '').substring(0, 44) }))}
+          placeholder="44 dígitos — cole a chave aqui"
+          inputMode="numeric"
+        />
+        {numeroMdfe && (
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#7a9ab8', marginTop: '4px' }}>
+            MDF-e nº {numeroMdfe} identificado
+          </div>
+        )}
+      </Campo>
+
+      <Grid cols={2}>
+        <Campo label="Data de emissão do MDF-e">
+          <InputComFocus type="date" style={{ ...inputStyle, colorScheme: 'dark' }}
+            value={form.mdfe_emissao_data || ''}
+            onChange={e => setForm(f => ({ ...f, mdfe_emissao_data: e.target.value }))} />
+        </Campo>
+        <Campo label="Hora de emissão">
+          <InputComFocus type="time" style={{ ...inputStyle, colorScheme: 'dark' }}
+            value={form.mdfe_emissao_hora || ''}
+            onChange={e => setForm(f => ({ ...f, mdfe_emissao_hora: e.target.value }))} />
+        </Campo>
+      </Grid>
+
+      <Campo label="">
+        <div
+          onClick={() => setForm(f => ({ ...f, mdfe_ativo: !f.mdfe_ativo }))}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer',
+            padding: '10px 14px', borderRadius: '8px',
+            background: form.mdfe_ativo ? 'rgba(201,168,76,0.1)' : 'rgba(255,255,255,0.03)',
+            border: form.mdfe_ativo ? '1px solid rgba(201,168,76,0.35)' : '1px solid rgba(255,255,255,0.07)',
+          }}>
+          <div style={{
+            width: '18px', height: '18px', borderRadius: '4px', flexShrink: 0,
+            background: form.mdfe_ativo ? '#c9a84c' : 'transparent',
+            border: form.mdfe_ativo ? '1px solid #c9a84c' : '1px solid rgba(255,255,255,0.2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            {form.mdfe_ativo && <span style={{ color: '#0d2f5e', fontSize: '0.75rem', fontWeight: 700 }}>✓</span>}
+          </div>
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', color: form.mdfe_ativo ? '#c9a84c' : '#5a6a7a' }}>
+            MDF-e estava ativo no momento da abordagem
+          </span>
+        </div>
+      </Campo>
+
+      <div style={{ marginTop: '12px', marginBottom: '4px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '12px' }}>
+        <label style={{ ...labelStyle, color: '#7a9ab8' }}>Confirmação do destinatário (art. 18-A)</label>
+      </div>
+      <Grid cols={2}>
+        <Campo label="Data da confirmação">
+          <InputComFocus type="date" style={{ ...inputStyle, colorScheme: 'dark' }}
+            value={form.mdfe_confirmacao_data || ''}
+            onChange={e => setForm(f => ({ ...f, mdfe_confirmacao_data: e.target.value }))} />
+        </Campo>
+        <Campo label="Hora da confirmação">
+          <InputComFocus type="time" style={{ ...inputStyle, colorScheme: 'dark' }}
+            value={form.mdfe_confirmacao_hora || ''}
+            onChange={e => setForm(f => ({ ...f, mdfe_confirmacao_hora: e.target.value }))} />
+        </Campo>
+      </Grid>
+    </div>
+  )
+}
+
 function CampoChavesMdfe({ form, setForm }) {
   const itens = form.chaves_nf && form.chaves_nf.length > 0 && typeof form.chaves_nf[0] === 'object'
     ? form.chaves_nf
@@ -805,6 +890,9 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
           <CampoDanfes form={form} setForm={setForm} />
         )}
 
+        {form.infracao === 'falta_mdfe' && form.tipo_mdfe === 'falta_encerramento' && (
+          <CampoEncerramento form={form} setForm={setForm} />
+        )}
         {form.infracao === 'falta_mdfe' && form.tipo_mdfe && (
           <CampoChavesMdfe form={form} setForm={setForm} />
         )}
@@ -1154,9 +1242,12 @@ function montarMensagemTVF(form) {
     infracao = `documentação fiscal inidônea — ${form.motivo_inidonia}`
   } else if (form.infracao === 'falta_mdfe') {
     const tipoMdfe = form.tipo_mdfe === 'falta_emissao' ? 'FALTA DE MANIFESTO'
-      : form.tipo_mdfe === 'falta_encerramento' ? 'FALTA DE ENCERRAMENTO DE MANIFESTO'
+      : form.tipo_mdfe === 'falta_encerramento' ? 'FALTA DE ENCERRAMENTO DE MANIFESTO APÓS CONCLUSÃO DO TRANSPORTE'
       : 'ENCERRAMENTO DE MANIFESTO NO CURSO DO TRANSPORTE'
-    infracao = `${tipoMdfe} — obrigação de emissão antes do início do transporte intermunicipal e interestadual (art. 3º, I e II, Subanexo XVII ao Anexo XV do RICMS/MS)`
+    const fundamentoMdfe = form.tipo_mdfe === 'falta_encerramento'
+      ? 'art. 14 do Subanexo XVII ao Anexo XV do RICMS/MS (Decreto nº 9.203/98)'
+      : 'art. 3º, I e II, Subanexo XVII ao Anexo XV do RICMS/MS'
+    infracao = `${tipoMdfe} — ${fundamentoMdfe}`
   } else if (form.infracao === 'mdfe_inidonio') {
     infracao = 'MDF-e Inidôneo'
   }
@@ -1166,6 +1257,20 @@ function montarMensagemTVF(form) {
     const num = parseFloat((it.valor || '').replace(/\./g, '').replace(',', '.'))
     return acc + (isNaN(num) ? 0 : num)
   }, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+  const extrairNumeroMdfe = (chave) => {
+    const digits = (chave || '').replace(/\D/g, '')
+    if (digits.length < 35) return null
+    return String(parseInt(digits.substring(27, 35), 10))
+  }
+  const dadosEncerramento = (form.infracao === 'falta_mdfe' && form.tipo_mdfe === 'falta_encerramento' && form.chave_mdfe) ? `
+MDF-e irregular:
+  Chave de acesso: ${form.chave_mdfe}
+  Número: ${extrairNumeroMdfe(form.chave_mdfe) || 'a apurar'}
+  Data de emissão: ${form.mdfe_emissao_data || 'não informada'}
+  Hora de emissão: ${form.mdfe_emissao_hora || 'não informada'}
+  MDF-e ativo no momento da abordagem: ${form.mdfe_ativo ? 'SIM' : 'NÃO informado'}${form.mdfe_confirmacao_data ? `
+  Confirmação do destinatário (art. 18-A): ${form.mdfe_confirmacao_data} às ${form.mdfe_confirmacao_hora || 'hora não informada'}` : ''}` : ''
 
   const dadosMdfe = (form.infracao === 'falta_mdfe' || form.infracao === 'mdfe_inidonio') ? `
 Documentos fiscais vinculados (${itensMdfe.length} NF-e):
@@ -1189,7 +1294,7 @@ Placa: ${form.placas.filter(p => p).join(' / ')}
 ${isMdfe && (form.origem_municipio || form.destino_municipio) ? `Origem: ${form.origem_municipio || 'não informado'}/${form.origem_uf || '?'} → Destino: ${form.destino_municipio || 'não informado'}/${form.destino_uf || '?'}` : ''}
 Motorista: ${form.motorista}${form.cpf ? ` — CPF: ${form.cpf}` : ''}${form.telefone ? ` — Tel: ${form.telefone}` : ''}
 Sujeito passivo: ${form.sujeito}${form.ie ? ` — IE: ${form.ie}` : ' — sem IE no MS'}${form.cnpj ? ` — CNPJ: ${form.cnpj}` : ''}${linhaMercadoria}
-Infração: ${infracao}${dadosMdfe}${dadosNFVencida}${form.obs ? `
+Infração: ${infracao}${dadosEncerramento}${dadosMdfe}${dadosNFVencida}${form.obs ? `
 Observações: ${form.obs}` : ''}`
 }
 
@@ -1304,6 +1409,8 @@ export default function Home() {
     chaves_nf: [{ chave: '', valor: '' }],
     danfes: [{ chave: '', emissao: '', saida: '', valor: '' }],
     origem_municipio: '', origem_uf: 'MS', destino_municipio: '', destino_uf: '',
+    chave_mdfe: '', mdfe_emissao_data: '', mdfe_emissao_hora: '',
+    mdfe_ativo: false, mdfe_confirmacao_data: '', mdfe_confirmacao_hora: '',
     obs: ''
   })
   const [formTA, setFormTA] = useState({
