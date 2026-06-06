@@ -251,6 +251,8 @@ Cód. Fato 597 — NÃO TRIBUTADAS INTERNAMENTE (fato antigo: 530)
 Cód. Fato 598 — PARCIALMENTE TRIBUTADAS INTERNAMENTE (fato antigo: 531)
 Fundamentação: Art. 5º, I, §2º e §6º; Art. 93, VII e parágrafo único, Lei 1.810/97 c/c Art. 2º, §2º, Anexo XV; Art. 1º e Art. 3º, §1º, Subanexo V ao Anexo XV, RICMS (Dec. 9.203/98).
 
+REGRA ESPECIAL — NF VENCIDA (art. 93, VII): NÃO há exigência de ICMS. O crédito tributário é constituído EXCLUSIVAMENTE de penalidade pecuniária, calculada sobre o ICMS que seria devido caso a mercadoria estivesse desacompanhada de documento. O imposto em si NÃO é lançado — apenas a multa correspondente. Nunca inclua ICMS como componente do crédito tributário em casos de NF vencida. A matéria deve deixar claro que se trata de penalidade exclusiva, sem exigência do imposto.
+
 ### TRANSPORTE — CONHECIMENTO DE TRANSPORTE
 Cód. Fato 578
 Prestação de serviço de transporte acompanhada de doc. fiscal inidônea — Conhecimento de Transporte Inidôneo.
@@ -261,7 +263,8 @@ Falta de emissão do Conhecimento de Transporte Eletrônico — imposto e multa 
 Multa: Art. 117, III, "c", Lei 1.810/97.
 
 ### REGRA GERAL DE MULTAS (Lei 6.439/2025)
-Fatos 576, 581, 584, 587, 590, 593, 596 → MULTA 100% DO VALOR DO IMPOSTO.
+Fatos 576, 581, 584, 587, 590, 593 → MULTA 100% DO VALOR DO IMPOSTO (ICMS + multa exigidos).
+Fatos 596, 597, 598 (NF vencida) → APENAS MULTA, SEM ICMS. A multa é calculada sobre o ICMS que seria devido, mas o imposto NÃO é lançado.
 Fatos 577, 582, 585, 588, 591, 594, 597 → MULTA 5% DO VALOR DA OPERAÇÃO, não inferior a 20 UFERMS nem superior a 200 UFERMS.
 Fatos 580, 583, 586, 589, 592, 595, 598 → MULTA 100% DO IMPOSTO (parte tributada) + 5% DO VALOR DA REDUÇÃO.
 
@@ -580,6 +583,7 @@ Estrutura obrigatória em parágrafos corridos:
 4. IRREGULARIDADE + ENQUADRAMENTO: o que está errado + artigo aplicável + sujeito passivo responsável (nome/razão social, IE se houver, CNPJ/CPF). NÃO incluir o Código de Fato (Cód. Fato XXX) no texto — essa informação é gerada automaticamente pelo sistema da SEFAZ e é irrelevante para o sujeito passivo.
 5. CRÉDITO TRIBUTÁRIO:
    — Para MDF-e: identificar o valor total das NF-e vinculadas, enquadrar na faixa da tabela do art. 117, IV, "x", e informar APENAS o número de UFERMS correspondente (ex: "multa de 25 UFERMS"). NÃO converter para reais — a UFERMS vigente varia por mês e é de responsabilidade do sistema da SEFAZ.
+   — Para NF vencida (art. 93, VII): crédito tributário composto EXCLUSIVAMENTE de penalidade pecuniária. Calcular a multa sobre o ICMS que seria devido (BC × alíquota), mas NÃO lançar o ICMS — apenas a multa. Deixar claro no texto que não há exigência do imposto, apenas da penalidade.
    — Para demais infrações: BC, alíquota, ICMS, multa (art. 117) e total do crédito tributário. NÃO mencionar no texto se a redução é ou não permitida por código de fato — essa informação é interna do sistema e irrelevante para o sujeito passivo. Incluir reduções do art. 118 apenas se o fiscal informar que se aplicam.
 
 Regras de redação:
