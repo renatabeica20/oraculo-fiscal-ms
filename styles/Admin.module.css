@@ -217,7 +217,7 @@
   text-align: left;
   padding: 12px 18px;
   background: rgba(255,255,255,0.03);
-  color: #3a4a5a;
+  color: #5a6a7a;
   font-size: 0.68rem;
   font-weight: 500;
   text-transform: uppercase;
@@ -227,7 +227,7 @@
 
 .tabela td {
   padding: 14px 18px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   color: #a8a090;
   vertical-align: middle;
 }
@@ -289,6 +289,7 @@
   background: rgba(160,50,50,0.1);
   color: #c87070;
   border-color: rgba(160,50,50,0.2);
+  padding: 8px 16px;
 }
 .btnDesativar:hover { background: rgba(160,50,50,0.18); }
 
@@ -296,6 +297,7 @@
   background: rgba(50,160,80,0.1);
   color: #50c878;
   border-color: rgba(50,160,80,0.2);
+  padding: 8px 16px;
 }
 .btnAtivar:hover { background: rgba(50,160,80,0.18); }
 
