@@ -296,6 +296,90 @@ function BtnVoltar({ onClick }) {
   )
 }
 
+const CIDADES_MS = [
+  'Água Clara','Alcinópolis','Amambai','Anastácio','Anaurilândia','Angélica','Antônio João',
+  'Aparecida do Taboado','Aquidauana','Aral Moreira','Bandeirantes','Bataguassu','Batayporã',
+  'Bela Vista','Bodoquena','Bonito','Brasilândia','Caarapó','Camapuã','Campo Grande',
+  'Caracol','Cassilândia','Chapadão do Sul','Corguinho','Coronel Sapucaia','Corumbá',
+  'Costa Rica','Coxim','Deodápolis','Dois Irmãos do Buriti','Douradina','Dourados',
+  'Eldorado','Fátima do Sul','Figueirão','Glória de Dourados','Guia Lopes da Laguna',
+  'Iguatemi','Inocência','Itaporã','Itaquiraí','Ivinhema','Japorã','Jaraguari','Jardim',
+  'Jateí','Juti','Ladário','Laguna Carapã','Maracaju','Miranda','Mundo Novo','Naviraí',
+  'Nioaque','Nova Alvorada do Sul','Nova Andradina','Novo Horizonte do Sul','Paraíso das Águas',
+  'Paranhos','Paranaíba','Paranhos','Pedro Gomes','Ponta Porã','Porto Murtinho','Ribas do Rio Pardo',
+  'Rio Brilhante','Rio Negro','Rio Verde de Mato Grosso','Rochedo','Santa Rita do Pardo',
+  'São Gabriel do Oeste','Selvíria','Sete Quedas','Sidrolândia','Sonora','Tacuru','Taquarussu',
+  'Terenos','Três Lagoas','Vicentina'
+]
+
+function CampoCidade({ value, onChange }) {
+  const [sugestoes, setSugestoes] = useState([])
+  const [aberto, setAberto] = useState(false)
+
+  const handleChange = (e) => {
+    const v = e.target.value
+    onChange(v)
+    if (v.length >= 2) {
+      const filtradas = CIDADES_MS.filter(c =>
+        c.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+          .includes(v.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''))
+      ).slice(0, 6)
+      setSugestoes(filtradas)
+      setAberto(filtradas.length > 0)
+    } else {
+      setSugestoes([])
+      setAberto(false)
+    }
+  }
+
+  const selecionar = (cidade) => {
+    onChange(cidade)
+    setSugestoes([])
+    setAberto(false)
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <InputComFocus
+          style={{ ...inputStyle, flex: 1 }}
+          value={value}
+          onChange={handleChange}
+          onBlur={() => setTimeout(() => setAberto(false), 150)}
+          placeholder="Digite a cidade..."
+        />
+        <div style={{
+          padding: '10px 12px', background: 'rgba(255,255,255,0.08)',
+          border: '1px solid rgba(201,168,76,0.35)', borderRadius: '8px',
+          fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem', color: '#c9a84c',
+          fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center'
+        }}>MS</div>
+      </div>
+      {aberto && sugestoes.length > 0 && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100,
+          background: '#0e1620', border: '1px solid rgba(201,168,76,0.3)',
+          borderRadius: '8px', marginTop: '4px',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.4)', overflow: 'hidden'
+        }}>
+          {sugestoes.map(c => (
+            <button key={c} onMouseDown={() => selecionar(c)} style={{
+              display: 'block', width: '100%', textAlign: 'left',
+              padding: '10px 14px', background: 'transparent', border: 'none',
+              borderBottom: '1px solid rgba(255,255,255,0.05)',
+              fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+              color: '#c8c0b0', cursor: 'pointer'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(201,168,76,0.1)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >{c}</button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function CampoChavesMdfe({ form, setForm }) {
   const itens = form.chaves_nf && form.chaves_nf.length > 0 && typeof form.chaves_nf[0] === 'object'
     ? form.chaves_nf
@@ -372,6 +456,88 @@ function CampoChavesMdfe({ form, setForm }) {
   )
 }
 
+
+function CampoDanfes({ form, setForm }) {
+  const itens = form.danfes && form.danfes.length > 0 ? form.danfes : [{ chave: '', emissao: '', saida: '', valor: '' }]
+
+  const setItem = (i, campo, val) => {
+    const novos = [...itens]
+    novos[i] = { ...novos[i], [campo]: val }
+    setForm(f => ({ ...f, danfes: novos }))
+  }
+
+  const addItem = () => setForm(f => ({ ...f, danfes: [...itens, { chave: '', emissao: '', saida: '', valor: '' }] }))
+  const removeItem = (i) => setForm(f => ({ ...f, danfes: itens.filter((_, idx) => idx !== i) }))
+
+  const totalNF = itens.reduce((acc, it) => {
+    const num = parseFloat((it.valor || '').replace(/\./g, '').replace(',', '.'))
+    return acc + (isNaN(num) ? 0 : num)
+  }, 0)
+  const totalFormatado = totalNF.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+  return (
+    <div>
+      <label style={labelStyle}>DANFE(s) — Notas fiscais vencidas</label>
+      {itens.map((it, i) => (
+        <div key={i} style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '12px', marginBottom: '10px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.7rem', color: '#5a6a7a' }}>NF-e {i + 1}</span>
+            {itens.length > 1 && (
+              <button onClick={() => removeItem(i)} style={{ background: 'none', border: 'none', color: '#c87070', cursor: 'pointer', fontSize: '0.85rem', padding: '2px 6px' }}>✕</button>
+            )}
+          </div>
+          <Campo label="Chave de acesso (44 dígitos)">
+            <InputComFocus
+              style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.76rem', letterSpacing: '0.03em' }}
+              value={it.chave}
+              onChange={e => setItem(i, 'chave', e.target.value.replace(/\D/g, '').substring(0, 44))}
+              placeholder="44 dígitos da chave de acesso"
+              inputMode="numeric"
+            />
+          </Campo>
+          <Grid cols={2}>
+            <Campo label="Data de emissão">
+              <InputComFocus type="date" style={{ ...inputStyle, colorScheme: 'dark' }} value={it.emissao} onChange={e => setItem(i, 'emissao', e.target.value)} />
+            </Campo>
+            <Campo label="Data de saída (se constar)">
+              <InputComFocus type="date" style={{ ...inputStyle, colorScheme: 'dark' }} value={it.saida} onChange={e => setItem(i, 'saida', e.target.value)} />
+            </Campo>
+          </Grid>
+          <Campo label="Valor da NF-e (R$)">
+            <InputComFocus
+              style={inputStyle}
+              value={it.valor}
+              onChange={e => setItem(i, 'valor', mascaraValor(e.target.value))}
+              placeholder="0,00"
+              inputMode="numeric"
+            />
+          </Campo>
+        </div>
+      ))}
+      <button onClick={addItem} style={{
+        background: 'rgba(201,168,76,0.08)', border: '1px dashed rgba(201,168,76,0.3)',
+        borderRadius: '8px', color: '#c9a84c', padding: '10px', cursor: 'pointer',
+        fontFamily: "'DM Sans', sans-serif", fontSize: '0.78rem',
+        width: '100%', marginBottom: '12px'
+      }}>+ Adicionar NF-e</button>
+      {itens.some(it => it.valor) && (
+        <div style={{
+          background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.2)',
+          borderRadius: '8px', padding: '10px 14px',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+        }}>
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#7a9ab8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            Valor total das notas fiscais
+          </span>
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.95rem', color: '#c9a84c', fontWeight: 700 }}>
+            R$ {totalFormatado}
+          </span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const INCISOS = [
   { value: 'confeccionada sem AIDF (art. 93, I)', label: 'I — Sem AIDF' },
   { value: 'com fraude comprovada (art. 93, II)', label: 'II — Fraude comprovada' },
@@ -394,8 +560,10 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
   })
 
   const isMdfe = form.infracao === 'falta_mdfe' || form.infracao === 'mdfe_inidonio'
+  const isNFVencida = form.infracao === 'inidonia' && form.motivo_inidonia === 'fora do prazo de validade (art. 93, VII)'
+  const semMercadoria = isMdfe || isNFVencida
   const temChaveMdfe = isMdfe && (form.chaves_nf || []).some(it => typeof it === 'object' ? it.chave : it)
-  const obrigatoriosOk = form.data && form.hora && form.endereco && form.placas?.[0] && form.motorista && form.sujeito && (isMdfe ? temChaveMdfe : form.mercadoria[0]?.descricao)
+  const obrigatoriosOk = form.data && form.hora && form.endereco && form.placas?.[0] && form.motorista && form.sujeito && (semMercadoria ? (isMdfe ? temChaveMdfe : true) : form.mercadoria[0]?.descricao)
 
   return (
     <div style={{ maxWidth: '820px', margin: '0 auto', padding: '24px' }}>
@@ -418,8 +586,7 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
             {[
               { value: 'sem_documento', label: 'Sem documentação fiscal' },
               { value: 'inidonia', label: 'Documentação inidônea' },
-              { value: 'falta_mdfe', label: 'Falta de MDF-e' },
-              { value: 'mdfe_inidonio', label: 'MDF-e Inidôneo' }
+              { value: 'falta_mdfe', label: 'Falta de MDF-e' }
             ].map(op => (
               <button key={op.value} onClick={() => setForm(f => ({ ...f, infracao: op.value }))}
                 style={{
@@ -437,11 +604,25 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
 
         {form.infracao === 'inidonia' && (
           <Campo label="Motivo da inidoneidade (art. 93)">
-            <select style={{ ...inputStyle, cursor: 'pointer' }} value={form.motivo_inidonia} onChange={set('motivo_inidonia')}>
-              <option value="">Selecione o inciso...</option>
-              {INCISOS.map(inc => <option key={inc.value} value={inc.value}>{inc.label}</option>)}
-            </select>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {INCISOS.map(inc => (
+                <button key={inc.value} onClick={() => setForm(f => ({ ...f, motivo_inidonia: inc.value }))}
+                  style={{
+                    padding: '10px 14px', borderRadius: '8px', cursor: 'pointer', textAlign: 'left',
+                    fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
+                    background: form.motivo_inidonia === inc.value ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
+                    border: form.motivo_inidonia === inc.value ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
+                    color: form.motivo_inidonia === inc.value ? '#c9a84c' : '#c8c0b0'
+                  }}>
+                  {inc.label}
+                </button>
+              ))}
+            </div>
           </Campo>
+        )}
+
+        {form.infracao === 'inidonia' && form.motivo_inidonia === 'fora do prazo de validade (art. 93, VII)' && (
+          <CampoDanfes form={form} setForm={setForm} />
         )}
 
         {form.infracao === 'falta_mdfe' && (
@@ -451,7 +632,8 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
                 {[
                   { value: 'falta_emissao', label: 'Falta de emissão antes do início do transporte' },
                   { value: 'falta_encerramento', label: 'Falta de encerramento após conclusão do transporte' },
-                  { value: 'encerramento_antecipado', label: 'Encerramento no curso do transporte' }
+                  { value: 'encerramento_antecipado', label: 'Encerramento no curso do transporte' },
+                  { value: 'mdfe_inidonio', label: 'MDF-e Inidôneo' }
                 ].map(op => (
                   <button key={op.value} onClick={() => setForm(f => ({ ...f, tipo_mdfe: op.value }))}
                     style={{
@@ -470,9 +652,6 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
           </>
         )}
 
-        {form.infracao === 'mdfe_inidonio' && (
-          <CampoChavesMdfe form={form} setForm={setForm} />
-        )}
 
         {tipo === 'TA' && (
           <Campo label="Responsável tributário">
@@ -506,17 +685,17 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
         <div style={secaoTituloStyle}>📍 Abordagem</div>
         <Grid cols={2}>
           <Campo label="Data *">
-            <InputComFocus type="date" style={inputStyle} value={form.data} onChange={set('data')} />
+            <InputComFocus type="date" style={{ ...inputStyle, colorScheme: 'dark' }} value={form.data} onChange={set('data')} />
           </Campo>
           <Campo label="Hora *">
-            <InputComFocus type="time" style={inputStyle} value={form.hora} onChange={set('hora')} />
+            <InputComFocus type="time" style={{ ...inputStyle, colorScheme: 'dark' }} value={form.hora} onChange={set('hora')} />
           </Campo>
         </Grid>
         <Campo label="Endereço completo *">
           <InputComFocus style={inputStyle} value={form.endereco} onChange={set('endereco')} placeholder="Rua, número, bairro" />
         </Campo>
         <Campo label="Cidade">
-          <InputComFocus style={inputStyle} value={form.cidade} onChange={set('cidade')} />
+          <CampoCidade value={form.cidade} onChange={v => setForm(f => ({ ...f, cidade: v }))} />
         </Campo>
       </div>
 
@@ -562,9 +741,6 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
             <InputComFocus style={inputStyle} value={form.cpf} onChange={e => setForm(f => ({ ...f, cpf: mascaraCPF(e.target.value) }))} placeholder="000.000.000-00" />
           </Campo>
         </Grid>
-        <Campo label="Telefone">
-          <InputComFocus style={inputStyle} value={form.telefone} onChange={e => setForm(f => ({ ...f, telefone: mascaraTelefone(e.target.value) }))} placeholder="(67) 99999-9999" />
-        </Campo>
       </div>
 
       {/* SUJEITO PASSIVO */}
@@ -591,8 +767,15 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
         )}
       </div>
 
-      {/* MERCADORIA — oculto para infrações de MDF-e */}
-      {!isMdfe && <div style={secaoStyle}>
+      {/* OBSERVAÇÕES ADICIONAIS */}
+      <div style={secaoStyle}>
+        <Campo label="Observações adicionais">
+          <TextareaComFocus style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }} value={form.obs} onChange={set('obs')} placeholder="Detalhes relevantes da abordagem, declarações do motorista, registros fotográficos..." />
+        </Campo>
+      </div>
+
+      {/* MERCADORIA — oculto para MDF-e e NF vencida */}
+      {!semMercadoria && <div style={secaoStyle}>
         <div style={{ ...secaoTituloStyle, justifyContent: 'space-between' }}>
           <span>📦 Mercadoria</span>
           <button onClick={addMerc} style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '6px', color: '#c9a84c', padding: '4px 12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem' }}>
@@ -614,8 +797,8 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
               <Campo label="Quantidade">
                 <InputComFocus style={inputStyle} value={m.quantidade} onChange={e => setMerc(i, 'quantidade', e.target.value)} placeholder="Ex: 70" />
               </Campo>
-              <Campo label="Unidade">
-                <InputComFocus style={inputStyle} value={m.unidade} onChange={e => setMerc(i, 'unidade', e.target.value)} placeholder="caixas, kg, m², unidades..." />
+              <Campo label="Unidade (ex: un, caixa, saco)">
+                <InputComFocus style={inputStyle} value={m.unidade} onChange={e => setMerc(i, 'unidade', e.target.value)} placeholder="un, caixa, saco, kg..." />
               </Campo>
               <Campo label="Valor unitário (R$)">
                 <InputComFocus style={inputStyle} value={m.valor} onChange={e => setMerc(i, 'valor', mascaraValor(e.target.value))} placeholder="0,00" />
@@ -628,7 +811,7 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
       {/* BOTÃO GERAR */}
       {!obrigatoriosOk && (
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.75rem', color: '#c87070', marginBottom: '12px' }}>
-          ⚠ Preencha os campos obrigatórios: data, hora, endereço, placa, motorista e sujeito passivo{!isMdfe && ', e ao menos um item de mercadoria'}{isMdfe && ', e ao menos uma chave de NF-e'}
+          ⚠ Preencha os campos obrigatórios: data, hora, endereço, placa, motorista e sujeito passivo{!semMercadoria && ', e ao menos um item de mercadoria'}{isMdfe && ', e ao menos uma chave de NF-e'}
         </p>
       )}
 
@@ -791,8 +974,14 @@ Documentos fiscais vinculados (${itensMdfe.length} NF-e):
 ${itensMdfe.map((it, i) => `  NF-e ${i+1}: Chave ${it.chave || 'não informada'} — Valor: R$ ${it.valor || '0,00'}`).join('\n')}
 Valor total dos documentos fiscais: R$ ${totalMdfe}` : ''
 
-  const isMdfe = form.infracao === 'falta_mdfe' || form.infracao === 'mdfe_inidonio'
-  const linhaMercadoria = isMdfe ? '' : `\nMercadoria: ${mercs}`
+  const isMdfe = form.infracao === 'falta_mdfe'
+  const isNFVencidaMsg = form.infracao === 'inidonia' && form.motivo_inidonia === 'fora do prazo de validade (art. 93, VII)'
+  const semMercadoriaMsg = isMdfe || isNFVencidaMsg
+  const linhaMercadoria = semMercadoriaMsg ? '' : `\nMercadoria: ${mercs}`
+
+  const dadosNFVencida = isNFVencidaMsg && form.danfes ? `
+Documentos fiscais vencidos (${form.danfes.length} NF-e):
+${form.danfes.map((d, i) => `  NF-e ${i+1}: Chave ${d.chave || 'não informada'} — Emissão: ${d.emissao || 'não informada'}${d.saida ? ` — Saída: ${d.saida}` : ''} — Valor: R$ ${d.valor || '0,00'}`).join('\n')}` : ''
 
   return `GERAR TVF com os seguintes dados:
 Data: ${form.data}
@@ -801,7 +990,7 @@ Local: ${form.endereco}, ${form.cidade}/MS
 Placa: ${form.placas.filter(p => p).join(' / ')}
 Motorista: ${form.motorista}${form.cpf ? ` — CPF: ${form.cpf}` : ''}${form.telefone ? ` — Tel: ${form.telefone}` : ''}
 Sujeito passivo: ${form.sujeito}${form.ie ? ` — IE: ${form.ie}` : ' — sem IE no MS'}${form.cnpj ? ` — CNPJ: ${form.cnpj}` : ''}${linhaMercadoria}
-Infração: ${infracao}${dadosMdfe}${form.obs ? `
+Infração: ${infracao}${dadosMdfe}${dadosNFVencida}${form.obs ? `
 Observações: ${form.obs}` : ''}`
 }
 
@@ -909,11 +1098,12 @@ export default function Home() {
     data: '', hora: '', endereco: '', cidade: 'Campo Grande',
     placas: [''], motorista: '', cpf: '', telefone: '',
     sujeito: '', ie: '', cnpj: '',
-    mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }],
+    mercadoria: [{ descricao: '', quantidade: '', unidade: '', valor: '' }],
     infracao: 'sem_documento',
     motivo_inidonia: '',
     tipo_mdfe: 'falta_emissao',
     chaves_nf: [{ chave: '', valor: '' }],
+    danfes: [{ chave: '', emissao: '', saida: '', valor: '' }],
     obs: ''
   })
   const [formTA, setFormTA] = useState({
@@ -1326,7 +1516,7 @@ export default function Home() {
       setModoOrigem(null)
       setMsgCopiada(null)
       setFormContestacao({ tipo: 'contestacao', numero_doc: '', contribuinte: '', ie_contrib: '', cnpj_contrib: '', destinatario: '', texto_tvf: '', texto_contribuinte: '' })
-      setFormTVF({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', tipo_mdfe: 'falta_emissao', chaves_nf: [{ chave: '', valor: '' }], obs: '' })
+      setFormTVF({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', mercadoria: [{ descricao: '', quantidade: '', unidade: '', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', tipo_mdfe: 'falta_emissao', chaves_nf: [{ chave: '', valor: '' }], danfes: [{ chave: '', emissao: '', saida: '', valor: '' }], obs: '' })
       setFormTA({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', documentos: '', mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', responsavel: 'transportador', obs: '' })
       if (sessaoIdRef.current) {
         supabase
