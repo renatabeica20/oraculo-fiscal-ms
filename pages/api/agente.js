@@ -71,10 +71,10 @@ export default async function handler(req, res) {
   if (!ANTHROPIC_KEY) return res.status(500).json({ error: 'Chave Anthropic não configurada' })
 
   // ─── CONFIGURAÇÕES ────────────────────────────────────────────────────────
-  const RAG_MATCH_COUNT   = 40   // trechos recuperados antes do filtro
+  const RAG_MATCH_COUNT   = 20   // trechos recuperados antes do filtro
   const RAG_THRESHOLD     = 0.35 // similaridade mínima (0 a 1) — abaixo disso descarta
-  const RAG_MIN_RESULTS   = 12    // se menos que isso passar no threshold, aceita os melhores mesmo assim
-  const MAX_HISTORICO     = 10   // máximo de turnos do histórico para não estourar contexto
+  const RAG_MIN_RESULTS   = 8    // se menos que isso passar no threshold, aceita os melhores mesmo assim
+  const MAX_HISTORICO     = 6    // máximo de turnos do histórico para não estourar contexto
 
   // ─── BASE LEGAL ESTRUTURADA (fallback + âncora sempre presente) ───────────
   const BASE_LEI = `
