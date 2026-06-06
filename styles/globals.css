@@ -70,3 +70,4 @@ img {
 * {
   -webkit-tap-highlight-color: transparent;
 }
+input[type="checkbox"] { accent-color: #c9a84c; }
