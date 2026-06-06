@@ -1305,10 +1305,12 @@ Valor total dos documentos fiscais: R$ ${totalMdfe}` : ''
 Documentos fiscais vencidos (${form.danfes.length} NF-e):
 ${form.danfes.map((d, i) => `  NF-e ${i+1}: Chave ${d.chave || 'não informada'} — Emissão: ${d.emissao || 'não informada'}${d.saida ? ` — Saída: ${d.saida}` : ''} — Valor: R$ ${d.valor || '0,00'}`).join('\n')}` : ''
 
+  const isFaltaEncerramentoMsg = form.infracao === 'falta_mdfe' && form.tipo_mdfe === 'falta_encerramento'
+
   return `GERAR TVF com os seguintes dados:
 Data: ${form.data}
 Hora: ${form.hora}
-Local: ${form.endereco}, ${form.cidade}/MS
+${isFaltaEncerramentoMsg ? 'Verificação: realizada via sistema FVM (sem abordagem física)' : `Local: ${form.endereco}, ${form.cidade}/MS`}
 Placa: ${form.placas.filter(p => p).join(' / ')}
 ${isMdfe && (form.origem_municipio || form.destino_municipio) ? `Origem: ${form.origem_municipio || 'não informado'}/${form.origem_uf || '?'} → Destino: ${form.destino_municipio || 'não informado'}/${form.destino_uf || '?'}` : ''}
 Motorista: ${form.motorista}${form.cpf ? ` — CPF: ${form.cpf}` : ''}${form.telefone ? ` — Tel: ${form.telefone}` : ''}
