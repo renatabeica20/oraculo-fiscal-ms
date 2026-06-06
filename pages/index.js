@@ -819,7 +819,9 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
   const isNFVencida = form.infracao === 'inidonia' && form.motivo_inidonia === 'fora do prazo de validade (art. 93, VII)'
   const semMercadoria = isMdfe || isNFVencida
   const temChaveMdfe = isMdfe && (form.chaves_nf || []).some(it => typeof it === 'object' ? it.chave : it)
-  const obrigatoriosOk = form.data && form.hora && form.endereco && form.placas?.[0] && form.motorista && form.sujeito && (semMercadoria ? (isMdfe ? temChaveMdfe : true) : form.mercadoria[0]?.descricao)
+  const isFaltaEncerramento = form.infracao === 'falta_mdfe' && form.tipo_mdfe === 'falta_encerramento'
+  const enderecoOk = isFaltaEncerramento || !!form.endereco
+  const obrigatoriosOk = form.data && form.hora && enderecoOk && form.placas?.[0] && form.motorista && form.sujeito && (semMercadoria ? (isMdfe ? temChaveMdfe : true) : form.mercadoria[0]?.descricao)
 
   return (
     <div style={{ maxWidth: '820px', margin: '0 auto', padding: '24px' }}>
@@ -1044,12 +1046,12 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
             <InputComFocus style={inputStyle} value={form.ie} onChange={e => {
               const raw = e.target.value.replace(/\D/g, '')
               if (raw.startsWith('28')) {
-                // Máscara MS: 28.XXX.XXX-XX (11 dígitos)
-                const n = raw.substring(0, 11)
+                // Máscara MS: 28.XXX.XXX-X (9 dígitos)
+                const n = raw.substring(0, 9)
                 let masked = n
-                if (n.length > 9) masked = n.replace(/(\d{2})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4')
-                else if (n.length > 6) masked = n.replace(/(\d{2})(\d{3})(\d{1,3})/, '$1.$2.$3')
-                else if (n.length > 3) masked = n.replace(/(\d{2})(\d{1,3})/, '$1.$2')
+                if (n.length > 8) masked = n.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, '$1.$2.$3-$4')
+                else if (n.length > 5) masked = n.replace(/(\d{2})(\d{3})(\d{1,3})/, '$1.$2.$3')
+                else if (n.length > 2) masked = n.replace(/(\d{2})(\d{1,3})/, '$1.$2')
                 setForm(f => ({ ...f, ie: masked }))
               } else {
                 setForm(f => ({ ...f, ie: e.target.value }))
@@ -1114,7 +1116,7 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
       {/* BOTÃO GERAR */}
       {!obrigatoriosOk && (
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.75rem', color: '#c87070', marginBottom: '12px' }}>
-          ⚠ Preencha os campos obrigatórios: data, hora, endereço, placa, motorista e sujeito passivo{!semMercadoria && ', e ao menos um item de mercadoria'}{isMdfe && ', e ao menos uma chave de NF-e'}
+          ⚠ Preencha os campos obrigatórios: data, hora, {isFaltaEncerramento ? '' : 'endereço, '}placa, motorista e sujeito passivo{!semMercadoria && ', e ao menos um item de mercadoria'}{isMdfe && ', e ao menos uma chave de NF-e'}
         </p>
       )}
 
