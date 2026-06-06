@@ -212,35 +212,44 @@ function mascaraTelefone(v) {
 }
 
 const inputStyle = {
-  width: '100%', padding: '10px 14px',
-  background: 'rgba(255,255,255,0.08)',
-  border: '1px solid rgba(201,168,76,0.35)',
-  borderRadius: '8px', fontSize: '0.9rem',
+  width: '100%', padding: '13px 16px',
+  background: 'rgba(14,22,32,0.55)',
+  border: '1px solid rgba(201,168,76,0.22)',
+  borderRadius: '9px', fontSize: '0.9rem',
   color: '#e8e0d0', outline: 'none',
   fontFamily: "'DM Sans', sans-serif",
-  boxSizing: 'border-box', transition: 'border-color 0.2s'
+  boxSizing: 'border-box',
+  transition: 'all 0.25s ease',
+  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.25)'
 }
 
 const labelStyle = {
   fontFamily: "'DM Sans', sans-serif",
-  fontSize: '0.68rem', color: '#7a9ab8',
-  textTransform: 'uppercase', letterSpacing: '0.08em',
-  display: 'block', marginBottom: '5px'
+  fontSize: '0.66rem', color: '#8a9aab',
+  textTransform: 'uppercase', letterSpacing: '0.16em',
+  display: 'block', marginBottom: '8px',
+  fontWeight: 600
 }
 
 const secaoStyle = {
-  background: 'rgba(255,255,255,0.02)',
-  border: '1px solid rgba(255,255,255,0.05)',
-  borderRadius: '10px', padding: '20px',
-  marginBottom: '16px'
+  background: 'linear-gradient(160deg, rgba(14,22,32,0.65) 0%, rgba(10,16,24,0.45) 100%)',
+  border: '1px solid rgba(201,168,76,0.12)',
+  borderTop: '2px solid rgba(201,168,76,0.45)',
+  borderRadius: '12px', padding: '24px 22px',
+  marginBottom: '22px',
+  boxShadow: '0 6px 22px rgba(0,0,0,0.32), inset 0 1px 0 rgba(201,168,76,0.06)',
+  position: 'relative'
 }
 
 const secaoTituloStyle = {
   fontFamily: "'DM Sans', sans-serif",
-  fontSize: '0.7rem', color: '#c9a84c',
-  textTransform: 'uppercase', letterSpacing: '0.12em',
-  marginBottom: '16px', display: 'flex',
-  alignItems: 'center', gap: '8px'
+  fontSize: '0.76rem', color: '#c9a84c',
+  textTransform: 'uppercase', letterSpacing: '0.22em',
+  marginBottom: '20px', paddingBottom: '14px',
+  display: 'flex', alignItems: 'center', gap: '12px',
+  fontWeight: 700,
+  borderBottom: '1px solid rgba(201,168,76,0.12)',
+  textShadow: '0 1px 8px rgba(201,168,76,0.25)'
 }
 
 function InputComFocus({ style, ...props }) {
@@ -250,9 +259,9 @@ function InputComFocus({ style, ...props }) {
       {...props}
       style={{
         ...style,
-        border: focused ? '1.5px solid rgba(201,168,76,0.85)' : (style?.border || '1px solid rgba(201,168,76,0.35)'),
-        boxShadow: focused ? '0 0 0 3px rgba(201,168,76,0.12)' : 'none',
-        background: focused ? 'rgba(255,255,255,0.11)' : (style?.background || 'rgba(255,255,255,0.08)'),
+        border: focused ? '1px solid rgba(201,168,76,0.75)' : (style?.border || '1px solid rgba(201,168,76,0.22)'),
+        boxShadow: focused ? 'inset 0 1px 2px rgba(0,0,0,0.25), 0 0 0 4px rgba(201,168,76,0.14), 0 0 20px rgba(201,168,76,0.18)' : (style?.boxShadow || 'inset 0 1px 2px rgba(0,0,0,0.25)'),
+        background: focused ? 'rgba(14,22,32,0.85)' : (style?.background || 'rgba(14,22,32,0.55)'),
       }}
       onFocus={e => { setFocused(true); props.onFocus?.(e) }}
       onBlur={e => { setFocused(false); props.onBlur?.(e) }}
@@ -267,9 +276,9 @@ function TextareaComFocus({ style, ...props }) {
       {...props}
       style={{
         ...style,
-        border: focused ? '1.5px solid rgba(201,168,76,0.85)' : (style?.border || '1px solid rgba(201,168,76,0.35)'),
-        boxShadow: focused ? '0 0 0 3px rgba(201,168,76,0.12)' : 'none',
-        background: focused ? 'rgba(255,255,255,0.11)' : (style?.background || 'rgba(255,255,255,0.08)'),
+        border: focused ? '1px solid rgba(201,168,76,0.75)' : (style?.border || '1px solid rgba(201,168,76,0.22)'),
+        boxShadow: focused ? 'inset 0 1px 2px rgba(0,0,0,0.25), 0 0 0 4px rgba(201,168,76,0.14), 0 0 20px rgba(201,168,76,0.18)' : (style?.boxShadow || 'inset 0 1px 2px rgba(0,0,0,0.25)'),
+        background: focused ? 'rgba(14,22,32,0.85)' : (style?.background || 'rgba(14,22,32,0.55)'),
       }}
       onFocus={e => { setFocused(true); props.onFocus?.(e) }}
       onBlur={e => { setFocused(false); props.onBlur?.(e) }}
@@ -907,11 +916,13 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
             {/* Sem documentação fiscal */}
             <button onClick={() => setForm(f => ({ ...f, infracao: f.infracao === 'sem_documento' ? null : 'sem_documento', motivo_inidonia: '', tipo_mdfe: 'falta_emissao' }))}
               style={{
-                padding: '12px 16px', borderRadius: '8px', cursor: 'pointer', textAlign: 'left',
-                fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
-                background: form.infracao === 'sem_documento' ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
-                border: form.infracao === 'sem_documento' ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                color: form.infracao === 'sem_documento' ? '#c9a84c' : '#c8c0b0',
+                padding: '14px 18px', borderRadius: '9px', cursor: 'pointer', textAlign: 'left',
+                fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem', fontWeight: form.infracao === 'sem_documento' ? 600 : 500,
+                background: form.infracao === 'sem_documento' ? 'linear-gradient(135deg, rgba(201,168,76,0.22), rgba(201,168,76,0.08))' : 'rgba(10,16,24,0.5)',
+                border: form.infracao === 'sem_documento' ? '1px solid rgba(201,168,76,0.55)' : '1px solid rgba(255,255,255,0.06)',
+                color: form.infracao === 'sem_documento' ? '#e8d090' : '#a0a8b0',
+                boxShadow: form.infracao === 'sem_documento' ? '0 4px 16px rgba(201,168,76,0.18), inset 0 1px 0 rgba(255,255,255,0.08)' : 'inset 0 1px 0 rgba(255,255,255,0.02)',
+                transition: 'all 0.25s ease',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center'
               }}>
               <span>Sem documentação fiscal</span>
@@ -974,11 +985,14 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
               ].map(op => (
                 <button key={op.value} onClick={() => setForm(f => ({ ...f, responsavel: op.value }))}
                   style={{
-                    flex: 1, padding: '10px', borderRadius: '8px', cursor: 'pointer',
+                    flex: 1, padding: '13px 14px', borderRadius: '9px', cursor: 'pointer',
                     fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem',
-                    background: form.responsavel === op.value ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
-                    border: form.responsavel === op.value ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
-                    color: form.responsavel === op.value ? '#c9a84c' : '#5a6a7a'
+                    fontWeight: form.responsavel === op.value ? 600 : 500,
+                    background: form.responsavel === op.value ? 'linear-gradient(135deg, rgba(201,168,76,0.22), rgba(201,168,76,0.08))' : 'rgba(10,16,24,0.5)',
+                    border: form.responsavel === op.value ? '1px solid rgba(201,168,76,0.55)' : '1px solid rgba(255,255,255,0.06)',
+                    color: form.responsavel === op.value ? '#e8d090' : '#7a8a9a',
+                    boxShadow: form.responsavel === op.value ? '0 4px 16px rgba(201,168,76,0.18), inset 0 1px 0 rgba(255,255,255,0.08)' : 'inset 0 1px 0 rgba(255,255,255,0.02)',
+                    transition: 'all 0.25s ease'
                   }}>
                   {op.label}
                 </button>
@@ -1186,17 +1200,21 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
       )}
 
       <button onClick={onGerar} disabled={!obrigatoriosOk} style={{
-        width: '100%', padding: '15px',
-        background: obrigatoriosOk ? 'linear-gradient(135deg, #b8902a, #c9a84c)' : 'rgba(255,255,255,0.05)',
-        color: obrigatoriosOk ? '#0d0f12' : '#3a4a5a',
-        border: 'none', borderRadius: '10px',
+        width: '100%', padding: '17px',
+        background: obrigatoriosOk ? 'linear-gradient(135deg, #d4b658 0%, #c9a84c 50%, #a88a3c 100%)' : 'rgba(10,16,24,0.4)',
+        color: obrigatoriosOk ? '#0d1218' : '#7a8a9a',
+        border: obrigatoriosOk ? '1px solid rgba(201,168,76,0.7)' : '1.5px dashed rgba(201,168,76,0.28)',
+        borderRadius: '11px',
         fontFamily: "'DM Sans', sans-serif",
         fontSize: '0.92rem', fontWeight: 700,
         cursor: obrigatoriosOk ? 'pointer' : 'not-allowed',
-        letterSpacing: '0.06em', textTransform: 'uppercase',
-        boxShadow: obrigatoriosOk ? '0 8px 24px rgba(180,140,40,0.25)' : 'none',
-        transition: 'all 0.2s'
-      }}>
+        letterSpacing: '0.18em', textTransform: 'uppercase',
+        boxShadow: obrigatoriosOk ? '0 10px 32px rgba(201,168,76,0.4), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.2)' : 'none',
+        transition: 'all 0.3s ease'
+      }}
+      onMouseEnter={e => { if(obrigatoriosOk){ e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 14px 40px rgba(201,168,76,0.55), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.2)' } }}
+      onMouseLeave={e => { if(obrigatoriosOk){ e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='0 10px 32px rgba(201,168,76,0.4), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.2)' } }}
+      >
         ✓ Gerar matéria tributária
       </button>
     </div>
