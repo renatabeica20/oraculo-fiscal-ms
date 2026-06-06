@@ -2028,7 +2028,7 @@ export default function Home() {
             <div className={styles.painel} onClick={e => e.stopPropagation()}>
               <div className={styles.painelHeader}>
                 <button onClick={() => setPainelHistorico(false)} style={{background:'transparent',border:'none',color:'#c9a84c',fontSize:'1.4rem',cursor:'pointer',padding:'8px 12px',minWidth:'44px',minHeight:'44px',display:'flex',alignItems:'center',justifyContent:'center'}}>←</button>
-                <h2 className={styles.painelTitulo}>📋 Histórico de Documentos</h2>
+                <h2 className={styles.painelTitulo} style={{fontFamily:"'Cormorant Garamond', Georgia, serif", fontSize:"1.5rem", letterSpacing:"0.01em", color:"#e8e0d0", textShadow:"0 1px 8px rgba(201,168,76,0.2)"}}>📋 Histórico de Documentos</h2>
               </div>
 
               {/* Abas */}
@@ -2080,17 +2080,21 @@ export default function Home() {
                         const { bg, cor, borda } = corTipo(doc.tipo)
                         return (
                           <div key={doc.id} style={{
-                            background: 'rgba(255,255,255,0.02)',
-                            border: '1px solid rgba(255,255,255,0.05)',
-                            borderRadius: '10px', padding: '12px 14px',
-                            marginBottom: '8px'
+                            background: 'linear-gradient(160deg, rgba(14,22,32,0.6), rgba(10,16,24,0.4))',
+                            border: '1px solid rgba(201,168,76,0.12)',
+                            borderLeft: '2px solid rgba(201,168,76,0.4)',
+                            borderRadius: '10px', padding: '14px 16px',
+                            marginBottom: '10px',
+                            boxShadow: '0 2px 10px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.02)',
+                            transition: 'all 0.2s ease'
                           }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                               <span style={{
                                 background: bg, color: cor, border: `1px solid ${borda}`,
-                                borderRadius: '6px', padding: '3px 10px',
-                                fontFamily: "'DM Sans', sans-serif", fontSize: '0.7rem', fontWeight: 600,
-                                letterSpacing: '0.06em'
+                                borderRadius: '4px', padding: '4px 12px',
+                                fontFamily: "'DM Sans', sans-serif", fontSize: '0.68rem', fontWeight: 700,
+                                letterSpacing: '0.12em', textTransform: 'uppercase',
+                                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)'
                               }}>
                                 {doc.tipo}{doc.infracao ? ` · ${doc.infracao}` : ''}
                               </span>
@@ -2216,9 +2220,9 @@ export default function Home() {
       )}
 
       {/* HEADER */}
-      <header className={styles.header}>
+      <header className={styles.header} style={{borderBottom:"1px solid rgba(201,168,76,0.28)", boxShadow:"0 1px 0 rgba(201,168,76,0.18), 0 4px 24px rgba(0,0,0,0.4)"}}>
         <div className={styles.headerContent}>
-          <div className={styles.logo} style={{background:"transparent",boxShadow:"none",width:"auto",height:"auto",padding:0}}><img src={`data:image/png;base64,${LOGO_B64}`} alt="Oráculo Fiscal MS" style={{width:"52px",height:"auto",objectFit:"contain",filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.3))"}} /></div>
+          <div className={styles.logo} style={{background:"transparent",boxShadow:"none",width:"auto",height:"auto",padding:0}}><img src={`data:image/png;base64,${LOGO_B64}`} alt="Oráculo Fiscal MS" style={{width:"52px",height:"auto",objectFit:"contain",filter:"drop-shadow(0 2px 12px rgba(201,168,76,0.45)) drop-shadow(0 1px 4px rgba(0,0,0,0.4))"}} /></div>
           <div className={styles.headerTexto} style={{textAlign:"center"}}>
             <h1 className={styles.titulo}>Oráculo Fiscal MS</h1>
             <p className={styles.subtitulo}>Especialista em legislação tributária do Estado de Mato Grosso do Sul</p>
@@ -2235,7 +2239,7 @@ export default function Home() {
           )}
           <div className={styles.headerUsuario}>
             <button className={styles.btnHistorico} onClick={abrirHistorico} title="Histórico de documentos">📋</button>
-            <span className={styles.nomeUsuario} style={{fontFamily:"Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",fontWeight:500,letterSpacing:"0.01em"}}>Olá, Fiscal {fiscal.nome}</span>
+            <span className={styles.nomeUsuario} style={{fontFamily:"Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",fontWeight:600,letterSpacing:"0.01em",color:"#d8d0c0"}}>Olá, Fiscal {fiscal.nome}</span>
             {fiscal.cargo === 'Administrador' && (
               <button className={styles.btnAdmin} onClick={() => router.push('/admin')}>Admin</button>
             )}
@@ -2248,11 +2252,12 @@ export default function Home() {
       <div className={styles.chat} ref={chatRef}>
         {mensagens.length === 0 && !modoAtivo && (
           <div style={{ maxWidth: '820px', margin: '32px auto', padding: '0 24px', position: 'relative' }}>
-            <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-              <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.6rem', color: '#c9a84c', fontWeight: 700, marginBottom: '8px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '2rem', color: '#c9a84c', fontWeight: 700, marginBottom: '14px', letterSpacing: '0.01em', textShadow: '0 2px 18px rgba(201,168,76,0.25)' }}>
                 Oráculo Fiscal MS
               </h2>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', color: '#4a5a6a', letterSpacing: '0.04em' }}>
+              <div aria-hidden style={{ width: '64px', height: '1px', margin: '0 auto 14px', background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.6), transparent)' }} />
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.88rem', color: '#8a9aab', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 500 }}>
                 Selecione o que deseja fazer
               </p>
             </div>
@@ -2276,24 +2281,33 @@ export default function Home() {
                     }
                   }}
                   style={{
-                    background: 'linear-gradient(180deg, #0e1620 0%, #0a1018 100%)',
-                    border: `1px solid rgba(255,255,255,0.06)`,
-                    borderTop: '3px solid rgba(201,168,76,0.6)',
-                    borderRadius: '12px',
-                    padding: '24px 20px',
+                    position: 'relative',
+                    background: 'linear-gradient(160deg, #0e1a28 0%, #0a1218 100%)',
+                    border: '1px solid rgba(201,168,76,0.18)',
+                    borderRadius: '14px',
+                    padding: '28px 24px',
                     cursor: 'pointer',
                     textAlign: 'left',
-                    transition: 'all 0.2s',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+                    transition: 'all 0.25s ease',
+                    boxShadow: '0 6px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(201,168,76,0.08)',
+                    overflow: 'hidden'
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.9)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(201,168,76,0.15)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.3)'; e.currentTarget.style.borderTopColor = 'rgba(201,168,76,0.6)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.55)'; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(201,168,76,0.15), inset 0 1px 0 rgba(201,168,76,0.18)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.18)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(201,168,76,0.08)' }}
                 >
-                  <div style={{ fontSize: '1.8rem', marginBottom: '12px' }}>{modo.icone}</div>
-                  <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.1rem', color: '#c8c0b0', fontWeight: 700, marginBottom: '8px' }}>
+                  <div aria-hidden style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.85), transparent)' }} />
+                  <div style={{
+                    width: '52px', height: '52px', borderRadius: '50%',
+                    background: 'radial-gradient(circle at 30% 30%, rgba(201,168,76,0.22), rgba(201,168,76,0.06) 70%)',
+                    border: '1px solid rgba(201,168,76,0.28)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '1.8rem', marginBottom: '18px',
+                    boxShadow: 'inset 0 1px 0 rgba(201,168,76,0.15), 0 4px 14px rgba(201,168,76,0.1)'
+                  }}>{modo.icone}</div>
+                  <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.4rem', color: '#e8e0d0', fontWeight: 700, marginBottom: '10px', letterSpacing: '0.005em' }}>
                     {modo.titulo}
                   </div>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.78rem', color: '#4a5a6a', lineHeight: 1.6 }}>
+                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', color: '#7a8a9a', lineHeight: 1.65 }}>
                     {modo.desc}
                   </div>
                 </button>
@@ -2468,16 +2482,16 @@ export default function Home() {
             {msg.tipo === 'user' ? (
               <div>
                 <div className={styles.msgUserLabel}>{fiscal.nome}</div>
-                <div className={styles.bubble}>
+                <div className={styles.bubble} style={{ background: 'linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.04))', border: '1px solid rgba(201,168,76,0.32)', boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(201,168,76,0.1)' }}>
                   <span style={{ whiteSpace: 'pre-wrap', fontSize: `${fontSize}px` }}>{msg.texto}</span>
                 </div>
               </div>
             ) : (
               <>
-                <div className={styles.avatar} style={{background:"transparent",boxShadow:"none",overflow:"visible"}}><img src={`data:image/png;base64,${LOGO_B64}`} alt="OF" style={{width:"38px",height:"auto",objectFit:"contain",filter:"drop-shadow(0 1px 4px rgba(0,0,0,0.4))"}} /></div>
+                <div className={styles.avatar} style={{background:"radial-gradient(circle at 30% 30%, rgba(201,168,76,0.28), rgba(201,168,76,0.06) 70%)",boxShadow:"inset 0 1px 0 rgba(201,168,76,0.2), 0 4px 14px rgba(201,168,76,0.18)",border:"1px solid rgba(201,168,76,0.35)",overflow:"visible"}}><img src={`data:image/png;base64,${LOGO_B64}`} alt="OF" style={{width:"38px",height:"auto",objectFit:"contain",filter:"drop-shadow(0 1px 4px rgba(0,0,0,0.5))"}} /></div>
                 <div className={styles.msgAgentInner}>
                   <div className={styles.msgAgentLabel}>⚖ Oráculo Fiscal MS</div>
-                  <div className={`${styles.bubble} ${msg.erro ? styles.bubbleErro : ''}`} style={{ fontSize: `${fontSize}px` }}>
+                  <div className={`${styles.bubble} ${msg.erro ? styles.bubbleErro : ''}`} style={{ fontSize: `${fontSize}px`, borderLeft: '4px solid rgba(201,168,76,0.55)', background: 'linear-gradient(180deg, rgba(14,22,32,0.85), rgba(10,16,24,0.95))', boxShadow: '0 4px 18px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.03)' }}>
                     {msg.trechos > 0 && <div className={styles.contextoBar}>📚 {msg.trechos} trechos da legislação consultados</div>}
                     {respostasAtivas[msgIdx] ? (
                       <div className={styles.formulario}>
@@ -2520,7 +2534,7 @@ export default function Home() {
 
         {carregando && (
           <div className={`${styles.msg} ${styles.msgAgent}`}>
-            <div className={styles.avatar} style={{background:"transparent",boxShadow:"none",overflow:"visible"}}><img src={`data:image/png;base64,${LOGO_B64}`} alt="OF" style={{width:"38px",height:"auto",objectFit:"contain",filter:"drop-shadow(0 1px 4px rgba(0,0,0,0.4))"}} /></div>
+            <div className={styles.avatar} style={{background:"radial-gradient(circle at 30% 30%, rgba(201,168,76,0.28), rgba(201,168,76,0.06) 70%)",boxShadow:"inset 0 1px 0 rgba(201,168,76,0.2), 0 4px 14px rgba(201,168,76,0.18)",border:"1px solid rgba(201,168,76,0.35)",overflow:"visible"}}><img src={`data:image/png;base64,${LOGO_B64}`} alt="OF" style={{width:"38px",height:"auto",objectFit:"contain",filter:"drop-shadow(0 1px 4px rgba(0,0,0,0.5))"}} /></div>
             <div className={styles.bubble}>
               <div className={styles.typing}><span></span><span></span><span></span></div>
             </div>
@@ -2529,7 +2543,7 @@ export default function Home() {
       </div>
 
       {/* ÁREA DE INPUT — oculto nos formulários */}
-      <div className={styles.inputArea} style={{ display: modoAtivo && modoAtivo !== 'consulta' && mensagens.length === 0 ? 'none' : undefined }}>
+      <div className={styles.inputArea} style={{ display: modoAtivo && modoAtivo !== 'consulta' && mensagens.length === 0 ? 'none' : undefined, background: 'linear-gradient(180deg, rgba(10,16,24,0.6), rgba(8,13,20,0.95))', borderTop: '1px solid rgba(201,168,76,0.18)', boxShadow: '0 -4px 24px rgba(0,0,0,0.3)' }}>
         {imagens.length > 0 && (
           <div className={styles.imagensPreview}>
             {imagens.map((img, i) => (
@@ -2548,6 +2562,7 @@ export default function Home() {
           <textarea
             ref={inputRef}
             className={styles.textarea}
+            style={{border:"1px solid rgba(201,168,76,0.18)", background:"rgba(14,22,32,0.6)", boxShadow:"inset 0 1px 2px rgba(0,0,0,0.3)"}}
             value={input}
             onChange={e => { setInput(e.target.value); e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
             onKeyDown={tecla}
@@ -2558,7 +2573,7 @@ export default function Home() {
             autoCorrect="on"
             autoCapitalize="sentences"
           />
-          <button className={styles.btnEnviar} onClick={() => enviar()} disabled={carregando || (!input.trim() && imagens.length === 0)}>
+          <button className={styles.btnEnviar} onClick={() => enviar()} disabled={carregando || (!input.trim() && imagens.length === 0)} style={{background:"linear-gradient(135deg, #c9a84c, #a88a3c)", boxShadow:"0 4px 16px rgba(201,168,76,0.35), inset 0 1px 0 rgba(255,255,255,0.18)", border:"1px solid rgba(201,168,76,0.6)"}}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="22" y1="2" x2="11" y2="13"></line>
               <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
