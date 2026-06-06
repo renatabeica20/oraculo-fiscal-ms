@@ -197,6 +197,7 @@ REGRAS ESPECÍFICAS PARA ESTE TIPO:
 - O MDF-e ativo no momento da abordagem deve ser mencionado como "permanecendo o MDF-e ativo no sistema da SEFAZ/MS na presente data".
 - A confirmação do destinatário (art. 18-A) é prova material obrigatória — sempre incluir com data e hora.
 - NUNCA usar "procedeu à abordagem" ou "abordagem" neste tipo — a verificação é remota, via FVM. Usar sempre "verificou, por meio do sistema de Fiscalização Virtual de Mercadorias (FVM)".
+- NUNCA mencionar município ou local de abordagem física no parágrafo 1 — não há local físico neste tipo de infração. O parágrafo 1 contém apenas data, hora, identificação do MDF-e, origem/destino e permanência ativo no sistema.
 - Origem e destino do transporte (extraídos do MDF-e consultado no FVM) devem constar no parágrafo 1 — formato: "com origem em [município]/[UF] e destino a [município]/[UF]".
 - A data e hora do parágrafo 1 são as da verificação no FVM (data/hora da abordagem informada no formulário), não a da emissão do MDF-e.
 
