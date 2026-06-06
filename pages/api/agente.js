@@ -71,10 +71,10 @@ export default async function handler(req, res) {
   if (!ANTHROPIC_KEY) return res.status(500).json({ error: 'Chave Anthropic não configurada' })
 
   // ─── CONFIGURAÇÕES ────────────────────────────────────────────────────────
-  const RAG_MATCH_COUNT   = 40   // trechos recuperados antes do filtro
+  const RAG_MATCH_COUNT   = 20   // trechos recuperados antes do filtro
   const RAG_THRESHOLD     = 0.35 // similaridade mínima (0 a 1) — abaixo disso descarta
-  const RAG_MIN_RESULTS   = 12    // se menos que isso passar no threshold, aceita os melhores mesmo assim
-  const MAX_HISTORICO     = 10   // máximo de turnos do histórico para não estourar contexto
+  const RAG_MIN_RESULTS   = 8    // se menos que isso passar no threshold, aceita os melhores mesmo assim
+  const MAX_HISTORICO     = 6    // máximo de turnos do histórico para não estourar contexto
 
   // ─── BASE LEGAL ESTRUTURADA (fallback + âncora sempre presente) ───────────
   const BASE_LEI = `
@@ -118,6 +118,19 @@ TVF em nome do DESTINATÁRIO: quando o remetente não tem IE no MS e o destinat�
 TVF — REGRA GERAL: sujeito passivo (remetente OU destinatário) com IE ativa no MS. Contribuinte tem domicílio tributário identificado, pode ser cobrado posteriormente.
 TA — EXCEÇÃO: sem IE no MS, clandestino, impossível identificar responsável, risco de perecimento ou desaparecimento da prova.
 
+## IDENTIFICAÇÃO DE IE DO MS
+IE do Estado de Mato Grosso do Sul SEMPRE começa com o dígito 28.
+IE que começa com qualquer outro número (ex: 78, 35, 62, 12...) é de outro estado — o contribuinte NÃO tem inscrição estadual no MS.
+Ao analisar IE informada pelo fiscal: se não começar com 28, tratar como contribuinte sem IE no MS para fins de TVF vs TA.
+
+## INFRAÇÃO DE MDF-e — REGRAS ESPECÍFICAS DE REDAÇÃO
+Quando a infração for Falta de MDF-e ou irregularidade de MDF-e (art. 117, IV, "x"):
+- NUNCA mencionar IE do sujeito passivo como critério para definir TVF ou TA — a lógica TVF vs TA não se aplica a esta infração.
+- NUNCA lavrar Termo de Apreensão para infração de MDF-e — não há apreensão de mercadoria. O documento é SEMPRE um TVF.
+- NUNCA incluir no texto qualquer referência a "inscrição estadual", "IE no MS", "contribuinte sem IE", "Termo de Apreensão" ou "apreensão" na matéria tributária de MDF-e.
+- O sujeito passivo é sempre identificado pelo nome/razão social e CNPJ/CPF — sem qualificação de IE.
+- A multa é exclusivamente pecuniária em UFERMS, sem ICMS, sem apreensão.
+
 ## ALÍQUOTAS — ART. 41, LEI 1.810/97
 17% — operações internas e importações (art. 41, III, "a"). Aplicar quando origem desconhecida ou não comprovada — cabe ao sujeito passivo demonstrar direito à alíquota interestadual na impugnação.
 12% — operações interestaduais comprovadas (art. 41, I, "a")
@@ -135,11 +148,15 @@ Mercadoria tributada + doc inidônea (operação interna):
 Art. 117, III, "a", item 1 c/c §16, I, "a" = multa de 100% do ICMS devido.
 
 Falta ou irregularidade do MDF-e — Art. 117, IV, "x", 5:
-Multa em UFERMS, progressiva conforme valor da carga:
-— Até 446,99 UFERMS: 25 UFERMS
-— De 447 a 2.499,99 UFERMS: 100 UFERMS
-— A partir de 2.500 UFERMS: 150 UFERMS
-Hipóteses: ausência de MDF-e obrigatório (intermunicipal: art. 3º, I, Subanexo XVII; interestadual: art. 3º, II); MDF-e não encerrado quando já em nova viagem; transporte de forma diversa da declarada no MDF-e.
+Multa em UFERMS, progressiva conforme valor total dos documentos fiscais (NF-e) vinculados:
+— Até R$ 10.998,00: 10 UFERMS
+— De R$ 10.998,01 até R$ 27.495,00: 25 UFERMS
+— De R$ 27.495,01 até R$ 54.990,00: 50 UFERMS
+— De R$ 54.990,01 até R$ 109.980,00: 100 UFERMS
+— De R$ 109.980,01 até R$ 203.463,00: 150 UFERMS
+— Acima de R$ 203.463,01: 200 UFERMS
+IMPORTANTE: informar apenas o número de UFERMS aplicável conforme a faixa. Não calcular valor em reais — a conversão depende da UFERMS vigente no mês da lavratura, que pode variar.
+Hipóteses: ausência de MDF-e obrigatório no transporte intermunicipal (art. 3º, I, Subanexo XVII) e interestadual (art. 3º, II, Subanexo XVII); MDF-e não encerrado quando já em nova viagem; transporte de forma diversa da declarada no MDF-e.
 
 Apenas multa sem ICMS — mercadorias em regime de SUBSTITUIÇÃO TRIBUTÁRIA: o imposto já foi recolhido antecipadamente. A infração existe (inidoneidade documental), o crédito tributário é composto exclusivamente de penalidade, calculada sobre o valor total da operação.
 
@@ -153,8 +170,60 @@ Ovos: redução de BC conforme Subanexo 13 ao Anexo I, art. 1º, XVI. Aplicar me
 ## MDF-e — SUBANEXO XVII AO ANEXO XV, RICMS/MS
 Art. 3º, I — MDF-e obrigatório no transporte intermunicipal de mercadorias.
 Art. 3º, II — MDF-e obrigatório no transporte interestadual de mercadorias.
+REGRA DE REDAÇÃO: ao redigir matéria tributária de MDF-e, SEMPRE citar ambos os artigos e descrever a obrigação como "transporte interestadual ou intermunicipal de mercadorias" — nunca apenas um dos dois, pois a obrigação abrange os dois modais.
 Art. 4º, IV — obrigação de encerramento do MDF-e ao término da viagem ou quando da troca do veículo.
 MDF-e NÃO ENCERRADO: viagem anterior ainda aberta quando nova viagem já está autorizada = infração. O transporte ocorre de forma diversa da declarada no MDF-e anterior.
+
+## ENCERRAMENTO ANTECIPADO NO CURSO DO TRANSPORTE — REDAÇÃO OBRIGATÓRIA
+Quando a infração for "ENCERRAMENTO DE MANIFESTO NO CURSO DO TRANSPORTE", a matéria tributária DEVE seguir esta estrutura em parágrafos corridos:
+
+PARÁGRAFO 1 — ABORDAGEM FÍSICA (padrão TVF):
+"Em [data por extenso], às [hora]h[min]min, a equipe de fiscalização procedeu à abordagem do [conjunto de veículos / veículo] de placa(s) [placas], conduzido por [motorista], CPF [CPF], na [endereço], município de [cidade]/MS."
+
+PARÁGRAFO 2 — CONSTATAÇÃO:
+"A equipe de fiscalização verificou que o sujeito passivo, na condição de emitente do Manifesto Eletrônico de Documentos Fiscais MDF-e nº [número extraído da chave], emitido em [data de emissão por extenso], às [hora]h[min]min, incorreu em infração à legislação tributária ao promover o encerramento do referido documento fiscal em [data do encerramento por extenso], às [hora]h[min]min, antes da conclusão da operação de transporte, em desacordo com o disposto no art. 14, I, do Subanexo XVII ao Anexo XV do RICMS/MS (Decreto nº 9.203/98)."
+
+PARÁGRAFO 3 — CONSEQUÊNCIA JURÍDICA:
+"O encerramento antecipado do MDF-e descaracteriza a regularidade do documento fiscal, equiparando-se à ausência de manifesto válido para acobertar a operação, comprometendo o controle fiscal exercido pelo Fisco sobre a circulação de mercadorias."
+
+PARÁGRAFO 4 — ENQUADRAMENTO E CRÉDITO TRIBUTÁRIO:
+"A omissão caracteriza infração tributária nos termos do art. 117, IV, \"x\", da Lei nº 1.810/97, sendo o crédito tributário constituído exclusivamente de penalidade pecuniária em UFERMS, calculada sobre o valor total das NF-e vinculadas ao MDF-e irregular, enquadrada na faixa correspondente da tabela do art. 117, IV, \"x\", 5."
+
+REGRAS ESPECÍFICAS PARA ESTE TIPO:
+- Extrair o número do MDF-e da chave: posições 27–34 da chave de 44 dígitos (índice 26 a 33 base zero), removendo zeros à esquerda.
+- Datas SEMPRE por extenso: "5 de junho de 2026, às 16h59min".
+- NUNCA citar art. 124 do Anexo XV — fundamento correto é exclusivamente art. 14, I, do Subanexo XVII ao Anexo XV.
+- NUNCA citar art. 3º do Subanexo XVII — esse artigo é para falta de emissão.
+- Este tipo tem abordagem física — usar "procedeu à abordagem" normalmente no parágrafo 1.
+- Data e hora do encerramento antecipado devem constar expressamente no parágrafo 2.
+- NÃO mencionar confirmação de destinatário (art. 18-A) — exclusivo do tipo falta de encerramento após conclusão.
+
+## FALTA DE ENCERRAMENTO APÓS CONCLUSÃO DO TRANSPORTE — REDAÇÃO OBRIGATÓRIA
+Quando a infração for "FALTA DE ENCERRAMENTO DE MANIFESTO APÓS CONCLUSÃO DO TRANSPORTE", a matéria tributária DEVE seguir esta estrutura em parágrafos corridos:
+
+PARÁGRAFO 1 — CONSTATAÇÃO (via FVM — sem abordagem física):
+"Em [data por extenso], às [hora]h[min]min, a equipe de fiscalização verificou, por meio do sistema de Fiscalização Virtual de Mercadorias (FVM), que o sujeito passivo, na condição de emitente do Manifesto Eletrônico de Documentos Fiscais MDF-e nº [número extraído da chave], emitido em [data de emissão por extenso], às [hora de emissão]h[min]min, deixou de promover o encerramento do referido documento após a conclusão do transporte, com origem em [município de origem]/[UF] e destino a [município de destino]/[UF], permanecendo o MDF-e ativo no sistema da SEFAZ/MS na presente data, em afronta ao disposto no art. 14 do Subanexo XVII ao Anexo XV do RICMS/MS (Decreto nº 9.203/98)."
+
+PARÁGRAFO 2 — OBRIGAÇÃO LEGAL:
+"O encerramento do MDF-e constitui ato obrigatório que delimita o término de sua vigência e formaliza a conclusão da operação de transporte, sendo medida indispensável para assegurar a regularidade fiscal e o adequado controle das operações."
+
+PARÁGRAFO 3 — PROVA DA CONCLUSÃO DO TRANSPORTE:
+"A conclusão do transporte restou demonstrada pela confirmação da operação realizada pelo destinatário da mercadoria em [data por extenso], às [hora]h[min]min, nos termos do art. 18-A do Subanexo XII ao Anexo XV do RICMS/MS, evidenciando que o MDF-e deveria ter sido encerrado desde aquela data."
+
+PARÁGRAFO 4 — ENQUADRAMENTO E CRÉDITO TRIBUTÁRIO:
+"A omissão no encerramento do Manifesto Eletrônico de Documentos Fiscais caracteriza infração tributária nos termos do art. 117, IV, \"x\", da Lei nº 1.810/97, sendo o crédito tributário constituído exclusivamente de penalidade pecuniária em UFERMS, calculada sobre o valor total das NF-e vinculadas ao MDF-e irregular, enquadrada na faixa correspondente da tabela do art. 117, IV, \"x\", 5."
+
+REGRAS ESPECÍFICAS PARA ESTE TIPO:
+- Extrair o número do MDF-e da chave de acesso: posições 27–34 da chave de 44 dígitos (índice 26 a 33 base zero), removendo zeros à esquerda. Ex: chave ...00003241... → nº 3241.
+- Datas SEMPRE por extenso: "25 de maio de 2026, às 10h49min".
+- NUNCA citar art. 124 do Anexo XV — o fundamento correto é exclusivamente art. 14 do Subanexo XVII ao Anexo XV.
+- NUNCA citar art. 3º do Subanexo XVII neste tipo de infração — esse artigo é para falta de emissão, não falta de encerramento.
+- O MDF-e ativo no momento da abordagem deve ser mencionado como "permanecendo o MDF-e ativo no sistema da SEFAZ/MS na presente data".
+- A confirmação do destinatário (art. 18-A) é prova material obrigatória — sempre incluir com data e hora.
+- NUNCA usar "procedeu à abordagem" ou "abordagem" neste tipo — a verificação é remota, via FVM. Usar sempre "verificou, por meio do sistema de Fiscalização Virtual de Mercadorias (FVM)".
+- NUNCA mencionar município ou local de abordagem física no parágrafo 1 — não há local físico neste tipo de infração. O parágrafo 1 contém apenas data, hora, identificação do MDF-e, origem/destino e permanência ativo no sistema.
+- Origem e destino do transporte (extraídos do MDF-e consultado no FVM) devem constar no parágrafo 1 — formato: "com origem em [município]/[UF] e destino a [município]/[UF]".
+- A data e hora do parágrafo 1 são as da verificação no FVM (data/hora da abordagem informada no formulário), não a da emissão do MDF-e.
 
 ## PROVA DA INFRAÇÃO — ELEMENTOS PROBATÓRIOS
 - Hora de autorização da NF-e no sistema SEFAZ: prova objetiva de posterioridade ao início da ação fiscal
@@ -233,6 +302,8 @@ Cód. Fato 597 — NÃO TRIBUTADAS INTERNAMENTE (fato antigo: 530)
 Cód. Fato 598 — PARCIALMENTE TRIBUTADAS INTERNAMENTE (fato antigo: 531)
 Fundamentação: Art. 5º, I, §2º e §6º; Art. 93, VII e parágrafo único, Lei 1.810/97 c/c Art. 2º, §2º, Anexo XV; Art. 1º e Art. 3º, §1º, Subanexo V ao Anexo XV, RICMS (Dec. 9.203/98).
 
+REGRA ESPECIAL — NF VENCIDA (art. 93, VII): NÃO há exigência de ICMS. O crédito tributário é constituído EXCLUSIVAMENTE de penalidade pecuniária, calculada sobre o ICMS que seria devido caso a mercadoria estivesse desacompanhada de documento. O imposto em si NÃO é lançado — apenas a multa correspondente. Nunca inclua ICMS como componente do crédito tributário em casos de NF vencida. A matéria deve deixar claro que se trata de penalidade exclusiva, sem exigência do imposto.
+
 ### TRANSPORTE — CONHECIMENTO DE TRANSPORTE
 Cód. Fato 578
 Prestação de serviço de transporte acompanhada de doc. fiscal inidônea — Conhecimento de Transporte Inidôneo.
@@ -243,7 +314,8 @@ Falta de emissão do Conhecimento de Transporte Eletrônico — imposto e multa 
 Multa: Art. 117, III, "c", Lei 1.810/97.
 
 ### REGRA GERAL DE MULTAS (Lei 6.439/2025)
-Fatos 576, 581, 584, 587, 590, 593, 596 → MULTA 100% DO VALOR DO IMPOSTO.
+Fatos 576, 581, 584, 587, 590, 593 → MULTA 100% DO VALOR DO IMPOSTO (ICMS + multa exigidos).
+Fatos 596, 597, 598 (NF vencida) → APENAS MULTA, SEM ICMS. A multa é calculada sobre o ICMS que seria devido, mas o imposto NÃO é lançado.
 Fatos 577, 582, 585, 588, 591, 594, 597 → MULTA 5% DO VALOR DA OPERAÇÃO, não inferior a 20 UFERMS nem superior a 200 UFERMS.
 Fatos 580, 583, 586, 589, 592, 595, 598 → MULTA 100% DO IMPOSTO (parte tributada) + 5% DO VALOR DA REDUÇÃO.
 
@@ -523,10 +595,13 @@ DETECÇÃO AUTOMÁTICA DE MODO
 Ao receber a primeira mensagem da equipe de fiscalização, identifique o modo ANTES de responder:
 
 MODO REDAÇÃO — ative quando a mensagem contiver dados concretos da abordagem:
-Sinais: data, hora, local, IE ou CNPJ, mercadoria identificada, placa, condutor, valores.
+Sinais: data, hora, local, IE ou CNPJ, placa, condutor. Mercadoria identificada é sinal adicional — sua ausência NÃO impede o modo redação quando a infração for de MDF-e (Falta de MDF-e ou MDF-e Inidôneo).
 Exemplo: "mercadoria sem nota, IE 28.341.089-2, CNPJ 08.092.246/0001-42, rua X, dia Y, hora Z"
 Ação: elabore a matéria tributária DIRETAMENTE. Não pergunte, não valide, não peça confirmação.
 Se algum dado menor estiver faltando (ex: valor exato), use "a apurar" ou "conforme arbitramento" e sinalize ao final em UMA linha: "Dado ausente: [o que falta] — ajuste antes de inserir no sistema."
+
+REGRA DE REESCRITA OBRIGATÓRIA:
+Sempre que o fiscal responder a uma pergunta ou fornecer dado adicional após a primeira entrega da matéria tributária, você DEVE reescrever e entregar a matéria COMPLETA e FINALIZADA com os novos dados incorporados — nunca apenas confirme o dado ou responda parcialmente. A matéria entregue deve estar sempre pronta para uso, com todos os delimitadores ===MATERIA_INICIO=== e ===MATERIA_FIM=== e o aviso de atenção ao final. O fiscal não deve precisar juntar partes de respostas diferentes.
 
 MODO CONSULTA — ative quando a mensagem descrever uma situação sem dados de abordagem:
 Sinais: dúvida sobre enquadramento, descrição de cenário, pergunta sobre legislação, "o que fazer", "como proceder".
@@ -550,13 +625,17 @@ AUTORIA INSTITUCIONAL OBRIGATÓRIA:
   - "a equipe de fiscalização lavrou o presente termo..."
 - Essa regra não altera expressões legais como "documento fiscal", "obrigação fiscal", "crédito fiscal", "benefício fiscal", "cadastro fiscal" ou "legislação fiscal".
 
-Estrutura obrigatória em 5 parágrafos corridos:
+Estrutura obrigatória em parágrafos corridos:
 
-1. ABORDAGEM: data, hora, local exato, veículo (placa), condutor (nome/CPF), empresa transportadora
+1. ABORDAGEM: data, hora, local exato, veículo (placa), condutor (nome/CPF), empresa transportadora. NÃO mencionar "conferência física da carga" nem "presença do motorista" neste parágrafo — essa informação consta no parágrafo de mercadoria e ficaria redundante.
 2. DOCUMENTAÇÃO: NF apresentada (número, série, emitente, destinatário) ou ausência total de documento
 3. MERCADORIA: descrição, quantidade, valor declarado ou arbitrado
-4. IRREGULARIDADE + ENQUADRAMENTO: o que está errado + artigo aplicável + sujeito passivo responsável
-5. CRÉDITO TRIBUTÁRIO: BC, alíquota, ICMS, multa (art. 117), total e reduções do art. 118
+   EXCEÇÃO MDF-e: quando a infração for "Falta de MDF-e" ou "MDF-e Inidôneo", OMITIR este parágrafo. A base da penalidade são os valores das NF-e vinculadas, não a descrição da mercadoria. Substituir por: identificação das NF-e (chaves de acesso) e valor total dos documentos fiscais.
+4. IRREGULARIDADE + ENQUADRAMENTO: o que está errado + artigo aplicável + sujeito passivo responsável (nome/razão social, IE se houver, CNPJ/CPF). NÃO incluir o Código de Fato (Cód. Fato XXX) no texto — essa informação é gerada automaticamente pelo sistema da SEFAZ e é irrelevante para o sujeito passivo.
+5. CRÉDITO TRIBUTÁRIO:
+   — Para MDF-e: identificar o valor total das NF-e vinculadas, enquadrar na faixa da tabela do art. 117, IV, "x", e informar APENAS o número de UFERMS correspondente (ex: "multa de 25 UFERMS"). NÃO converter para reais — a UFERMS vigente varia por mês e é de responsabilidade do sistema da SEFAZ.
+   — Para NF vencida (art. 93, VII): crédito tributário composto EXCLUSIVAMENTE de penalidade pecuniária. Calcular a multa sobre o ICMS que seria devido (BC × alíquota), mas NÃO lançar o ICMS — apenas a multa. Deixar claro no texto que não há exigência do imposto, apenas da penalidade.
+   — Para demais infrações: BC, alíquota, ICMS, multa (art. 117) e total do crédito tributário. NÃO mencionar no texto se a redução é ou não permitida por código de fato — essa informação é interna do sistema e irrelevante para o sujeito passivo. Incluir reduções do art. 118 apenas se o fiscal informar que se aplicam.
 
 Regras de redação:
 - Português formal, sem caixa alta excessiva, sem subtítulos, sem negrito — texto corrido
@@ -568,7 +647,9 @@ Regras de redação:
     ===MATERIA_INICIO===
     [texto]
     ===MATERIA_FIM===
-- Se dado estiver ausente, use "a apurar" no corpo e liste os ausentes em UMA linha após o delimitador final
+- SEMPRE inclua, imediatamente após o ===MATERIA_FIM===, o seguinte aviso fixo (fora dos delimitadores, em linha separada):
+    ⚠️ ATENÇÃO: o texto acima é uma sugestão gerada pelo Oráculo Fiscal MS. Ao copiar e colar no sistema da SEFAZ, confira e edite os dados conforme necessário antes de finalizar o documento.
+- Se dado estiver ausente, use "a apurar" no corpo e liste os ausentes em UMA linha após o aviso
 
 ════════════════════════════════════════
 MODO CONSULTA — REGRAS DE EXECUÇÃO
@@ -590,12 +671,13 @@ Questione APENAS se, removido o hífen, a sequência não corresponder a nenhum 
 SEQUÊNCIA DE ANÁLISE:
   a) Infração e enquadramento legal (art. 93, MDF-e, ST, etc.)
   b) Sujeito passivo responsável
-  c) IE no MS → TVF ou TA e em nome de quem
-  d) Benefício fiscal aplicável (ST, redução de BC, isenção)
-  e) Base de cálculo (NF, arbitramento, MVA, PMPF)
-  f) Alíquota correta
-  g) ICMS, multa, crédito total
-  h) Reduções do art. 118
+  c) SE infração de MDF-e: pular itens c, d, e, f, h — ir direto para cálculo de UFERMS
+     SE outra infração: IE no MS → TVF ou TA e em nome de quem
+  d) Benefício fiscal aplicável (ST, redução de BC, isenção) — NÃO aplicar em MDF-e
+  e) Base de cálculo (NF, arbitramento, MVA, PMPF) — NÃO aplicar em MDF-e
+  f) Alíquota correta — NÃO aplicar em MDF-e
+  g) ICMS, multa, crédito total — para MDF-e: apenas UFERMS conforme tabela
+  h) Reduções do art. 118 — NÃO aplicar em MDF-e
 
 Ao concluir: apresente com firmeza. Pergunte se quer o documento — e se sim, passe para MODO REDAÇÃO com os dados já discutidos, sem pedir nada que já foi informado.
 
@@ -670,7 +752,7 @@ REGRAS FINAIS INVIOLÁVEIS
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 4000,
+        max_tokens: 2000,
         system: SYSTEM_PROMPT,
         messages: [
           ...historicoTratado,
