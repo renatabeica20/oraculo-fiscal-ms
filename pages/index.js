@@ -383,13 +383,31 @@ function CampoCidade({ value, onChange }) {
 function MenuExpansivel({ label, opcoes, valorSelecionado, aberto, onToggle, onSelecionar }) {
   const [focusIdx, setFocusIdx] = useState(-1)
   const itemRefs = useRef([])
+  const btnRef = useRef(null)
+  const pendingFocus = useRef(-1)
+
+  // Foca no item correto APÓS o menu abrir (quando os refs já existem no DOM)
+  useEffect(() => {
+    if (aberto && pendingFocus.current >= 0) {
+      const idx = pendingFocus.current
+      pendingFocus.current = -1
+      setTimeout(() => {
+        itemRefs.current[idx]?.focus()
+        setFocusIdx(idx)
+      }, 0)
+    }
+    if (!aberto) {
+      pendingFocus.current = -1
+      setFocusIdx(-1)
+    }
+  }, [aberto])
 
   const handleKeyDown = (e) => {
     if (!aberto) {
       if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
+        pendingFocus.current = 0
         onToggle()
-        setFocusIdx(0)
       }
       return
     }
@@ -406,7 +424,7 @@ function MenuExpansivel({ label, opcoes, valorSelecionado, aberto, onToggle, onS
     } else if (e.key === 'Escape') {
       e.preventDefault()
       onToggle()
-      setFocusIdx(-1)
+      btnRef.current?.focus()
     }
   }
 
@@ -429,7 +447,7 @@ function MenuExpansivel({ label, opcoes, valorSelecionado, aberto, onToggle, onS
     } else if (e.key === 'Escape') {
       e.preventDefault()
       onToggle()
-      setFocusIdx(-1)
+      setTimeout(() => btnRef.current?.focus(), 0)
     }
   }
 
@@ -438,6 +456,7 @@ function MenuExpansivel({ label, opcoes, valorSelecionado, aberto, onToggle, onS
   return (
     <div>
       <button
+        ref={btnRef}
         onClick={onToggle}
         onKeyDown={handleKeyDown}
         aria-expanded={aberto}
