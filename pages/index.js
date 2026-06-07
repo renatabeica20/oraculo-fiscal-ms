@@ -1398,6 +1398,22 @@ function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
       {/* FLUXO TVF/TA */}
       {form.fluxo === 'tvf_ta' && (
         <>
+          {/* Seletor tipo de infração */}
+          <div style={secStyle}>
+            <div style={{ ...labelStyle, marginBottom: '12px' }}>◆ Tipo de infração</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              {[
+                { val: 'geral', label: '📋 Geral', desc: 'Sem nota, NF vencida, inidônea, embaraço, DIFCON' },
+                { val: 'mdfe', label: '🚛 MDF-e', desc: 'Falta de emissão ou irregularidade de MDF-e' }
+              ].map(opt => (
+                <button key={opt.val} onClick={() => set('tipo_infracao')(opt.val)} style={{ background: form.tipo_infracao === opt.val ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.02)', border: `1px solid ${form.tipo_infracao === opt.val ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '8px', padding: '14px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s' }}>
+                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', color: '#e8e0d0', fontWeight: 600, marginBottom: '4px' }}>{opt.label}</div>
+                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#5a6a7a' }}>{opt.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div style={secStyle}>
             <div style={{ ...labelStyle, marginBottom: '8px' }}>◆ Matéria tributária original</div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#4a5a6a', marginBottom: '10px' }}>Cole aqui a matéria tributária completa do TVF ou TA que originou este ALIM.</p>
@@ -1408,44 +1424,81 @@ function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
               style={{ ...inputStyle, minHeight: '180px', resize: 'vertical', lineHeight: 1.6 }}
             />
           </div>
-          <div style={secStyle}>
-            <div style={{ ...labelStyle, marginBottom: '4px' }}>◆ Valores calculados</div>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#4a5a6a', marginBottom: '14px' }}>
-              Preencha os valores do campo 10 do TVF ou do demonstrativo do TA. Deixe em branco o que não se aplicar.
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-              <div>
-                <div style={labelStyle}>Valor total da operação (R$)</div>
-                <InputComFocus style={inputStyle} value={form.val_operacao} onChange={e => setForm(f => ({ ...f, val_operacao: mascaraValorBR(e.target.value) }))} placeholder="Ex: 3.169,00" inputMode="decimal" />
+
+          {/* Campos extras para MDF-e */}
+          {form.tipo_infracao === 'mdfe' && (
+            <div style={secStyle}>
+              <div style={{ ...labelStyle, marginBottom: '12px' }}>◆ Trajeto e UFERMS</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                <div>
+                  <div style={labelStyle}>Município de origem</div>
+                  <InputComFocus style={inputStyle} value={form.mdfe_origem} onChange={setE('mdfe_origem')} placeholder="Ex: Campo Grande" />
+                </div>
+                <div>
+                  <div style={labelStyle}>Município de destino</div>
+                  <InputComFocus style={inputStyle} value={form.mdfe_destino} onChange={setE('mdfe_destino')} placeholder="Ex: Sidrolândia" />
+                </div>
               </div>
-              <div>
-                <div style={labelStyle}>Alíquota (%)</div>
-                <InputComFocus style={inputStyle} value={form.val_aliquota} onChange={e => setForm(f => ({ ...f, val_aliquota: mascaraAliquota(e.target.value) }))} placeholder="Ex: 17" inputMode="decimal" />
-              </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-              <div>
-                <div style={labelStyle}>ICMS devido (R$)</div>
-                <InputComFocus style={inputStyle} value={form.val_icms} onChange={e => setForm(f => ({ ...f, val_icms: mascaraValorBR(e.target.value) }))} placeholder="Ex: 538,73" inputMode="decimal" />
-              </div>
-              <div>
-                <div style={labelStyle}>Multa principal (R$)</div>
-                <InputComFocus style={inputStyle} value={form.val_multa} onChange={e => setForm(f => ({ ...f, val_multa: mascaraValorBR(e.target.value) }))} placeholder="Ex: 538,73" inputMode="decimal" />
-              </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div>
-                <div style={labelStyle}>FECOMP (R$)</div>
-                <InputComFocus style={inputStyle} value={form.val_fecomp} onChange={e => setForm(f => ({ ...f, val_fecomp: mascaraValorBR(e.target.value) }))} placeholder="Ex: 243,90" inputMode="decimal" />
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Só bebidas alcoólicas (art. 41-A)</p>
-              </div>
-              <div>
-                <div style={labelStyle}>Qtd. UFERMS</div>
-                <InputComFocus style={inputStyle} value={form.val_uferms_qtd} onChange={e => setForm(f => ({ ...f, val_uferms_qtd: e.target.value.replace(/\D/g, '') }))} placeholder="Ex: 25" inputMode="numeric" />
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Só MDF-e e embaraço</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <div style={labelStyle}>Qtd. UFERMS</div>
+                  <InputComFocus style={inputStyle} value={form.val_uferms_qtd} onChange={e => setForm(f => ({ ...f, val_uferms_qtd: e.target.value.replace(/\D/g, '') }))} placeholder="Ex: 25" inputMode="numeric" />
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Conforme tabela do art. 117, IV, "x"</p>
+                </div>
+                <div>
+                  <div style={labelStyle}>Valor da UFERMS vigente (R$)</div>
+                  <InputComFocus style={inputStyle} value={form.val_uferms_valor} onChange={e => setForm(f => ({ ...f, val_uferms_valor: mascaraValorBR(e.target.value) }))} placeholder="Ex: 52,73" inputMode="decimal" />
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>
+                    {form.val_uferms_qtd && form.val_uferms_valor
+                      ? `Total: R$ ${(parseInt(form.val_uferms_qtd) * parseFloat(form.val_uferms_valor.replace('.','').replace(',','.'))).toLocaleString('pt-BR', {minimumFractionDigits:2})}`
+                      : 'Valor vigente no mês da lavratura'}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Valores calculados — só para não-MDF-e */}
+          {form.tipo_infracao !== 'mdfe' && (
+            <div style={secStyle}>
+              <div style={{ ...labelStyle, marginBottom: '4px' }}>◆ Valores calculados</div>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#4a5a6a', marginBottom: '14px' }}>
+                Preencha os valores do campo 10 do TVF ou do demonstrativo do TA. Deixe em branco o que não se aplicar.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                <div>
+                  <div style={labelStyle}>Valor total da operação (R$)</div>
+                  <InputComFocus style={inputStyle} value={form.val_operacao} onChange={e => setForm(f => ({ ...f, val_operacao: mascaraValorBR(e.target.value) }))} placeholder="Ex: 3.169,00" inputMode="decimal" />
+                </div>
+                <div>
+                  <div style={labelStyle}>Alíquota (%)</div>
+                  <InputComFocus style={inputStyle} value={form.val_aliquota} onChange={e => setForm(f => ({ ...f, val_aliquota: mascaraAliquota(e.target.value) }))} placeholder="Ex: 17" inputMode="decimal" />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                <div>
+                  <div style={labelStyle}>ICMS devido (R$)</div>
+                  <InputComFocus style={inputStyle} value={form.val_icms} onChange={e => setForm(f => ({ ...f, val_icms: mascaraValorBR(e.target.value) }))} placeholder="Ex: 538,73" inputMode="decimal" />
+                </div>
+                <div>
+                  <div style={labelStyle}>Multa principal (R$)</div>
+                  <InputComFocus style={inputStyle} value={form.val_multa} onChange={e => setForm(f => ({ ...f, val_multa: mascaraValorBR(e.target.value) }))} placeholder="Ex: 538,73" inputMode="decimal" />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <div style={labelStyle}>FECOMP (R$)</div>
+                  <InputComFocus style={inputStyle} value={form.val_fecomp} onChange={e => setForm(f => ({ ...f, val_fecomp: mascaraValorBR(e.target.value) }))} placeholder="Ex: 243,90" inputMode="decimal" />
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Só bebidas alcoólicas (art. 41-A)</p>
+                </div>
+                <div>
+                  <div style={labelStyle}>Qtd. UFERMS</div>
+                  <InputComFocus style={inputStyle} value={form.val_uferms_qtd} onChange={e => setForm(f => ({ ...f, val_uferms_qtd: e.target.value.replace(/\D/g, '') }))} placeholder="Ex: 25" inputMode="numeric" />
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Só embaraço</p>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
 
@@ -1659,18 +1712,36 @@ Use os delimitadores ===ALIM_CAMPO3_INICIO=== / ===ALIM_CAMPO3_FIM===, ===ALIM_C
   }
 
   // Monta bloco de valores calculados para passar ao agente
+  const ehMdfe = form.tipo_infracao === 'mdfe'
   const valoresLinhas = []
-  if (form.val_operacao)   valoresLinhas.push('VALOR TOTAL DA OPERAÇÃO: R$ ' + form.val_operacao)
-  if (form.val_aliquota)   valoresLinhas.push('ALÍQUOTA: ' + form.val_aliquota + '%')
-  if (form.val_icms)       valoresLinhas.push('ICMS DEVIDO: R$ ' + form.val_icms)
-  if (form.val_multa)      valoresLinhas.push('MULTA PRINCIPAL (100%): R$ ' + form.val_multa)
-  if (form.val_fecomp)     valoresLinhas.push('FECOMP (2%): R$ ' + form.val_fecomp)
-  if (form.val_uferms_qtd) valoresLinhas.push('QUANTIDADE DE UFERMS: ' + form.val_uferms_qtd + ' UFERMS')
+
+  if (ehMdfe) {
+    if (form.mdfe_origem && form.mdfe_destino) {
+      valoresLinhas.push('TRAJETO: ' + form.mdfe_origem + '/MS x ' + form.mdfe_destino + '/MS (trajeto intermunicipal)')
+    }
+    if (form.val_uferms_qtd) valoresLinhas.push('QUANTIDADE DE UFERMS: ' + form.val_uferms_qtd + ' UFERMS')
+    if (form.val_uferms_valor) {
+      const total = form.val_uferms_qtd
+        ? (parseInt(form.val_uferms_qtd) * parseFloat(form.val_uferms_valor.replace(/\./g,'').replace(',','.'))).toLocaleString('pt-BR', {minimumFractionDigits:2})
+        : null
+      valoresLinhas.push('VALOR DA UFERMS VIGENTE: R$ ' + form.val_uferms_valor + (total ? ' (VALOR TOTAL DA MULTA: R$ ' + total + ')' : ''))
+    }
+  } else {
+    if (form.val_operacao)   valoresLinhas.push('VALOR TOTAL DA OPERAÇÃO: R$ ' + form.val_operacao)
+    if (form.val_aliquota)   valoresLinhas.push('ALÍQUOTA: ' + form.val_aliquota + '%')
+    if (form.val_icms)       valoresLinhas.push('ICMS DEVIDO: R$ ' + form.val_icms)
+    if (form.val_multa)      valoresLinhas.push('MULTA PRINCIPAL (100%): R$ ' + form.val_multa)
+    if (form.val_fecomp)     valoresLinhas.push('FECOMP (2%): R$ ' + form.val_fecomp)
+    if (form.val_uferms_qtd) valoresLinhas.push('QUANTIDADE DE UFERMS: ' + form.val_uferms_qtd + ' UFERMS')
+  }
+
   const blocoValores = valoresLinhas.length > 0
     ? '\n\nVALORES CALCULADOS (USE EXATAMENTE ESTES — NÃO RECALCULE, NÃO ALTERE):\n' + valoresLinhas.join('\n')
     : ''
 
-  return `GERAR MATÉRIA TRIBUTÁRIA DO ALIM
+  const tipoAlim = ehMdfe ? 'GERAR MATÉRIA TRIBUTÁRIA DO ALIM — TIPO: MDF-e' : 'GERAR MATÉRIA TRIBUTÁRIA DO ALIM'
+
+  return `${tipoAlim}
 
 Com base na matéria tributária abaixo, extraída do TVF ou TA original, elabore os blocos de texto prontos para inserção no sistema SEFAZ-MS.${blocoValores}
 
@@ -1903,6 +1974,7 @@ export default function Home() {
   })
   const FORM_ALIM_INICIAL = {
     fluxo: 'tvf_ta',
+    tipo_infracao: 'geral', // 'geral' | 'mdfe'
     materia_original: '',
     val_operacao: '',
     val_icms: '',
@@ -1910,6 +1982,9 @@ export default function Home() {
     val_multa: '',
     val_fecomp: '',
     val_uferms_qtd: '',
+    val_uferms_valor: '',
+    mdfe_origem: '',
+    mdfe_destino: '',
     difcon_sujeito: '', difcon_ie: '', difcon_cnpj: '', difcon_uf: '',
     difcon_periodo_inicio: '', difcon_periodo_fim: '',
     difcon_valor_tributavel: '', difcon_icms: '', difcon_referencias: ''
