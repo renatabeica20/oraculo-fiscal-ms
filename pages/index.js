@@ -133,21 +133,101 @@ function extrairFato(texto) {
   return null
 }
 
+// Mapa de rótulos para cada bloco ALIM
+const ALIM_LABELS = {
+  'ALIM_CAMPO3':   { titulo: 'Campo 3 — Matéria Tributável (Fato Gerador)', campo: 'Campo 3' },
+  'ALIM_CAMPO4_1': { titulo: 'Campo 4.1 — Descrição da Infração',           campo: 'Campo 4.1' },
+  'ALIM_CAMPO4_2': { titulo: 'Campo 4.2 — Enquadramento da Infração',        campo: 'Campo 4.2' },
+  'ALIM_CAMPO4_4': { titulo: 'Campo 4.4 — Descrição da Infração 2',          campo: 'Campo 4.4' },
+  'ALIM_CAMPO4_5': { titulo: 'Campo 4.5 — Enquadramento da Infração 2',      campo: 'Campo 4.5' },
+  'ALIM_MORA':     { titulo: 'Multa de Mora — Enquadramento',                campo: 'Mora' },
+}
+
+function processarBlocosALIM(txt) {
+  // Extrai todos os blocos ALIM e substitui por placeholders HTML
+  const blocos = []
+  let resultado = txt
+
+  // Regex que captura qualquer bloco ===ALIM_XXXXX_INICIO=== ... ===ALIM_XXXXX_FIM===
+  const re = /===([A-Z0-9_]+)_INICIO===\n?([\s\S]*?)===\1_FIM===/g
+  resultado = resultado.replace(re, (match, chave, conteudo) => {
+    const label = ALIM_LABELS[chave]
+    if (!label) return match // bloco desconhecido — deixa como estava
+    const idx = blocos.length
+    const textoLimpo = conteudo.trim()
+    blocos.push({ chave, label, texto: textoLimpo })
+    return `__ALIM_BLOCO_${idx}__`
+  })
+
+  return { resultado, blocos }
+}
+
 function formatarTexto(txt) {
-  let html = txt.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  // 1. Processa blocos ALIM antes de fazer escape HTML
+  const { resultado: txtComPlaceholders, blocos } = processarBlocosALIM(txt)
+
+  // 2. Escape HTML no texto restante
+  let html = txtComPlaceholders
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+  // 3. Renderiza blocos TVF/TA existentes
   html = html
     .replace(/===MATERIA_INICIO===/g, '<div style="border-left:3px solid #c9a84c;padding:12px 16px;margin:10px 0;background:rgba(201,168,76,0.05);border-radius:0 6px 6px 0">')
     .replace(/===MATERIA_FIM===/g, '</div>')
+
+  // 4. Markdown básico
   html = html
     .replace(/^## (.+)$/gm, '<h3 style="color:#c9a84c;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;margin:16px 0 6px;font-family:\'DM Sans\',sans-serif;font-weight:600">$1</h3>')
     .replace(/^# (.+)$/gm, '<h3 style="color:#c9a84c;font-size:0.9rem;margin:16px 0 8px;font-weight:700;font-family:\'Cormorant Garamond\',serif">$1</h3>')
     .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#d4b86a">$1</strong>')
     .replace(/\*(.+?)\*/g, '<em style="color:#a8a090">$1</em>')
+
+  // 5. Parágrafos
   const paragrafos = html.split('\n\n')
   html = paragrafos.map(p => {
     if (p.startsWith('<h3') || p.startsWith('<div') || p.trim() === '') return p
+    if (p.trim().startsWith('__ALIM_BLOCO_')) return p.trim()
     return '<p style="margin-bottom:8px">' + p.replace(/\n/g, '<br>') + '</p>'
   }).join('\n')
+
+  // 6. Substitui placeholders ALIM pelos cards HTML com botão copiar
+  blocos.forEach((bloco, idx) => {
+    const id = `alim-bloco-${idx}-${Date.now()}`
+    const textoEscapado = bloco.texto
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    const textoParaCopiar = bloco.texto.replace(/'/g, "\\'").replace(/\n/g, '\\n')
+
+    const cardHtml = `
+<div style="margin:14px 0;border:1px solid rgba(201,168,76,0.35);border-radius:10px;overflow:hidden;background:rgba(201,168,76,0.04)">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(201,168,76,0.10);border-bottom:1px solid rgba(201,168,76,0.2)">
+    <span style="font-family:'DM Sans',sans-serif;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#c9a84c">${bloco.label.titulo}</span>
+    <button
+      id="${id}"
+      onclick="(function(){
+        var t='${textoParaCopiar.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}';
+        t=t.replace(/\\\\n/g,'\\n');
+        navigator.clipboard.writeText(t).then(function(){
+          var b=document.getElementById('${id}');
+          var orig=b.innerHTML;
+          b.innerHTML='✓ Copiado';
+          b.style.background='rgba(80,180,120,0.25)';
+          b.style.borderColor='rgba(80,180,120,0.5)';
+          b.style.color='#6dcf9a';
+          setTimeout(function(){b.innerHTML=orig;b.style.background='';b.style.borderColor='';b.style.color='';},2000);
+        });
+      })()"
+      style="display:flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(201,168,76,0.3);border-radius:6px;background:rgba(201,168,76,0.08);color:#c9a84c;font-family:'DM Sans',sans-serif;font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap"
+    >
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Copiar ${bloco.label.campo}
+    </button>
+  </div>
+  <div style="padding:14px 16px;font-family:'DM Sans',sans-serif;font-size:0.88rem;line-height:1.7;color:#c8c0b0;white-space:pre-wrap">${textoEscapado}</div>
+</div>`
+
+    html = html.replace(`__ALIM_BLOCO_${idx}__`, cardHtml)
+  })
+
   return html
 }
 
