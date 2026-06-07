@@ -2791,7 +2791,7 @@ export default function Home() {
               {[
                 { id: 'consulta', icone: '🔍', titulo: 'Consultar legislação', desc: 'Tire dúvidas sobre a legislação tributária estadual, enquadramentos e procedimentos', cor: '#3a6aaa' },
                 { id: 'tvf', icone: '📋', titulo: 'Gerar TVF / TA', desc: 'Termo de Verificação Fiscal ou Termo de Apreensão — escolha o tipo dentro', cor: '#c9a84c' },
-                { id: 'alim', icone: '🔒', titulo: 'Gerar ALIM', desc: 'Auto de Lançamento e Imposição de Multa — matéria tributária pronta para o sistema', cor: '#c87050' },
+                { id: 'alim', icone: '📝', titulo: 'Gerar ALIM', desc: 'Auto de Lançamento e Imposição de Multa — matéria tributária pronta para o sistema', cor: '#c87050' },
                 { id: 'contestacao', icone: '⚖️', titulo: 'Contestação / DESK', desc: 'Resposta a impugnação de ALIM ou reclamação de contribuinte via DESK', cor: '#6a9a6a' },
               ].map(modo => (
                 <button
