@@ -562,7 +562,7 @@ function MenuExpansivel({ label, opcoes, valorSelecionado, aberto, onToggle, onS
   )
 }
 
-function CampoEncerramento({ form, setForm }) {
+function CampoEncerramento({ form, setForm, setScannerAberto }) {
   const extrairNumeroMdfe = (chave) => {
     const digits = (chave || '').replace(/\D/g, '')
     if (digits.length < 35) return ''
@@ -655,7 +655,7 @@ function CampoEncerramento({ form, setForm }) {
   )
 }
 
-function CampoEncerramentoAntecipado({ form, setForm }) {
+function CampoEncerramentoAntecipado({ form, setForm, setScannerAberto }) {
   const extrairNumeroMdfe = (chave) => {
     const digits = (chave || '').replace(/\D/g, '')
     if (digits.length < 35) return ''
@@ -725,7 +725,7 @@ function CampoEncerramentoAntecipado({ form, setForm }) {
   )
 }
 
-function CampoChavesMdfe({ form, setForm }) {
+function CampoChavesMdfe({ form, setForm, setScannerAberto }) {
   const itens = form.chaves_nf && form.chaves_nf.length > 0 && typeof form.chaves_nf[0] === 'object'
     ? form.chaves_nf
     : [{ chave: '', valor: '' }]
@@ -810,7 +810,7 @@ function CampoChavesMdfe({ form, setForm }) {
 }
 
 
-function CampoDanfes({ form, setForm }) {
+function CampoDanfes({ form, setForm, setScannerAberto }) {
   const itens = form.danfes && form.danfes.length > 0 ? form.danfes : [{ chave: '', emissao: '', saida: '', valor: '' }]
 
   const setItem = (i, campo, val) => {
@@ -996,17 +996,17 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
         </Campo>
 
         {form.infracao === 'inidonia' && form.motivo_inidonia === 'fora do prazo de validade (art. 93, VII)' && (
-          <CampoDanfes form={form} setForm={setForm} />
+          <CampoDanfes form={form} setForm={setForm} setScannerAberto={setScannerAberto} />
         )}
 
         {form.infracao === 'falta_mdfe' && form.tipo_mdfe === 'falta_encerramento' && (
-          <CampoEncerramento form={form} setForm={setForm} />
+          <CampoEncerramento form={form} setForm={setForm} setScannerAberto={setScannerAberto} />
         )}
         {form.infracao === 'falta_mdfe' && form.tipo_mdfe === 'encerramento_antecipado' && (
-          <CampoEncerramentoAntecipado form={form} setForm={setForm} />
+          <CampoEncerramentoAntecipado form={form} setForm={setForm} setScannerAberto={setScannerAberto} />
         )}
         {form.infracao === 'falta_mdfe' && form.tipo_mdfe && (
-          <CampoChavesMdfe form={form} setForm={setForm} />
+          <CampoChavesMdfe form={form} setForm={setForm} setScannerAberto={setScannerAberto} />
         )}
 
 
