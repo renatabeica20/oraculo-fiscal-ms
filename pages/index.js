@@ -875,7 +875,7 @@ const INCISOS = [
   { value: 'fora do prazo de validade (art. 93, VII)', label: 'VII — Documento vencido' },
 ]
 
-function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
+function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar, onTrocarTipo }) {
   const set = (campo) => (e) => setForm(f => ({ ...f, [campo]: e.target.value }))
 
   const addMerc = () => setForm(f => ({ ...f, mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }, ...f.mercadoria] }))
@@ -898,12 +898,20 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
     <div style={{ maxWidth: '820px', margin: '0 auto', padding: '24px' }}>
       <BtnVoltar onClick={onVoltar} />
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-        <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.4rem', color: '#c9a84c', fontWeight: 700 }}>
+      <div style={{ marginBottom: '24px' }}>
+        <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.4rem', color: '#c9a84c', fontWeight: 700, marginBottom: '16px' }}>
           {tipo === 'TVF' ? '📋' : '🔒'} Gerar {tipo}
         </div>
-        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.75rem', color: '#4a5a6a' }}>
-          {tipo === 'TVF' ? 'Termo de Verificação Fiscal' : 'Termo de Apreensão'}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          {[
+            { val: 'TVF', icone: '📋', label: 'Gerar TVF', desc: 'Sujeito passivo com IE ativa no MS' },
+            { val: 'TA', icone: '🔒', label: 'Gerar TA', desc: 'Sem IE, clandestino ou risco de desaparecimento' }
+          ].map(op => (
+            <button key={op.val} onClick={() => onTrocarTipo(op.val)} style={{ background: tipo === op.val ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.02)', border: `1px solid ${tipo === op.val ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '8px', padding: '12px 16px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s' }}>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', color: '#e8e0d0', fontWeight: 600, marginBottom: '4px' }}>{op.icone} {op.label}</div>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#5a6a7a' }}>{op.desc}</div>
+            </button>
+          ))}
         </div>
       </div>
 
@@ -1236,11 +1244,9 @@ function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
 
   return (
     <div style={{ maxWidth: '680px', margin: '0 auto', padding: '24px' }}>
-      <button onClick={onVoltar} style={{ background: 'none', border: 'none', color: '#c9a84c', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: '0.8rem', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-        ← Voltar
-      </button>
+      <BtnVoltar onClick={onVoltar} />
       <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.6rem', color: '#e8e0d0', marginBottom: '24px' }}>
-        ⚡ Gerar ALIM
+        🔒 Gerar ALIM
       </h2>
 
       {/* Seleção de fluxo */}
@@ -1272,7 +1278,6 @@ function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
               style={{ ...inputStyle, minHeight: '180px', resize: 'vertical', lineHeight: 1.6 }}
             />
           </div>
-
           <div style={secStyle}>
             <div style={{ ...labelStyle, marginBottom: '12px' }}>◆ Dados complementares</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -1322,7 +1327,6 @@ function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
               </div>
             </div>
           </div>
-
           <div style={secStyle}>
             <div style={{ ...labelStyle, marginBottom: '12px' }}>◆ Período e valores</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
@@ -1346,13 +1350,12 @@ function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
               </div>
             </div>
           </div>
-
           <div style={secStyle}>
             <div style={{ ...labelStyle, marginBottom: '8px' }}>◆ Referências aos demonstrativos</div>
             <textarea
               value={form.difcon_referencias}
               onChange={setE('difcon_referencias')}
-              placeholder="Ex: Anexo 001 — relação de DFes vinculados aos TVFs; Anexo 002 — relação de Termos Fiscais; Anexo 003 — demonstrativo do imposto devido; Anexo 004 — demonstrativo de cálculo"
+              placeholder="Ex: Anexo 001 — relação de DFes; Anexo 002 — relação de Termos Fiscais; Anexo 003 — demonstrativo do imposto; Anexo 004 — demonstrativo de cálculo"
               style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }}
             />
           </div>
@@ -1364,7 +1367,7 @@ function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
         disabled={!podeProsseguir}
         style={{ width: '100%', background: podeProsseguir ? 'linear-gradient(135deg, rgba(201,168,76,0.25), rgba(201,168,76,0.1))' : 'rgba(255,255,255,0.03)', border: `1px solid ${podeProsseguir ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.06)'}`, borderRadius: '10px', padding: '16px', cursor: podeProsseguir ? 'pointer' : 'not-allowed', fontFamily: "'DM Sans', sans-serif", fontSize: '0.9rem', color: podeProsseguir ? '#c9a84c' : '#3a4a5a', fontWeight: 600, letterSpacing: '0.06em', transition: 'all 0.2s' }}
       >
-        {podeProsseguir ? '⚡ Gerar matéria do ALIM' : 'Preencha os campos obrigatórios'}
+        {podeProsseguir ? '🔒 Gerar matéria do ALIM' : 'Preencha os campos obrigatórios'}
       </button>
     </div>
   )
@@ -1494,20 +1497,19 @@ UF DE ORIGEM: ${form.difcon_uf}
 PERÍODO DA AUTUAÇÃO: ${form.difcon_periodo_inicio} a ${form.difcon_periodo_fim}
 VALOR TRIBUTÁVEL TOTAL: R$ ${form.difcon_valor_tributavel}
 ICMS APURADO (DIFCON): R$ ${form.difcon_icms}
-${form.difcon_referencias ? `DEMONSTRATIVOS ANEXOS: ${form.difcon_referencias}` : ''}
+${form.difcon_referencias ? 'DEMONSTRATIVOS ANEXOS: ' + form.difcon_referencias : ''}
 
 FUNDAMENTO: Falta de recolhimento do ICMS — Diferencial de Alíquotas — Consumidor Final (DIFCON). Operação interestadual com destinação de bens a consumidor final não contribuinte localizado no MS. Multa: art. 117, I, "t", Lei 1.810/97 — 100% sobre o imposto.
 
-Por favor, elabore a matéria tributária do ALIM com os três blocos separados:
+Por favor, elabore a matéria tributária do ALIM com os seguintes blocos separados:
 1. MATÉRIA TRIBUTÁVEL (campo 3 do ALIM)
 2. DESCRIÇÃO DA INFRAÇÃO (campo 4.1)
 3. ENQUADRAMENTO DA INFRAÇÃO (campo 4.2)
 4. ENQUADRAMENTO DA MULTA (campo 4.3)
 
-Use os delimitadores ===MATERIA_INICIO=== e ===MATERIA_FIM=== em cada bloco, identificando-os claramente.`
+Use os delimitadores ===ALIM_CAMPO3_INICIO=== / ===ALIM_CAMPO3_FIM===, ===ALIM_CAMPO4_1_INICIO=== / ===ALIM_CAMPO4_1_FIM===, ===ALIM_CAMPO4_2_INICIO=== / ===ALIM_CAMPO4_2_FIM=== em cada bloco, identificando-os claramente.`
   }
 
-  // Fluxo TVF/TA
   return `GERAR MATÉRIA TRIBUTÁRIA DO ALIM
 
 Com base na matéria tributária abaixo, extraída do TVF ou TA original, elabore os blocos de texto prontos para inserção no sistema SEFAZ-MS:
@@ -1515,16 +1517,16 @@ Com base na matéria tributária abaixo, extraída do TVF ou TA original, elabor
 MATÉRIA ORIGINAL DO TVF/TA:
 ${form.materia_original}
 
-${form.valor_uferms ? `VALOR DA UFERMS VIGENTE: R$ ${form.valor_uferms}` : ''}
+${form.valor_uferms ? 'VALOR DA UFERMS VIGENTE: R$ ' + form.valor_uferms : ''}
 MULTA DE MORA (art. 119, VI): ${form.tem_mora === 'sim' ? 'SIM — incluir bloco de multa de mora' : 'NÃO'}
 
-Por favor, elabore os blocos separados para os campos do ALIM:
+Por favor, elabore os seguintes blocos separados para os campos do ALIM:
 1. MATÉRIA TRIBUTÁVEL — campo 3 do ALIM (narrativa do fato gerador, adaptada do TVF/TA)
 2. DESCRIÇÃO DA INFRAÇÃO — campo 4.1 (texto da infração principal)
 3. ENQUADRAMENTO DA INFRAÇÃO — campo 4.2 (artigos aplicáveis)
 ${form.tem_mora === 'sim' ? '4. MULTA DE MORA — campo separado (enquadramento art. 119, VI, com percentual de 11%)' : ''}
 
-Identifique claramente cada bloco e use os delimitadores ===MATERIA_INICIO=== e ===MATERIA_FIM=== em cada um. Não calcule valores — apenas redija os textos com as informações já presentes na matéria original.`
+Use os delimitadores ===ALIM_CAMPO3_INICIO=== / ===ALIM_CAMPO3_FIM===, ===ALIM_CAMPO4_1_INICIO=== / ===ALIM_CAMPO4_1_FIM===, ===ALIM_CAMPO4_2_INICIO=== / ===ALIM_CAMPO4_2_FIM=== em cada bloco. Não calcule valores — apenas redija os textos com as informações já presentes na matéria original.`
 }
 
 function montarMensagemTVF(form) {
@@ -1746,7 +1748,6 @@ export default function Home() {
     materia_original: '',
     valor_uferms: '',
     tem_mora: 'nao',
-    // campos DIFCON
     difcon_sujeito: '', difcon_ie: '', difcon_cnpj: '', difcon_uf: '',
     difcon_periodo_inicio: '', difcon_periodo_fim: '',
     difcon_valor_tributavel: '', difcon_icms: '', difcon_referencias: ''
@@ -2494,7 +2495,7 @@ export default function Home() {
               {[
                 { id: 'consulta', icone: '🔍', titulo: 'Consultar legislação', desc: 'Tire dúvidas sobre a legislação tributária estadual, enquadramentos e procedimentos', cor: '#3a6aaa' },
                 { id: 'tvf', icone: '📋', titulo: 'Gerar TVF / TA', desc: 'Termo de Verificação Fiscal ou Termo de Apreensão — escolha o tipo dentro', cor: '#c9a84c' },
-                { id: 'alim', icone: '⚡', titulo: 'Gerar ALIM', desc: 'Auto de Lançamento e Imposição de Multa — matéria tributária pronta para o sistema', cor: '#a06030' },
+                { id: 'alim', icone: '🔒', titulo: 'Gerar ALIM', desc: 'Auto de Lançamento e Imposição de Multa — matéria tributária pronta para o sistema', cor: '#c87050' },
                 { id: 'contestacao', icone: '⚖️', titulo: 'Contestação / DESK', desc: 'Resposta a impugnação de ALIM ou reclamação de contribuinte via DESK', cor: '#6a9a6a' },
               ].map(modo => (
                 <button
@@ -2663,6 +2664,7 @@ export default function Home() {
             form={formTVF}
             setForm={setFormTVF}
             onVoltar={() => setModoAtivo(null)}
+            onTrocarTipo={(t) => setModoAtivo(t === 'TVF' ? 'tvf' : 'ta')}
             onGerar={() => {
               const msg = montarMensagemTVF(formTVF)
               setModoOrigem('tvf')
@@ -2679,6 +2681,7 @@ export default function Home() {
             form={formTA}
             setForm={setFormTA}
             onVoltar={() => setModoAtivo(null)}
+            onTrocarTipo={(t) => setModoAtivo(t === 'TVF' ? 'tvf' : 'ta')}
             onGerar={() => {
               const msg = montarMensagemTA(formTA)
               setModoOrigem('ta')
