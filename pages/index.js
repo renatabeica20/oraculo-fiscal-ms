@@ -1876,7 +1876,7 @@ export default function Home() {
   const [fontSize, setFontSize] = useState(14)
   const [imagens, setImagens] = useState([])
   const [painelHistorico, setPainelHistorico] = useState(false)
-  const [abaHistorico, setAbaHistorico] = useState('autuacao') // autuacao | defesa
+  const [abaHistorico, setAbaHistorico] = useState('autuacao') // autuacao | alim | defesa
   const [avisoLimite, setAvisoLimite] = useState(false)
   const [popupSalvar, setPopupSalvar] = useState(null) // { texto, textoCopiar }
   const [confirmarExclusao, setConfirmarExclusao] = useState(null) // doc a excluir
@@ -2446,12 +2446,12 @@ export default function Home() {
     <div className={styles.app}>
       {/* PAINEL HISTÓRICO */}
       {painelHistorico && (() => {
-        const TIPOS_AUTUACAO = ['TVF', 'TA', 'ALIM']
         const docsAba = historicoDocumentos.filter(d => {
           const tipo = (d.tipo || '').toUpperCase()
-          const eAutuacao = TIPOS_AUTUACAO.includes(tipo)
-          if (abaHistorico === 'autuacao') return eAutuacao
-          return !eAutuacao // tudo que não é autuação vai para defesa
+          if (abaHistorico === 'autuacao') return tipo === 'TVF' || tipo === 'TA'
+          if (abaHistorico === 'alim') return tipo === 'ALIM'
+          // defesa: tudo que não é TVF, TA nem ALIM
+          return tipo !== 'TVF' && tipo !== 'TA' && tipo !== 'ALIM'
         })
         const gruposAba = agruparPorData(docsAba)
 
@@ -2478,6 +2478,7 @@ export default function Home() {
               <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '0 12px' }}>
                 {[
                   { id: 'autuacao', label: '⚖️ TVF / TA' },
+                  { id: 'alim', label: '🔒 ALIM' },
                   { id: 'defesa', label: '🛡️ Contestação / DESK' }
                 ].map(aba => (
                   <button key={aba.id} onClick={() => setAbaHistorico(aba.id)}
