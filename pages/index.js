@@ -147,7 +147,7 @@ function extrairTextoBlocosALIM(txt) {
       'ALIM_CAMPO4_2': 'CAMPO 4.2 — ENQUADRAMENTO',
       'ALIM_CAMPO4_4': 'CAMPO 4.4 — DESCRIÇÃO DA INFRAÇÃO 2',
       'ALIM_CAMPO4_5': 'CAMPO 4.5 — ENQUADRAMENTO 2',
-      'ALIM_MORA':     'MULTA DE MORA',
+      'ALIM_MORA':     'CAMPO 4.3 — ENQUADRAMENTO DA MULTA DE MORA',
     }
     const label = labels[chave]
     if (label) blocos.push(`${label}:\n${conteudo}`)
@@ -166,7 +166,7 @@ const ALIM_LABELS = {
   'ALIM_CAMPO4_2': { titulo: 'Campo 4.2 — Enquadramento da Infração',        campo: 'Campo 4.2' },
   'ALIM_CAMPO4_4': { titulo: 'Campo 4.4 — Descrição da Infração 2',          campo: 'Campo 4.4' },
   'ALIM_CAMPO4_5': { titulo: 'Campo 4.5 — Enquadramento da Infração 2',      campo: 'Campo 4.5' },
-  'ALIM_MORA':     { titulo: 'Multa de Mora — Enquadramento',                campo: 'Mora' },
+  'ALIM_MORA':     { titulo: 'Campo 4.3 — Enquadramento da Multa de Mora',   campo: 'Campo 4.3' },
 }
 
 function processarBlocosALIM(txt) {
