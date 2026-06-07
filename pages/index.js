@@ -2,8 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
 import styles from '../styles/Home.module.css'
-import dynamic from 'next/dynamic'
-const ScannerQR = dynamic(() => import('../components/ScannerQR'), { ssr: false })
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function detectarTipoCampo(texto) {
@@ -562,7 +560,7 @@ function MenuExpansivel({ label, opcoes, valorSelecionado, aberto, onToggle, onS
   )
 }
 
-function CampoEncerramento({ form, setForm, setScannerAberto }) {
+function CampoEncerramento({ form, setForm }) {
   const extrairNumeroMdfe = (chave) => {
     const digits = (chave || '').replace(/\D/g, '')
     if (digits.length < 35) return ''
@@ -578,21 +576,13 @@ function CampoEncerramento({ form, setForm, setScannerAberto }) {
       </div>
 
       <Campo label="Chave de acesso do MDF-e (44 dígitos)">
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-          <InputComFocus
-            style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.76rem', letterSpacing: '0.03em' }}
-            value={form.chave_mdfe || ''}
-            onChange={e => setForm(f => ({ ...f, chave_mdfe: e.target.value.replace(/\D/g, '').substring(0, 44) }))}
-            placeholder="44 dígitos — cole a chave aqui"
-            inputMode="numeric"
-          />
-          <button
-            type="button"
-            onClick={() => setScannerAberto({ campo: 'Chave MDF-e', setter: v => setForm(f => ({ ...f, chave_mdfe: v })) })}
-            title="Escanear com celular"
-            style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)', borderRadius: '8px', padding: '10px 12px', cursor: 'pointer', flexShrink: 0, fontSize: '1.1rem', minHeight: '44px' }}
-          >📷</button>
-        </div>
+        <InputComFocus
+          style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.76rem', letterSpacing: '0.03em' }}
+          value={form.chave_mdfe || ''}
+          onChange={e => setForm(f => ({ ...f, chave_mdfe: e.target.value.replace(/\D/g, '').substring(0, 44) }))}
+          placeholder="44 dígitos — cole a chave aqui"
+          inputMode="numeric"
+        />
         {numeroMdfe && (
           <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#7a9ab8', marginTop: '4px' }}>
             MDF-e nº {numeroMdfe} identificado
@@ -655,7 +645,7 @@ function CampoEncerramento({ form, setForm, setScannerAberto }) {
   )
 }
 
-function CampoEncerramentoAntecipado({ form, setForm, setScannerAberto }) {
+function CampoEncerramentoAntecipado({ form, setForm }) {
   const extrairNumeroMdfe = (chave) => {
     const digits = (chave || '').replace(/\D/g, '')
     if (digits.length < 35) return ''
@@ -671,21 +661,13 @@ function CampoEncerramentoAntecipado({ form, setForm, setScannerAberto }) {
       </div>
 
       <Campo label="Chave de acesso do MDF-e (44 dígitos)">
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-          <InputComFocus
-            style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.76rem', letterSpacing: '0.03em' }}
-            value={form.chave_mdfe || ''}
-            onChange={e => setForm(f => ({ ...f, chave_mdfe: e.target.value.replace(/\D/g, '').substring(0, 44) }))}
-            placeholder="44 dígitos — cole a chave aqui"
-            inputMode="numeric"
-          />
-          <button
-            type="button"
-            onClick={() => setScannerAberto({ campo: 'Chave MDF-e (encerramento antecipado)', setter: v => setForm(f => ({ ...f, chave_mdfe: v })) })}
-            title="Escanear com celular"
-            style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)', borderRadius: '8px', padding: '10px 12px', cursor: 'pointer', flexShrink: 0, fontSize: '1.1rem', minHeight: '44px' }}
-          >📷</button>
-        </div>
+        <InputComFocus
+          style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.76rem', letterSpacing: '0.03em' }}
+          value={form.chave_mdfe || ''}
+          onChange={e => setForm(f => ({ ...f, chave_mdfe: e.target.value.replace(/\D/g, '').substring(0, 44) }))}
+          placeholder="44 dígitos — cole a chave aqui"
+          inputMode="numeric"
+        />
         {numeroMdfe && (
           <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#7a9ab8', marginTop: '4px' }}>
             MDF-e nº {numeroMdfe} identificado
@@ -725,7 +707,7 @@ function CampoEncerramentoAntecipado({ form, setForm, setScannerAberto }) {
   )
 }
 
-function CampoChavesMdfe({ form, setForm, setScannerAberto }) {
+function CampoChavesMdfe({ form, setForm }) {
   const itens = form.chaves_nf && form.chaves_nf.length > 0 && typeof form.chaves_nf[0] === 'object'
     ? form.chaves_nf
     : [{ chave: '', valor: '' }]
@@ -758,21 +740,13 @@ function CampoChavesMdfe({ form, setForm, setScannerAberto }) {
             )}
           </div>
           <Campo label="Chave de acesso (44 dígitos)">
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-              <InputComFocus
-                style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.76rem', letterSpacing: '0.03em' }}
-                value={it.chave}
-                onChange={e => setItem(i, 'chave', e.target.value.replace(/\D/g, '').substring(0, 44))}
-                placeholder="44 dígitos da chave de acesso"
-                inputMode="numeric"
-              />
-              <button
-                type="button"
-                onClick={() => setScannerAberto({ campo: `Chave NF-e ${i + 1}`, setter: v => setItem(i, 'chave', v) })}
-                title="Escanear com celular"
-                style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)', borderRadius: '8px', padding: '10px 12px', cursor: 'pointer', flexShrink: 0, fontSize: '1.1rem', minHeight: '44px' }}
-              >📷</button>
-            </div>
+            <InputComFocus
+              style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.76rem', letterSpacing: '0.03em' }}
+              value={it.chave}
+              onChange={e => setItem(i, 'chave', e.target.value.replace(/\D/g, '').substring(0, 44))}
+              placeholder="44 dígitos da chave de acesso"
+              inputMode="numeric"
+            />
           </Campo>
           <Campo label="Valor da NF-e (R$)">
             <InputComFocus
@@ -810,7 +784,7 @@ function CampoChavesMdfe({ form, setForm, setScannerAberto }) {
 }
 
 
-function CampoDanfes({ form, setForm, setScannerAberto }) {
+function CampoDanfes({ form, setForm }) {
   const itens = form.danfes && form.danfes.length > 0 ? form.danfes : [{ chave: '', emissao: '', saida: '', valor: '' }]
 
   const setItem = (i, campo, val) => {
@@ -840,21 +814,13 @@ function CampoDanfes({ form, setForm, setScannerAberto }) {
             )}
           </div>
           <Campo label="Chave de acesso (44 dígitos)">
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-              <InputComFocus
-                style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.76rem', letterSpacing: '0.03em' }}
-                value={it.chave}
-                onChange={e => setItem(i, 'chave', e.target.value.replace(/\D/g, '').substring(0, 44))}
-                placeholder="44 dígitos da chave de acesso"
-                inputMode="numeric"
-              />
-              <button
-                type="button"
-                onClick={() => setScannerAberto({ campo: `Chave NF-e ${i + 1}`, setter: v => setItem(i, 'chave', v) })}
-                title="Escanear com celular"
-                style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)', borderRadius: '8px', padding: '10px 12px', cursor: 'pointer', flexShrink: 0, fontSize: '1.1rem', minHeight: '44px' }}
-              >📷</button>
-            </div>
+            <InputComFocus
+              style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.76rem', letterSpacing: '0.03em' }}
+              value={it.chave}
+              onChange={e => setItem(i, 'chave', e.target.value.replace(/\D/g, '').substring(0, 44))}
+              placeholder="44 dígitos da chave de acesso"
+              inputMode="numeric"
+            />
           </Campo>
           <Grid cols={2}>
             <Campo label="Data de emissão">
@@ -909,7 +875,7 @@ const INCISOS = [
   { value: 'fora do prazo de validade (art. 93, VII)', label: 'VII — Documento vencido' },
 ]
 
-function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar, setScannerAberto }) {
+function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
   const set = (campo) => (e) => setForm(f => ({ ...f, [campo]: e.target.value }))
 
   const addMerc = () => setForm(f => ({ ...f, mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }, ...f.mercadoria] }))
@@ -996,17 +962,17 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar, setScanne
         </Campo>
 
         {form.infracao === 'inidonia' && form.motivo_inidonia === 'fora do prazo de validade (art. 93, VII)' && (
-          <CampoDanfes form={form} setForm={setForm} setScannerAberto={setScannerAberto} />
+          <CampoDanfes form={form} setForm={setForm} />
         )}
 
         {form.infracao === 'falta_mdfe' && form.tipo_mdfe === 'falta_encerramento' && (
-          <CampoEncerramento form={form} setForm={setForm} setScannerAberto={setScannerAberto} />
+          <CampoEncerramento form={form} setForm={setForm} />
         )}
         {form.infracao === 'falta_mdfe' && form.tipo_mdfe === 'encerramento_antecipado' && (
-          <CampoEncerramentoAntecipado form={form} setForm={setForm} setScannerAberto={setScannerAberto} />
+          <CampoEncerramentoAntecipado form={form} setForm={setForm} />
         )}
         {form.infracao === 'falta_mdfe' && form.tipo_mdfe && (
-          <CampoChavesMdfe form={form} setForm={setForm} setScannerAberto={setScannerAberto} />
+          <CampoChavesMdfe form={form} setForm={setForm} />
         )}
 
 
@@ -1547,7 +1513,6 @@ export default function Home() {
   const [modoAtivo, setModoAtivo] = useState(null) // null | 'consulta' | 'tvf' | 'ta' | 'contestacao'
   const [modoOrigem, setModoOrigem] = useState(null) // guarda o modo do formulário original
   const [bannerFechado, setBannerFechado] = useState(true)
-  const [scannerAberto, setScannerAberto] = useState(null)
   const [formTVF, setFormTVF] = useState({
     data: '', hora: '', endereco: '', cidade: 'Campo Grande',
     placas: [''], motorista: '', cpf: '', telefone: '',
@@ -2498,7 +2463,6 @@ export default function Home() {
               setModoAtivo('consulta')
               enviar(msg)
             }}
-            setScannerAberto={setScannerAberto}
           />
         )}
 
@@ -2515,7 +2479,6 @@ export default function Home() {
               setModoAtivo('consulta')
               enviar(msg)
             }}
-            setScannerAberto={setScannerAberto}
           />
         )}
 
@@ -2640,14 +2603,6 @@ export default function Home() {
       </div>
 
       {/* POP-UP SALVAR DOCUMENTO */}
-      {scannerAberto && (
-        <ScannerQR
-          campo={scannerAberto.campo}
-          onChaveCapturada={scannerAberto.setter}
-          onFechar={() => setScannerAberto(null)}
-        />
-      )}
-
       {popupSalvar && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 9999,
