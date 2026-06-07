@@ -1376,7 +1376,7 @@ function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
     <div style={{ maxWidth: '680px', margin: '0 auto', padding: '24px' }}>
       <BtnVoltar onClick={onVoltar} />
       <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.6rem', color: '#e8e0d0', marginBottom: '24px' }}>
-        🔒 Gerar ALIM
+        📝 Gerar ALIM
       </h2>
 
       {/* Seleção de fluxo */}
@@ -1590,7 +1590,7 @@ function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
         disabled={!podeProsseguir}
         style={{ width: '100%', background: podeProsseguir ? 'linear-gradient(135deg, rgba(201,168,76,0.25), rgba(201,168,76,0.1))' : 'rgba(255,255,255,0.03)', border: `1px solid ${podeProsseguir ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.06)'}`, borderRadius: '10px', padding: '16px', cursor: podeProsseguir ? 'pointer' : 'not-allowed', fontFamily: "'DM Sans', sans-serif", fontSize: '0.9rem', color: podeProsseguir ? '#c9a84c' : '#3a4a5a', fontWeight: 600, letterSpacing: '0.06em', transition: 'all 0.2s' }}
       >
-        {podeProsseguir ? '🔒 Gerar matéria do ALIM' : 'Preencha os campos obrigatórios'}
+        {podeProsseguir ? '📝 Gerar matéria do ALIM' : 'Preencha os campos obrigatórios'}
       </button>
     </div>
   )
@@ -2557,7 +2557,7 @@ export default function Home() {
               <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '0 12px' }}>
                 {[
                   { id: 'autuacao', label: '⚖️ TVF / TA' },
-                  { id: 'alim', label: '🔒 ALIM' },
+                  { id: 'alim', label: '📝 ALIM' },
                   { id: 'defesa', label: '🛡️ Contestação / DESK' }
                 ].map(aba => (
                   <button key={aba.id} onClick={() => setAbaHistorico(aba.id)}
