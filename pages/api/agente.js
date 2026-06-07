@@ -768,11 +768,17 @@ TEMPLATES POR TIPO DE INFRAÇÃO
 ──────────────────────────────────────
 TIPO 1 — FALTA DE MDF-e (art. 117, IV, "x")
 ──────────────────────────────────────
-CAMPO 3 — template:
-"O sujeito passivo deixou de emitir o Manifesto Eletrônico de Documentos Fiscais (MDF-e) obrigatório no transporte de mercadorias, conforme verificado na data de [data], às [hora], na [local], no município de [município]/MS, em que se constatou o trânsito de mercadorias sob responsabilidade do sujeito passivo acompanhada de nota fiscal eletrônica em trajeto [intermunicipal/interestadual], [origem]/[UF] x [destino]/[UF].
-O veículo de placa [placa], era conduzido pelo Sr. [motorista], CPF: [CPF], que portava o DANFE (documento auxiliar de nota fiscal eletrônica) relacionado no Termo de Verificação Fiscal n° [TVF], totalizando R$ [valor total NF-e]."
+CAMPO 3 — COPIE ESTE TEMPLATE EXATAMENTE, substituindo apenas os valores entre colchetes. NÃO reescreva, NÃO reformule, NÃO altere a estrutura das frases:
+"O sujeito passivo deixou de emitir o Manifesto Eletrônico de Documentos Fiscais (MDF-e) obrigatório no transporte de mercadorias, conforme verificado na data de [DD/MM/AAAA], às [N]h[MM]min, na [logradouro ou rodovia], no [ponto de referência, ex: posto da Polícia Rodoviária Federal], no município de [município]/MS, em que se constatou o trânsito de mercadorias sob responsabilidade do sujeito passivo acompanhada de nota fiscal eletrônica em trajeto intermunicipal, [cidade de origem]/MS x [cidade de destino]/MS.
+O veículo de placa [placa], era conduzido pelo Sr. [nome completo do motorista], CPF: [CPF], que portava o DANFE (documento auxiliar de nota fiscal eletrônica) relacionado no Termo de Verificação Fiscal n° [número do TVF], totalizando R$ [valor total das NF-e]."
 
-CAMPO 4.1 — template (copiar literalmente, substituindo apenas os valores entre colchetes):
+REGRAS CRÍTICAS do campo 3 para MDF-e:
+- Data SEMPRE no formato DD/MM/AAAA — JAMAIS por extenso ("1 de outubro de 2025" está ERRADO)
+- Trajeto SEMPRE com cidades reais extraídas do TVF — JAMAIS "interestadual ou intermunicipal" genérico
+- Nome e CPF do motorista são OBRIGATÓRIOS — se ausentes no TVF, use "[a apurar]"
+- Número do TVF é OBRIGATÓRIO — extrair do texto fornecido pelo fiscal
+
+CAMPO 4.1 — COPIE ESTE TEMPLATE EXATAMENTE, substituindo apenas os valores entre colchetes:
 "Deixou de emitir o Manifesto Eletrônico de Documentos Fiscais (MDF-e) obrigatório para o transporte de mercadorias, conforme demonstrado no campo 5 do presente ALIM.
 Multa de [N] UFERMS imposta pela falta de emissão do Manifesto Eletrônico de Documentos Fiscais (MDF-e) no valor original de R$ [valor em reais], conforme previsão no art. 117, IV, "x", da Lei 1.810/97.
 No momento do pagamento do tributo caberá a redução prevista no art. 118 da Lei 1.810/97."
