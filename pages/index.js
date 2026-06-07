@@ -1310,6 +1310,20 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar, onTrocarT
   )
 }
 
+// Máscara valor monetário BR: digita números, formata 1.234,56
+function mascaraValorBR(v) {
+  const n = v.replace(/\D/g, '')
+  if (!n) return ''
+  const num = parseInt(n, 10)
+  return (num / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+// Máscara alíquota: até 2 casas decimais, sem símbolo
+function mascaraAliquota(v) {
+  const n = v.replace(/[^\d,]/g, '').replace(/,/g, (m, i, s) => s.indexOf(',') === i ? ',' : '')
+  return n.substring(0, 5)
+}
+
 function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
   const set = (campo) => (val) => setForm(f => ({ ...f, [campo]: val }))
   const setE = (campo) => (e) => setForm(f => ({ ...f, [campo]: e.target.value }))
@@ -1366,44 +1380,44 @@ function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
               <div>
                 <div style={labelStyle}>Valor total da operação (R$)</div>
-                <InputComFocus style={inputStyle} value={form.val_operacao} onChange={setE('val_operacao')} placeholder="Ex: 3.169,00" inputMode="decimal" />
+                <InputComFocus style={inputStyle} value={form.val_operacao} onChange={e => setForm(f => ({ ...f, val_operacao: mascaraValorBR(e.target.value) }))} placeholder="Ex: 3.169,00" inputMode="decimal" />
               </div>
               <div>
                 <div style={labelStyle}>Alíquota (%)</div>
-                <InputComFocus style={inputStyle} value={form.val_aliquota} onChange={setE('val_aliquota')} placeholder="Ex: 17" inputMode="decimal" />
+                <InputComFocus style={inputStyle} value={form.val_aliquota} onChange={e => setForm(f => ({ ...f, val_aliquota: mascaraAliquota(e.target.value) }))} placeholder="Ex: 17" inputMode="decimal" />
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
               <div>
                 <div style={labelStyle}>ICMS devido (R$)</div>
-                <InputComFocus style={inputStyle} value={form.val_icms} onChange={setE('val_icms')} placeholder="Ex: 538,73" inputMode="decimal" />
+                <InputComFocus style={inputStyle} value={form.val_icms} onChange={e => setForm(f => ({ ...f, val_icms: mascaraValorBR(e.target.value) }))} placeholder="Ex: 538,73" inputMode="decimal" />
               </div>
               <div>
                 <div style={labelStyle}>Multa principal (R$)</div>
-                <InputComFocus style={inputStyle} value={form.val_multa} onChange={setE('val_multa')} placeholder="Ex: 538,73" inputMode="decimal" />
+                <InputComFocus style={inputStyle} value={form.val_multa} onChange={e => setForm(f => ({ ...f, val_multa: mascaraValorBR(e.target.value) }))} placeholder="Ex: 538,73" inputMode="decimal" />
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
               <div>
                 <div style={labelStyle}>Multa de mora (R$)</div>
-                <InputComFocus style={inputStyle} value={form.val_mora} onChange={setE('val_mora')} placeholder="Ex: 80,84" inputMode="decimal" />
+                <InputComFocus style={inputStyle} value={form.val_mora} onChange={e => setForm(f => ({ ...f, val_mora: mascaraValorBR(e.target.value) }))} placeholder="Ex: 80,84" inputMode="decimal" />
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Deixe vazio se não há mora</p>
               </div>
               <div>
                 <div style={labelStyle}>FECOMP (R$)</div>
-                <InputComFocus style={inputStyle} value={form.val_fecomp} onChange={setE('val_fecomp')} placeholder="Ex: 243,90" inputMode="decimal" />
+                <InputComFocus style={inputStyle} value={form.val_fecomp} onChange={e => setForm(f => ({ ...f, val_fecomp: mascaraValorBR(e.target.value) }))} placeholder="Ex: 243,90" inputMode="decimal" />
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Só bebidas alcoólicas (art. 41-A)</p>
               </div>
               <div>
                 <div style={labelStyle}>Qtd. UFERMS</div>
-                <InputComFocus style={inputStyle} value={form.val_uferms_qtd} onChange={setE('val_uferms_qtd')} placeholder="Ex: 25" inputMode="numeric" />
+                <InputComFocus style={inputStyle} value={form.val_uferms_qtd} onChange={e => setForm(f => ({ ...f, val_uferms_qtd: e.target.value.replace(/\D/g, '') }))} placeholder="Ex: 25" inputMode="numeric" />
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Só MDF-e e embaraço</p>
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
                 <div style={labelStyle}>Valor da UFERMS vigente (R$)</div>
-                <InputComFocus style={inputStyle} value={form.valor_uferms} onChange={setE('valor_uferms')} placeholder="Ex: 52,73" inputMode="decimal" />
+                <InputComFocus style={inputStyle} value={form.valor_uferms} onChange={e => setForm(f => ({ ...f, valor_uferms: mascaraValorBR(e.target.value) }))} placeholder="Ex: 52,73" inputMode="decimal" />
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Para calcular o valor em reais da multa UFERMS</p>
               </div>
               <div>
