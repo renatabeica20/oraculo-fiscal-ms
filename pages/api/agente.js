@@ -714,8 +714,25 @@ Entregue sempre 3 ou 4 blocos separados, cada um com delimitadores próprios e i
 
 BLOCO 1 — MATÉRIA TRIBUTÁVEL (campo 3 do ALIM):
 ===ALIM_CAMPO3_INICIO===
-[Narrativa do fato gerador, adaptada do TVF/TA. Texto corrido, passado, formal. Mantém os fatos essenciais: data, hora, local, veículo, condutor, mercadoria ou infração, valor da operação, fundamento da ficção legal quando aplicável.]
+[Narrativa REESCRITA do fato gerador — NÃO copie o texto do TVF/TA. Reescreva com linguagem de lançamento: tempo verbal passado, tom conclusivo, sem verbos de flagrante. O campo 3 descreve o que o sujeito passivo FEZ, não o que a fiscalização encontrou. Mantenha os fatos essenciais: data, hora, local, veículo, condutor, mercadoria ou infração, valor da operação, fundamento da ficção legal quando aplicável.]
 ===ALIM_CAMPO3_FIM===
+
+REGRA DE TRANSFORMAÇÃO LINGUÍSTICA — OBRIGATÓRIA PARA TODO ALIM:
+O campo 3 do ALIM NÃO é o TVF reformatado. É uma narrativa jurídica independente, redigida como se o fato fosse descrito pela autoridade lançadora, não pelo fiscal de campo.
+
+DIFERENÇA CRÍTICA — EXEMPLO OBRIGATÓRIO DE TRANSFORMAÇÃO:
+
+TVF (linguagem de flagrante — PROIBIDA no ALIM):
+"Em 10 de abril de 2026, às 14h20min, a equipe de fiscalização procedeu à abordagem do veículo de placa ABC1D23, conduzido por João Silva, CPF 000.000.000-00, na BR-163, município de Campo Grande/MS, constatando que as mercadorias estavam sendo transportadas sem a correspondente documentação fiscal..."
+
+ALIM campo 3 (linguagem de lançamento — OBRIGATÓRIA):
+"Em 10 de abril de 2026, às 14h20min, o sujeito passivo realizou operação de circulação de mercadorias transportadas pelo veículo de placa ABC1D23, conduzido por João Silva, CPF 000.000.000-00, na BR-163, município de Campo Grande/MS, sem a correspondente documentação fiscal, configurando o fato gerador do ICMS nos termos do art. 5°, §2°, III, da Lei n. 1.810/97."
+
+VERBOS PROIBIDOS no campo 3 do ALIM (linguagem de flagrante — não use):
+"foi flagrado", "procedeu à abordagem", "constatou", "verificou", "encontrou", "estava transportando", "foi encontrado", "foi abordado".
+
+VERBOS CORRETOS no campo 3 do ALIM (linguagem de lançamento — use sempre):
+"realizou", "promoveu", "efetuou", "deixou de", "acobertou com", "utilizou", "transportou", "remeteu", "fez circular".
 
 BLOCO 2 — DESCRIÇÃO DA INFRAÇÃO (campo 4.1):
 ===ALIM_CAMPO4_1_INICIO===
