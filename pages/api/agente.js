@@ -725,32 +725,43 @@ O campo 4.1 mantém linguagem de lançamento mas é mais direto: descreve a cond
 ════════════════════════════════════════
 ESTRUTURA DE SAÍDA OBRIGATÓRIA
 ════════════════════════════════════════
-Entregue sempre os blocos abaixo, cada um com seus delimitadores. Para tipos com 2 infrações, entregue também o bloco 4.4.
+REGRA CRÍTICA: cada bloco DEVE ter seu delimitador de abertura e fechamento em linhas separadas. NUNCA junte dois blocos na mesma linha. NUNCA omita um delimitador de fechamento antes de abrir o próximo.
 
-BLOCO 1 — MATÉRIA TRIBUTÁVEL (campo 3):
+ORDEM EXATA DOS BLOCOS — siga sempre esta sequência:
+
+BLOCO 1 — MATÉRIA TRIBUTÁVEL (campo 3) — SEMPRE:
 ===ALIM_CAMPO3_INICIO===
-[texto conforme template do tipo de infração abaixo]
+[texto]
 ===ALIM_CAMPO3_FIM===
 
-BLOCO 2 — DESCRIÇÃO DA INFRAÇÃO 1 (campo 4.1):
+BLOCO 2 — DESCRIÇÃO DA INFRAÇÃO 1 (campo 4.1) — SEMPRE:
 ===ALIM_CAMPO4_1_INICIO===
-[texto conforme template do tipo de infração abaixo]
+[texto]
 ===ALIM_CAMPO4_1_FIM===
 
-BLOCO 3 — ENQUADRAMENTO DA INFRAÇÃO 1 (campo 4.2):
+BLOCO 3 — ENQUADRAMENTO DA INFRAÇÃO 1 (campo 4.2) — SEMPRE:
 ===ALIM_CAMPO4_2_INICIO===
-[apenas artigos, sem narrativa]
+[apenas artigos]
 ===ALIM_CAMPO4_2_FIM===
 
-BLOCO 4 — DESCRIÇÃO DA INFRAÇÃO 2 (campo 4.4) — somente tipos com 2 infrações:
-===ALIM_CAMPO4_4_INICIO===
-[texto conforme template do tipo de infração abaixo]
-===ALIM_CAMPO4_4_FIM===
-
-BLOCO 5 — MULTA DE MORA (campo separado) — somente quando há ICMS exigido:
+BLOCO 4 — MULTA DE MORA (campo 4.3) — SOMENTE quando há ICMS exigido (tipos 3, 5 e 6):
 ===ALIM_MORA_INICIO===
 Art. 119, VI, da Lei n. 1.810/97. (Percentual de 11,00%)
 ===ALIM_MORA_FIM===
+
+BLOCO 5 — DESCRIÇÃO DA INFRAÇÃO 2 (campo 4.4) — SOMENTE tipos com 2 infrações (tipos 3, 5 e 6):
+===ALIM_CAMPO4_4_INICIO===
+[texto]
+===ALIM_CAMPO4_4_FIM===
+
+BLOCO 6 — ENQUADRAMENTO DA INFRAÇÃO 2 (campo 4.5) — SOMENTE tipos com 2 infrações (tipos 3, 5 e 6):
+===ALIM_CAMPO4_5_INICIO===
+[apenas artigos]
+===ALIM_CAMPO4_5_FIM===
+
+ATENÇÃO: os tipos 1 (MDF-e), 2 (embaraço) e 7 (DIFCON) têm apenas 1 infração — gere somente os BLOCOS 1, 2 e 3.
+Os tipos 3 (sem nota), 5 (destinatário diverso) e 6 (quantidade divergente) têm 2 infrações — gere os BLOCOS 1, 2, 3, 4, 5 e 6.
+O tipo 4 (NF vencida) tem apenas 1 infração sem ICMS — gere somente os BLOCOS 1, 2 e 3, SEM mora.
 
 ════════════════════════════════════════
 TEMPLATES POR TIPO DE INFRAÇÃO
