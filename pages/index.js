@@ -133,21 +133,137 @@ function extrairFato(texto) {
   return null
 }
 
+// Extrai e limpa o conteúdo de todos os blocos ALIM de uma resposta
+function extrairTextoBlocosALIM(txt) {
+  const re = /===([A-Z0-9_]+)_INICIO===\n?([\s\S]*?)===\1_FIM===/g
+  const blocos = []
+  let m
+  while ((m = re.exec(txt)) !== null) {
+    const chave = m[1]
+    const conteudo = m[2].trim()
+    const labels = {
+      'ALIM_CAMPO3':   'CAMPO 3.1 — MATÉRIA TRIBUTÁVEL',
+      'ALIM_CAMPO3_2': 'CAMPO 3.2 — FUNDAMENTAÇÃO LEGAL',
+      'ALIM_CAMPO4_1': 'CAMPO 4.1 — DESCRIÇÃO DA INFRAÇÃO 1 — PRINCIPAL (11%)',
+      'ALIM_CAMPO4_2': 'CAMPO 4.2 — ENQUADRAMENTO',
+      'ALIM_CAMPO4_4': 'CAMPO 4.4 — DESCRIÇÃO DA INFRAÇÃO 2 — ACESSÓRIA (100%)',
+    }
+    const label = labels[chave]
+    if (label) blocos.push(`${label}:\n${conteudo}`)
+  }
+  return blocos.join('\n\n')
+}
+
+function temBlocosALIM(txt) {
+  return /===ALIM_[A-Z0-9_]+_INICIO===/.test(txt)
+}
+
+// Mapa de rótulos para cada bloco ALIM
+const ALIM_LABELS = {
+  'ALIM_CAMPO3':   { titulo: 'Campo 3.1 — Matéria Tributável (Fato Gerador)', campo: 'Campo 3.1' },
+  'ALIM_CAMPO3_2': { titulo: 'Campo 3.2 — Fundamentação Legal',               campo: 'Campo 3.2' },
+  'ALIM_CAMPO4_1': { titulo: 'Campo 4.1 — Descrição da Infração 1 — Principal (11%)', campo: 'Campo 4.1' },
+  'ALIM_CAMPO4_2': { titulo: 'Campo 4.2 — Enquadramento da Infração',         campo: 'Campo 4.2' },
+  'ALIM_CAMPO4_4': { titulo: 'Campo 4.4 — Descrição da Infração 2 — Acessória (100%)', campo: 'Campo 4.4' },
+}
+
+function processarBlocosALIM(txt) {
+  // Extrai todos os blocos ALIM e substitui por placeholders HTML
+  const blocos = []
+  let resultado = txt
+
+  // Regex que captura qualquer bloco ===ALIM_XXXXX_INICIO=== ... ===ALIM_XXXXX_FIM===
+  const re = /===([A-Z0-9_]+)_INICIO===\n?([\s\S]*?)===\1_FIM===/g
+  resultado = resultado.replace(re, (match, chave, conteudo) => {
+    const labelBase = ALIM_LABELS[chave]
+    if (!labelBase) return match // bloco desconhecido — deixa como estava
+    const idx = blocos.length
+    const textoLimpo = conteudo.trim()
+
+    // Campo 4.1: ajusta título conforme o conteúdo
+    // Se menciona UFERMS → obrigação acessória (MDF-e, embaraço)
+    // Se menciona ICMS ou imposto → obrigação principal (11%)
+    let label = { ...labelBase }
+    if (chave === 'ALIM_CAMPO4_1') {
+      const t = textoLimpo.toUpperCase()
+      if (t.includes('UFERMS')) {
+        label = { titulo: 'Campo 4.1 — Descrição da Infração — Acessória (UFERMS)', campo: 'Campo 4.1' }
+      }
+    }
+
+    blocos.push({ chave, label, texto: textoLimpo })
+    return `__ALIM_BLOCO_${idx}__`
+  })
+
+  return { resultado, blocos }
+}
+
 function formatarTexto(txt) {
-  let html = txt.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  // 1. Processa blocos ALIM antes de fazer escape HTML
+  const { resultado: txtComPlaceholders, blocos } = processarBlocosALIM(txt)
+
+  // 2. Escape HTML no texto restante
+  let html = txtComPlaceholders
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+  // 3. Renderiza blocos TVF/TA existentes
   html = html
     .replace(/===MATERIA_INICIO===/g, '<div style="border-left:3px solid #c9a84c;padding:12px 16px;margin:10px 0;background:rgba(201,168,76,0.05);border-radius:0 6px 6px 0">')
     .replace(/===MATERIA_FIM===/g, '</div>')
+
+  // 4. Markdown básico
   html = html
     .replace(/^## (.+)$/gm, '<h3 style="color:#c9a84c;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;margin:16px 0 6px;font-family:\'DM Sans\',sans-serif;font-weight:600">$1</h3>')
     .replace(/^# (.+)$/gm, '<h3 style="color:#c9a84c;font-size:0.9rem;margin:16px 0 8px;font-weight:700;font-family:\'Cormorant Garamond\',serif">$1</h3>')
     .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#d4b86a">$1</strong>')
     .replace(/\*(.+?)\*/g, '<em style="color:#a8a090">$1</em>')
+
+  // 5. Parágrafos
   const paragrafos = html.split('\n\n')
   html = paragrafos.map(p => {
     if (p.startsWith('<h3') || p.startsWith('<div') || p.trim() === '') return p
+    if (p.trim().startsWith('__ALIM_BLOCO_')) return p.trim()
     return '<p style="margin-bottom:8px">' + p.replace(/\n/g, '<br>') + '</p>'
   }).join('\n')
+
+  // 6. Substitui placeholders ALIM pelos cards HTML com botão copiar
+  blocos.forEach((bloco, idx) => {
+    const id = `alim-bloco-${idx}-${Date.now()}`
+    const textoEscapado = bloco.texto
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    const textoParaCopiar = bloco.texto.replace(/'/g, "\\'").replace(/\n/g, '\\n')
+
+    const cardHtml = `
+<div style="margin:14px 0;border:1px solid rgba(201,168,76,0.35);border-radius:10px;overflow:hidden;background:rgba(201,168,76,0.04)">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(201,168,76,0.10);border-bottom:1px solid rgba(201,168,76,0.2)">
+    <span style="font-family:'DM Sans',sans-serif;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#c9a84c">${bloco.label.titulo}</span>
+    <button
+      id="${id}"
+      onclick="(function(){
+        var t='${textoParaCopiar.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}';
+        t=t.replace(/\\\\n/g,'\\n');
+        navigator.clipboard.writeText(t).then(function(){
+          var b=document.getElementById('${id}');
+          var orig=b.innerHTML;
+          b.innerHTML='✓ Copiado';
+          b.style.background='rgba(80,180,120,0.25)';
+          b.style.borderColor='rgba(80,180,120,0.5)';
+          b.style.color='#6dcf9a';
+          setTimeout(function(){b.innerHTML=orig;b.style.background='';b.style.borderColor='';b.style.color='';},2000);
+        });
+      })()"
+      style="display:flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(201,168,76,0.3);border-radius:6px;background:rgba(201,168,76,0.08);color:#c9a84c;font-family:'DM Sans',sans-serif;font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap"
+    >
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Copiar ${bloco.label.campo}
+    </button>
+  </div>
+  <div style="padding:14px 16px;font-family:'DM Sans',sans-serif;font-size:0.88rem;line-height:1.7;color:#c8c0b0;white-space:pre-wrap">${textoEscapado}</div>
+</div>`
+
+    html = html.replace(`__ALIM_BLOCO_${idx}__`, cardHtml)
+  })
+
   return html
 }
 
@@ -875,7 +991,7 @@ const INCISOS = [
   { value: 'fora do prazo de validade (art. 93, VII)', label: 'VII — Documento vencido' },
 ]
 
-function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
+function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar, onTrocarTipo }) {
   const set = (campo) => (e) => setForm(f => ({ ...f, [campo]: e.target.value }))
 
   const addMerc = () => setForm(f => ({ ...f, mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }, ...f.mercadoria] }))
@@ -898,12 +1014,20 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
     <div style={{ maxWidth: '820px', margin: '0 auto', padding: '24px' }}>
       <BtnVoltar onClick={onVoltar} />
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-        <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.4rem', color: '#c9a84c', fontWeight: 700 }}>
+      <div style={{ marginBottom: '24px' }}>
+        <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.4rem', color: '#c9a84c', fontWeight: 700, marginBottom: '16px' }}>
           {tipo === 'TVF' ? '📋' : '🔒'} Gerar {tipo}
         </div>
-        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.75rem', color: '#4a5a6a' }}>
-          {tipo === 'TVF' ? 'Termo de Verificação Fiscal' : 'Termo de Apreensão'}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          {[
+            { val: 'TVF', icone: '📋', label: 'Gerar TVF', desc: 'Sujeito passivo com IE ativa no MS' },
+            { val: 'TA', icone: '🔒', label: 'Gerar TA', desc: 'Sem IE, clandestino ou risco de desaparecimento' }
+          ].map(op => (
+            <button key={op.val} onClick={() => onTrocarTipo(op.val)} style={{ background: tipo === op.val ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.02)', border: `1px solid ${tipo === op.val ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '8px', padding: '12px 16px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s' }}>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', color: '#e8e0d0', fontWeight: 600, marginBottom: '4px' }}>{op.icone} {op.label}</div>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#5a6a7a' }}>{op.desc}</div>
+            </button>
+          ))}
         </div>
       </div>
 
@@ -1222,6 +1346,256 @@ function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
   )
 }
 
+// Máscara valor monetário BR: digita números, formata 1.234,56
+function mascaraValorBR(v) {
+  const n = v.replace(/\D/g, '')
+  if (!n) return ''
+  const num = parseInt(n, 10)
+  return (num / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+// Máscara alíquota: até 2 casas decimais, sem símbolo
+function mascaraAliquota(v) {
+  const n = v.replace(/[^\d,]/g, '').replace(/,/g, (m, i, s) => s.indexOf(',') === i ? ',' : '')
+  return n.substring(0, 5)
+}
+
+function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
+  const set = (campo) => (val) => setForm(f => ({ ...f, [campo]: val }))
+  const setE = (campo) => (e) => setForm(f => ({ ...f, [campo]: e.target.value }))
+
+  const labelStyle = { fontFamily: "'DM Sans', sans-serif", fontSize: '0.68rem', color: '#c9a84c', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }
+  const inputStyle = { width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '10px 14px', color: '#e8e0d0', fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s' }
+  const secStyle = { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '10px', padding: '20px', marginBottom: '16px' }
+
+  const podeProsseguir = form.fluxo === 'difcon'
+    ? (form.difcon_sujeito && form.difcon_cnpj && form.difcon_periodo_inicio && form.difcon_periodo_fim && form.difcon_icms)
+    : form.materia_original.trim().length > 50
+
+  return (
+    <div style={{ maxWidth: '680px', margin: '0 auto', padding: '24px' }}>
+      <BtnVoltar onClick={onVoltar} />
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.6rem', color: '#e8e0d0', marginBottom: '24px' }}>
+        🔒 Gerar ALIM
+      </h2>
+
+      {/* Seleção de fluxo */}
+      <div style={secStyle}>
+        <div style={{ ...labelStyle, marginBottom: '12px' }}>◆ Tipo de lançamento</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          {[
+            { val: 'tvf_ta', label: '📄 Decorrente de TVF ou TA', desc: 'Infração constatada em abordagem' },
+            { val: 'difcon', label: '🔄 DIFCON', desc: 'Diferencial de alíquotas — consumidor final' }
+          ].map(opt => (
+            <button key={opt.val} onClick={() => set('fluxo')(opt.val)} style={{ background: form.fluxo === opt.val ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.02)', border: `1px solid ${form.fluxo === opt.val ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '8px', padding: '14px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s' }}>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', color: '#e8e0d0', fontWeight: 600, marginBottom: '4px' }}>{opt.label}</div>
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#5a6a7a' }}>{opt.desc}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* FLUXO TVF/TA */}
+      {form.fluxo === 'tvf_ta' && (
+        <>
+          {/* Seletor tipo de infração */}
+          <div style={secStyle}>
+            <div style={{ ...labelStyle, marginBottom: '12px' }}>◆ Tipo de infração</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              {[
+                { val: 'geral', label: '📋 Geral', desc: 'Sem nota, NF vencida, inidônea, embaraço, DIFCON' },
+                { val: 'mdfe', label: '🚛 MDF-e', desc: 'Falta de emissão ou irregularidade de MDF-e' }
+              ].map(opt => (
+                <button key={opt.val} onClick={() => set('tipo_infracao')(opt.val)} style={{ background: form.tipo_infracao === opt.val ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.02)', border: `1px solid ${form.tipo_infracao === opt.val ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '8px', padding: '14px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s' }}>
+                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', color: '#e8e0d0', fontWeight: 600, marginBottom: '4px' }}>{opt.label}</div>
+                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#5a6a7a' }}>{opt.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={secStyle}>
+            <div style={{ ...labelStyle, marginBottom: '8px' }}>◆ Matéria tributária original</div>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#4a5a6a', marginBottom: '10px' }}>Cole aqui a matéria tributária completa do TVF ou TA que originou este ALIM.</p>
+            <textarea
+              value={form.materia_original}
+              onChange={setE('materia_original')}
+              placeholder="Cole aqui o texto completo do campo 5 (TVF) ou campo de descrição (TA)..."
+              style={{ ...inputStyle, minHeight: '180px', resize: 'vertical', lineHeight: 1.6 }}
+            />
+          </div>
+
+          {/* Campos extras para MDF-e */}
+          {form.tipo_infracao === 'mdfe' && (() => {
+            const tipoTrajeto = (form.mdfe_uf_origem || 'MS') === 'MS' && (form.mdfe_uf_destino || 'MS') === 'MS' ? 'intermunicipal' : 'interestadual'
+            const ufsOpts = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO']
+            const selectStyle = { ...inputStyle, cursor: 'pointer' }
+            return (
+            <div style={secStyle}>
+              <div style={{ ...labelStyle, marginBottom: '4px' }}>◆ Trajeto e UFERMS</div>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#4a5a6a', marginBottom: '14px' }}>
+                Tipo de trajeto detectado: <strong style={{ color: '#c9a84c' }}>{tipoTrajeto === 'intermunicipal' ? '🔵 Intermunicipal (dentro do MS)' : '🟠 Interestadual'}</strong>
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', marginBottom: '12px', alignItems: 'end' }}>
+                <div>
+                  <div style={labelStyle}>Município de origem</div>
+                  <InputComFocus style={inputStyle} value={form.mdfe_origem} onChange={setE('mdfe_origem')} placeholder="Ex: Campo Grande" />
+                </div>
+                <div style={{ minWidth: '80px' }}>
+                  <div style={labelStyle}>UF</div>
+                  <select style={selectStyle} value={form.mdfe_uf_origem || 'MS'} onChange={e => setForm(f => ({ ...f, mdfe_uf_origem: e.target.value }))}>
+                    {ufsOpts.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', marginBottom: '12px', alignItems: 'end' }}>
+                <div>
+                  <div style={labelStyle}>Município de destino</div>
+                  <InputComFocus style={inputStyle} value={form.mdfe_destino} onChange={setE('mdfe_destino')} placeholder="Ex: Sidrolândia" />
+                </div>
+                <div style={{ minWidth: '80px' }}>
+                  <div style={labelStyle}>UF</div>
+                  <select style={selectStyle} value={form.mdfe_uf_destino || 'MS'} onChange={e => setForm(f => ({ ...f, mdfe_uf_destino: e.target.value }))}>
+                    {ufsOpts.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <div style={labelStyle}>Qtd. UFERMS</div>
+                  <InputComFocus style={inputStyle} value={form.val_uferms_qtd} onChange={e => setForm(f => ({ ...f, val_uferms_qtd: e.target.value.replace(/\D/g, '') }))} placeholder="Ex: 25" inputMode="numeric" />
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Conforme tabela do art. 117, IV, "x"</p>
+                </div>
+                <div>
+                  <div style={labelStyle}>Valor da UFERMS vigente (R$)</div>
+                  <InputComFocus style={inputStyle} value={form.val_uferms_valor} onChange={e => setForm(f => ({ ...f, val_uferms_valor: mascaraValorBR(e.target.value) }))} placeholder="Ex: 52,73" inputMode="decimal" />
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>
+                    {form.val_uferms_qtd && form.val_uferms_valor
+                      ? `Total: R$ ${(parseInt(form.val_uferms_qtd) * parseFloat(form.val_uferms_valor.replace('.','').replace(',','.'))).toLocaleString('pt-BR', {minimumFractionDigits:2})}`
+                      : 'Valor vigente no mês da lavratura'}
+                  </p>
+                </div>
+              </div>
+            </div>
+            )
+          })()}
+
+          {/* Valores calculados — só para não-MDF-e */}
+          {form.tipo_infracao !== 'mdfe' && (
+            <div style={secStyle}>
+              <div style={{ ...labelStyle, marginBottom: '4px' }}>◆ Valores calculados</div>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#4a5a6a', marginBottom: '14px' }}>
+                Preencha os valores do campo 10 do TVF ou do demonstrativo do TA. Deixe em branco o que não se aplicar.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                <div>
+                  <div style={labelStyle}>Valor total da operação (R$)</div>
+                  <InputComFocus style={inputStyle} value={form.val_operacao} onChange={e => setForm(f => ({ ...f, val_operacao: mascaraValorBR(e.target.value) }))} placeholder="Ex: 3.169,00" inputMode="decimal" />
+                </div>
+                <div>
+                  <div style={labelStyle}>Alíquota (%)</div>
+                  <InputComFocus style={inputStyle} value={form.val_aliquota} onChange={e => setForm(f => ({ ...f, val_aliquota: mascaraAliquota(e.target.value) }))} placeholder="Ex: 17" inputMode="decimal" />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                <div>
+                  <div style={labelStyle}>ICMS devido (R$)</div>
+                  <InputComFocus style={inputStyle} value={form.val_icms} onChange={e => setForm(f => ({ ...f, val_icms: mascaraValorBR(e.target.value) }))} placeholder="Ex: 538,73" inputMode="decimal" />
+                </div>
+                <div>
+                  <div style={labelStyle}>Multa principal (R$)</div>
+                  <InputComFocus style={inputStyle} value={form.val_multa} onChange={e => setForm(f => ({ ...f, val_multa: mascaraValorBR(e.target.value) }))} placeholder="Ex: 538,73" inputMode="decimal" />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <div style={labelStyle}>FECOMP (R$)</div>
+                  <InputComFocus style={inputStyle} value={form.val_fecomp} onChange={e => setForm(f => ({ ...f, val_fecomp: mascaraValorBR(e.target.value) }))} placeholder="Ex: 243,90" inputMode="decimal" />
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Só bebidas alcoólicas (art. 41-A)</p>
+                </div>
+                <div>
+                  <div style={labelStyle}>Qtd. UFERMS</div>
+                  <InputComFocus style={inputStyle} value={form.val_uferms_qtd} onChange={e => setForm(f => ({ ...f, val_uferms_qtd: e.target.value.replace(/\D/g, '') }))} placeholder="Ex: 25" inputMode="numeric" />
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Só embaraço</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* FLUXO DIFCON */}
+      {form.fluxo === 'difcon' && (
+        <>
+          <div style={secStyle}>
+            <div style={{ ...labelStyle, marginBottom: '12px' }}>◆ Sujeito passivo</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <div style={labelStyle}>Razão social *</div>
+                <InputComFocus style={inputStyle} value={form.difcon_sujeito} onChange={setE('difcon_sujeito')} placeholder="Nome ou Razão Social" />
+              </div>
+              <div>
+                <div style={labelStyle}>UF de origem *</div>
+                <InputComFocus style={inputStyle} value={form.difcon_uf} onChange={setE('difcon_uf')} placeholder="Ex: SC" maxLength={2} />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div>
+                <div style={labelStyle}>CNPJ *</div>
+                <InputComFocus style={inputStyle} value={form.difcon_cnpj} onChange={setE('difcon_cnpj')} placeholder="00.000.000/0000-00" />
+              </div>
+              <div>
+                <div style={labelStyle}>Inscrição Estadual (MS)</div>
+                <InputComFocus style={inputStyle} value={form.difcon_ie} onChange={setE('difcon_ie')} placeholder="Se houver" />
+              </div>
+            </div>
+          </div>
+          <div style={secStyle}>
+            <div style={{ ...labelStyle, marginBottom: '12px' }}>◆ Período e valores</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <div style={labelStyle}>Período início *</div>
+                <InputComFocus style={inputStyle} value={form.difcon_periodo_inicio} onChange={setE('difcon_periodo_inicio')} placeholder="Ex: 18/04/2022" />
+              </div>
+              <div>
+                <div style={labelStyle}>Período fim *</div>
+                <InputComFocus style={inputStyle} value={form.difcon_periodo_fim} onChange={setE('difcon_periodo_fim')} placeholder="Ex: 02/01/2023" />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div>
+                <div style={labelStyle}>Valor tributável total (R$) *</div>
+                <InputComFocus style={inputStyle} value={form.difcon_valor_tributavel} onChange={setE('difcon_valor_tributavel')} placeholder="Ex: 548.129,93" inputMode="decimal" />
+              </div>
+              <div>
+                <div style={labelStyle}>ICMS apurado (R$) *</div>
+                <InputComFocus style={inputStyle} value={form.difcon_icms} onChange={setE('difcon_icms')} placeholder="Ex: 58.671,86" inputMode="decimal" />
+              </div>
+            </div>
+          </div>
+          <div style={secStyle}>
+            <div style={{ ...labelStyle, marginBottom: '8px' }}>◆ Referências aos demonstrativos</div>
+            <textarea
+              value={form.difcon_referencias}
+              onChange={setE('difcon_referencias')}
+              placeholder="Ex: Anexo 001 — relação de DFes; Anexo 002 — relação de Termos Fiscais; Anexo 003 — demonstrativo do imposto; Anexo 004 — demonstrativo de cálculo"
+              style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }}
+            />
+          </div>
+        </>
+      )}
+
+      <button
+        onClick={onGerar}
+        disabled={!podeProsseguir}
+        style={{ width: '100%', background: podeProsseguir ? 'linear-gradient(135deg, rgba(201,168,76,0.25), rgba(201,168,76,0.1))' : 'rgba(255,255,255,0.03)', border: `1px solid ${podeProsseguir ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.06)'}`, borderRadius: '10px', padding: '16px', cursor: podeProsseguir ? 'pointer' : 'not-allowed', fontFamily: "'DM Sans', sans-serif", fontSize: '0.9rem', color: podeProsseguir ? '#c9a84c' : '#3a4a5a', fontWeight: 600, letterSpacing: '0.06em', transition: 'all 0.2s' }}
+      >
+        {podeProsseguir ? '🔒 Gerar matéria do ALIM' : 'Preencha os campos obrigatórios'}
+      </button>
+    </div>
+  )
+}
+
 function FormularioContestacao({ form, setForm, onVoltar, onGerar }) {
   const set = (campo) => (e) => setForm(f => ({ ...f, [campo]: e.target.value }))
   const obrigatoriosOk = form.numero_doc && form.contribuinte && form.texto_contribuinte
@@ -1333,6 +1707,81 @@ function FormularioContestacao({ form, setForm, onVoltar, onGerar }) {
 }
 
 // ─── Monta mensagem estruturada para o agente ────────────────────────────────
+
+function montarMensagemALIM(form) {
+  if (form.fluxo === 'difcon') {
+    return `GERAR MATÉRIA TRIBUTÁRIA DO ALIM — DIFCON
+
+SUJEITO PASSIVO: ${form.difcon_sujeito}
+CNPJ: ${form.difcon_cnpj}
+IE NO MS: ${form.difcon_ie || 'Não possui'}
+UF DE ORIGEM: ${form.difcon_uf}
+
+PERÍODO DA AUTUAÇÃO: ${form.difcon_periodo_inicio} a ${form.difcon_periodo_fim}
+VALOR TRIBUTÁVEL TOTAL: R$ ${form.difcon_valor_tributavel}
+ICMS APURADO (DIFCON): R$ ${form.difcon_icms}
+${form.difcon_referencias ? 'DEMONSTRATIVOS ANEXOS: ' + form.difcon_referencias : ''}
+
+FUNDAMENTO: Falta de recolhimento do ICMS — Diferencial de Alíquotas — Consumidor Final (DIFCON). Operação interestadual com destinação de bens a consumidor final não contribuinte localizado no MS. Multa: art. 117, I, "t", Lei 1.810/97 — 100% sobre o imposto.
+
+Por favor, elabore a matéria tributária do ALIM com os seguintes blocos separados:
+1. MATÉRIA TRIBUTÁVEL (campo 3 do ALIM)
+2. DESCRIÇÃO DA INFRAÇÃO (campo 4.1)
+3. ENQUADRAMENTO DA INFRAÇÃO (campo 4.2)
+4. ENQUADRAMENTO DA MULTA (campo 4.3)
+
+Use os delimitadores ===ALIM_CAMPO3_INICIO=== / ===ALIM_CAMPO3_FIM===, ===ALIM_CAMPO4_1_INICIO=== / ===ALIM_CAMPO4_1_FIM===, ===ALIM_CAMPO4_2_INICIO=== / ===ALIM_CAMPO4_2_FIM=== em cada bloco, identificando-os claramente.`
+  }
+
+  // Monta bloco de valores calculados para passar ao agente
+  const ehMdfe = form.tipo_infracao === 'mdfe'
+  const valoresLinhas = []
+
+  if (ehMdfe) {
+    if (form.mdfe_origem && form.mdfe_destino) {
+      const ufOri = form.mdfe_uf_origem || 'MS'
+      const ufDest = form.mdfe_uf_destino || 'MS'
+      const tipoTrajeto = ufOri === 'MS' && ufDest === 'MS' ? 'intermunicipal' : 'interestadual'
+      valoresLinhas.push('TRAJETO: ' + form.mdfe_origem + '/' + ufOri + ' x ' + form.mdfe_destino + '/' + ufDest + ' (trajeto ' + tipoTrajeto + ')')
+    }
+    if (form.val_uferms_qtd) valoresLinhas.push('QUANTIDADE DE UFERMS: ' + form.val_uferms_qtd + ' UFERMS')
+    if (form.val_uferms_valor) {
+      const total = form.val_uferms_qtd
+        ? (parseInt(form.val_uferms_qtd) * parseFloat(form.val_uferms_valor.replace(/\./g,'').replace(',','.'))).toLocaleString('pt-BR', {minimumFractionDigits:2})
+        : null
+      valoresLinhas.push('VALOR DA UFERMS VIGENTE: R$ ' + form.val_uferms_valor + (total ? ' (VALOR TOTAL DA MULTA: R$ ' + total + ')' : ''))
+    }
+  } else {
+    if (form.val_operacao)   valoresLinhas.push('VALOR TOTAL DA OPERAÇÃO: R$ ' + form.val_operacao)
+    if (form.val_aliquota)   valoresLinhas.push('ALÍQUOTA: ' + form.val_aliquota + '%')
+    if (form.val_icms)       valoresLinhas.push('ICMS DEVIDO: R$ ' + form.val_icms)
+    if (form.val_multa)      valoresLinhas.push('MULTA PRINCIPAL (100%): R$ ' + form.val_multa)
+    if (form.val_fecomp)     valoresLinhas.push('FECOMP (2%): R$ ' + form.val_fecomp)
+    if (form.val_uferms_qtd) valoresLinhas.push('QUANTIDADE DE UFERMS: ' + form.val_uferms_qtd + ' UFERMS')
+  }
+
+  const blocoValores = valoresLinhas.length > 0
+    ? '\n\nVALORES CALCULADOS (USE EXATAMENTE ESTES — NÃO RECALCULE, NÃO ALTERE):\n' + valoresLinhas.join('\n')
+    : ''
+
+  const tipoAlim = ehMdfe ? 'GERAR MATÉRIA TRIBUTÁRIA DO ALIM — TIPO: MDF-e' : 'GERAR MATÉRIA TRIBUTÁRIA DO ALIM'
+
+  return `${tipoAlim}
+
+Com base na matéria tributária abaixo, extraída do TVF ou TA original, elabore os blocos de texto prontos para inserção no sistema SEFAZ-MS.${blocoValores}
+
+MATÉRIA ORIGINAL DO TVF/TA:
+${form.materia_original}
+
+Elabore os seguintes blocos separados para os campos do ALIM:
+1. MATÉRIA TRIBUTÁVEL — campo 3.1
+2. FUNDAMENTAÇÃO LEGAL — campo 3.2
+3. DESCRIÇÃO DA INFRAÇÃO 1 — campo 4.1
+4. ENQUADRAMENTO DA INFRAÇÃO 1 — campo 4.2
+5. DESCRIÇÃO DA INFRAÇÃO 2 — campo 4.4 (somente se for tipo com 2 infrações)
+
+Use os delimitadores ===ALIM_CAMPO3_INICIO=== / ===ALIM_CAMPO3_FIM===, ===ALIM_CAMPO4_1_INICIO=== / ===ALIM_CAMPO4_1_FIM===, ===ALIM_CAMPO4_2_INICIO=== / ===ALIM_CAMPO4_2_FIM=== em cada bloco. Use os valores fornecidos acima exatamente como estão — não calcule, não altere.`
+}
 
 function montarMensagemTVF(form) {
   const mercs = form.mercadoria.map(m =>
@@ -1503,14 +1952,14 @@ export default function Home() {
   const [fontSize, setFontSize] = useState(14)
   const [imagens, setImagens] = useState([])
   const [painelHistorico, setPainelHistorico] = useState(false)
-  const [abaHistorico, setAbaHistorico] = useState('autuacao') // autuacao | defesa
+  const [abaHistorico, setAbaHistorico] = useState('autuacao') // autuacao | alim | defesa
   const [avisoLimite, setAvisoLimite] = useState(false)
   const [popupSalvar, setPopupSalvar] = useState(null) // { texto, textoCopiar }
   const [confirmarExclusao, setConfirmarExclusao] = useState(null) // doc a excluir
   const [labelSalvar, setLabelSalvar] = useState('')
   const [tipoEscolhido, setTipoEscolhido] = useState('')
   const [msgCopiada, setMsgCopiada] = useState(null) // índice da mensagem copiada
-  const [modoAtivo, setModoAtivo] = useState(null) // null | 'consulta' | 'tvf' | 'ta' | 'contestacao'
+  const [modoAtivo, setModoAtivo] = useState(null) // null | 'consulta' | 'tvf' | 'ta' | 'contestacao' | 'alim'
   const [modoOrigem, setModoOrigem] = useState(null) // guarda o modo do formulário original
   const [bannerFechado, setBannerFechado] = useState(true)
   const [formTVF, setFormTVF] = useState({
@@ -1548,6 +1997,26 @@ export default function Home() {
     texto_tvf: '', // texto extraído do PDF do TVF/TA
     texto_contribuinte: ''
   })
+  const FORM_ALIM_INICIAL = {
+    fluxo: 'tvf_ta',
+    tipo_infracao: 'geral', // 'geral' | 'mdfe'
+    materia_original: '',
+    val_operacao: '',
+    val_icms: '',
+    val_aliquota: '',
+    val_multa: '',
+    val_fecomp: '',
+    val_uferms_qtd: '',
+    val_uferms_valor: '',
+    mdfe_origem: '',
+    mdfe_uf_origem: 'MS',
+    mdfe_destino: '',
+    mdfe_uf_destino: 'MS',
+    difcon_sujeito: '', difcon_ie: '', difcon_cnpj: '', difcon_uf: '',
+    difcon_periodo_inicio: '', difcon_periodo_fim: '',
+    difcon_valor_tributavel: '', difcon_icms: '', difcon_referencias: ''
+  }
+  const [formALIM, setFormALIM] = useState(FORM_ALIM_INICIAL)
 
   const [historicoDocumentos, setHistoricoDocumentos] = useState([])
   const [carregandoHistorico, setCarregandoHistorico] = useState(false)
@@ -1865,10 +2334,17 @@ export default function Home() {
   }
 
   const copiarTexto = (texto, msgIdx) => {
-    const inicio = texto.indexOf('===MATERIA_INICIO===')
-    const fim = texto.indexOf('===MATERIA_FIM===')
-    const eMateria = inicio !== -1 && fim !== -1
-    let textoCopiar = eMateria ? texto.substring(inicio + 20, fim).trim() : texto
+    let textoCopiar
+
+    if (temBlocosALIM(texto)) {
+      // Resposta ALIM: extrai blocos limpos sem delimitadores
+      textoCopiar = extrairTextoBlocosALIM(texto)
+    } else {
+      const inicio = texto.indexOf('===MATERIA_INICIO===')
+      const fim = texto.indexOf('===MATERIA_FIM===')
+      const eMateria = inicio !== -1 && fim !== -1
+      textoCopiar = eMateria ? texto.substring(inicio + 20, fim).trim() : texto
+    }
 
     // Remove markdown do texto copiado
     textoCopiar = textoCopiar
@@ -1876,11 +2352,14 @@ export default function Home() {
       .replace(/\*(.+?)\*/g, '$1')       // itálico
       .replace(/^#{1,3}\s+/gm, '')       // títulos
       .replace(/^[-*]\s+/gm, '')         // listas
+      // Remove aviso de atenção final
+      .replace(/⚠️ ATENÇÃO[\s\S]*$/m, '')
       .trim()
 
     // Detecta tipo: usa modoOrigem (contexto do formulário) se disponível
     const tipoModo = modoOrigem === 'tvf' ? 'TVF'
       : modoOrigem === 'ta' ? 'TA'
+      : modoOrigem === 'alim' ? 'ALIM'
       : modoOrigem === 'desk' ? 'DESK'
       : modoOrigem === 'contestacao' ? 'CONTESTACAO'
       : (() => {
@@ -1914,19 +2393,41 @@ export default function Home() {
     if (fiscal) {
       const tipo = tipoEscolhido || detectarTipoDocumento(textoCopiar) || 'TVF'
       const ehDefesa = ['DESK', 'CONTESTACAO'].includes(tipo)
+      const ehALIM = tipo === 'ALIM'
+
       // Fonte primária: sujeito digitado no formulário; fallback: extração do texto
       const sujeitoForm = modoOrigem === 'tvf' ? formTVF.sujeito
         : modoOrigem === 'ta' ? formTA.sujeito
+        : modoOrigem === 'alim'
+          ? (formALIM.fluxo === 'difcon'
+              ? formALIM.difcon_sujeito
+              : extrairAutuado(formALIM.materia_original) || '')
         : modoOrigem === 'contestacao' || modoOrigem === 'desk' ? formContestacao.contribuinte
         : ''
       const autuadoFinal = ehDefesa
         ? (labelSalvar || sujeitoForm || popupSalvar.autuado || null)
         : (sujeitoForm || popupSalvar.autuado || null)
+
+      // Para ALIM: infracao vem do tipo de lançamento (ex: "Nota Fiscal Vencida")
+      // Para TVF/TA: infracao vem do label digitado pelo fiscal
+      // Para defesas: sem infracao
+      let infracaoFinal = null
+      if (!ehDefesa) {
+        if (ehALIM && labelSalvar) {
+          infracaoFinal = labelSalvar
+        } else if (ehALIM && formALIM.fluxo === 'difcon') {
+          infracaoFinal = 'DIFCON'
+        } else if (!ehALIM) {
+          infracaoFinal = labelSalvar.replace(tipo, '').replace(/^[\s\-]+|[\s\-]+$/g, '') || null
+        }
+      }
+
+      // textoCopiar já está limpo (sem delimitadores, sem aviso) — salvar direto
       await supabase.from('historico_documentos').upsert({
         fiscal_id: fiscal.id,
         tipo,
         autuado: autuadoFinal,
-        infracao: ehDefesa ? null : (labelSalvar.replace(tipo, '').replace(/^[\s\-]+|[\s\-]+$/g, '') || null),
+        infracao: infracaoFinal,
         materia_tributaria: textoCopiar,
         conversa: historico.slice(-10)
       })
@@ -1947,6 +2448,7 @@ export default function Home() {
       setFormContestacao({ tipo: 'contestacao', numero_doc: '', contribuinte: '', ie_contrib: '', cnpj_contrib: '', destinatario: '', texto_tvf: '', texto_contribuinte: '' })
       setFormTVF({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', mercadoria: [{ descricao: '', quantidade: '', unidade: '', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', tipo_mdfe: 'falta_emissao', chaves_nf: [{ chave: '', valor: '' }], danfes: [{ chave: '', emissao: '', saida: '', valor: '' }], origem_municipio: '', origem_uf: 'MS', destino_municipio: '', destino_uf: '', chave_mdfe: '', mdfe_emissao_data: '', mdfe_emissao_hora: '', mdfe_ativo: false, mdfe_confirmacao_data: '', mdfe_confirmacao_hora: '', mdfe_encerramento_data: '', mdfe_encerramento_hora: '', obs: '' })
       setFormTA({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', documentos: '', mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', responsavel: 'transportador', obs: '' })
+      setFormALIM(FORM_ALIM_INICIAL)
       if (sessaoIdRef.current) {
         supabase
           .from('sessoes_chat')
@@ -2023,12 +2525,12 @@ export default function Home() {
     <div className={styles.app}>
       {/* PAINEL HISTÓRICO */}
       {painelHistorico && (() => {
-        const TIPOS_AUTUACAO = ['TVF', 'TA', 'ALIM']
         const docsAba = historicoDocumentos.filter(d => {
           const tipo = (d.tipo || '').toUpperCase()
-          const eAutuacao = TIPOS_AUTUACAO.includes(tipo)
-          if (abaHistorico === 'autuacao') return eAutuacao
-          return !eAutuacao // tudo que não é autuação vai para defesa
+          if (abaHistorico === 'autuacao') return tipo === 'TVF' || tipo === 'TA'
+          if (abaHistorico === 'alim') return tipo === 'ALIM'
+          // defesa: tudo que não é TVF, TA nem ALIM
+          return tipo !== 'TVF' && tipo !== 'TA' && tipo !== 'ALIM'
         })
         const gruposAba = agruparPorData(docsAba)
 
@@ -2055,6 +2557,7 @@ export default function Home() {
               <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '0 12px' }}>
                 {[
                   { id: 'autuacao', label: '⚖️ TVF / TA' },
+                  { id: 'alim', label: '🔒 ALIM' },
                   { id: 'defesa', label: '🛡️ Contestação / DESK' }
                 ].map(aba => (
                   <button key={aba.id} onClick={() => setAbaHistorico(aba.id)}
@@ -2287,8 +2790,8 @@ export default function Home() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
               {[
                 { id: 'consulta', icone: '🔍', titulo: 'Consultar legislação', desc: 'Tire dúvidas sobre a legislação tributária estadual, enquadramentos e procedimentos', cor: '#3a6aaa' },
-                { id: 'tvf', icone: '📋', titulo: 'Gerar TVF', desc: 'Termo de Verificação Fiscal — sujeito passivo com IE ativa no MS', cor: '#c9a84c' },
-                { id: 'ta', icone: '🔒', titulo: 'Gerar TA', desc: 'Termo de Apreensão — sem IE no MS, clandestino ou risco de desaparecimento', cor: '#c87050' },
+                { id: 'tvf', icone: '📋', titulo: 'Gerar TVF / TA', desc: 'Termo de Verificação Fiscal ou Termo de Apreensão — escolha o tipo dentro', cor: '#c9a84c' },
+                { id: 'alim', icone: '📝', titulo: 'Gerar ALIM', desc: 'Auto de Lançamento e Imposição de Multa — matéria tributária pronta para o sistema', cor: '#c87050' },
                 { id: 'contestacao', icone: '⚖️', titulo: 'Contestação / DESK', desc: 'Resposta a impugnação de ALIM ou reclamação de contribuinte via DESK', cor: '#6a9a6a' },
               ].map(modo => (
                 <button
@@ -2457,6 +2960,7 @@ export default function Home() {
             form={formTVF}
             setForm={setFormTVF}
             onVoltar={() => setModoAtivo(null)}
+            onTrocarTipo={(t) => setModoAtivo(t === 'TVF' ? 'tvf' : 'ta')}
             onGerar={() => {
               const msg = montarMensagemTVF(formTVF)
               setModoOrigem('tvf')
@@ -2473,9 +2977,25 @@ export default function Home() {
             form={formTA}
             setForm={setFormTA}
             onVoltar={() => setModoAtivo(null)}
+            onTrocarTipo={(t) => setModoAtivo(t === 'TVF' ? 'tvf' : 'ta')}
             onGerar={() => {
               const msg = montarMensagemTA(formTA)
               setModoOrigem('ta')
+              setModoAtivo('consulta')
+              enviar(msg)
+            }}
+          />
+        )}
+
+        {/* FORMULÁRIO ALIM */}
+        {mensagens.length === 0 && modoAtivo === 'alim' && (
+          <FormularioALIM
+            form={formALIM}
+            setForm={setFormALIM}
+            onVoltar={() => setModoAtivo(null)}
+            onGerar={() => {
+              const msg = montarMensagemALIM(formALIM)
+              setModoOrigem('alim')
               setModoAtivo('consulta')
               enviar(msg)
             }}
@@ -2638,13 +3158,23 @@ export default function Home() {
 
             {/* Identificação */}
             <p style={{ fontFamily: "'DM Sans', sans-serif", color: '#7a8a9a', fontSize: '0.78rem', marginBottom: '8px' }}>
-              Identificação no histórico (opcional):
+              {tipoEscolhido === 'ALIM'
+                ? 'Tipo de infração (ex: Nota Fiscal Vencida, Falta de MDF-e):'
+                : ['DESK','CONTESTACAO'].includes(tipoEscolhido)
+                  ? 'Identificação no histórico (contribuinte):'
+                  : 'Identificação no histórico (opcional):'}
             </p>
             <input
               type="text"
               value={labelSalvar}
               onChange={e => setLabelSalvar(e.target.value)}
-              placeholder="Ex: Fato 593 · Meyer Ltda"
+              placeholder={
+                tipoEscolhido === 'ALIM'
+                  ? 'Ex: Nota Fiscal Vencida'
+                  : ['DESK','CONTESTACAO'].includes(tipoEscolhido)
+                    ? 'Ex: Meyer Ltda'
+                    : 'Ex: Fato 593 · Meyer Ltda'
+              }
               autoFocus
               style={{
                 width: '100%', padding: '11px 14px',
