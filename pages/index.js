@@ -143,9 +143,9 @@ function extrairTextoBlocosALIM(txt) {
     const conteudo = m[2].trim()
     const labels = {
       'ALIM_CAMPO3':   'CAMPO 3 — MATÉRIA TRIBUTÁVEL',
-      'ALIM_CAMPO4_1': 'CAMPO 4.1 — DESCRIÇÃO DA INFRAÇÃO',
+      'ALIM_CAMPO4_1': 'CAMPO 4.1 — DESCRIÇÃO DA INFRAÇÃO 1 — PRINCIPAL (11%)',
       'ALIM_CAMPO4_2': 'CAMPO 4.2 — ENQUADRAMENTO',
-      'ALIM_CAMPO4_4': 'CAMPO 4.4 — DESCRIÇÃO DA INFRAÇÃO 2',
+      'ALIM_CAMPO4_4': 'CAMPO 4.4 — DESCRIÇÃO DA INFRAÇÃO 2 — ACESSÓRIA (100%)',
       'ALIM_CAMPO4_5': 'CAMPO 4.5 — ENQUADRAMENTO 2',
       'ALIM_MORA':     'CAMPO 4.3 — ENQUADRAMENTO DA MULTA DE MORA',
     }
@@ -162,9 +162,9 @@ function temBlocosALIM(txt) {
 // Mapa de rótulos para cada bloco ALIM
 const ALIM_LABELS = {
   'ALIM_CAMPO3':   { titulo: 'Campo 3 — Matéria Tributável (Fato Gerador)', campo: 'Campo 3' },
-  'ALIM_CAMPO4_1': { titulo: 'Campo 4.1 — Descrição da Infração',           campo: 'Campo 4.1' },
+  'ALIM_CAMPO4_1': { titulo: 'Campo 4.1 — Descrição da Infração 1 — Principal (11%)', campo: 'Campo 4.1' },
   'ALIM_CAMPO4_2': { titulo: 'Campo 4.2 — Enquadramento da Infração',        campo: 'Campo 4.2' },
-  'ALIM_CAMPO4_4': { titulo: 'Campo 4.4 — Descrição da Infração 2',          campo: 'Campo 4.4' },
+  'ALIM_CAMPO4_4': { titulo: 'Campo 4.4 — Descrição da Infração 2 — Acessória (100%)', campo: 'Campo 4.4' },
   'ALIM_CAMPO4_5': { titulo: 'Campo 4.5 — Enquadramento da Infração 2',      campo: 'Campo 4.5' },
   'ALIM_MORA':     { titulo: 'Campo 4.3 — Enquadramento da Multa de Mora',   campo: 'Campo 4.3' },
 }
