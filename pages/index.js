@@ -133,6 +133,32 @@ function extrairFato(texto) {
   return null
 }
 
+// Extrai e limpa o conteúdo de todos os blocos ALIM de uma resposta
+function extrairTextoBlocosALIM(txt) {
+  const re = /===([A-Z0-9_]+)_INICIO===\n?([\s\S]*?)===\1_FIM===/g
+  const blocos = []
+  let m
+  while ((m = re.exec(txt)) !== null) {
+    const chave = m[1]
+    const conteudo = m[2].trim()
+    const labels = {
+      'ALIM_CAMPO3':   'CAMPO 3 — MATÉRIA TRIBUTÁVEL',
+      'ALIM_CAMPO4_1': 'CAMPO 4.1 — DESCRIÇÃO DA INFRAÇÃO',
+      'ALIM_CAMPO4_2': 'CAMPO 4.2 — ENQUADRAMENTO',
+      'ALIM_CAMPO4_4': 'CAMPO 4.4 — DESCRIÇÃO DA INFRAÇÃO 2',
+      'ALIM_CAMPO4_5': 'CAMPO 4.5 — ENQUADRAMENTO 2',
+      'ALIM_MORA':     'MULTA DE MORA',
+    }
+    const label = labels[chave]
+    if (label) blocos.push(`${label}:\n${conteudo}`)
+  }
+  return blocos.join('\n\n')
+}
+
+function temBlocosALIM(txt) {
+  return /===ALIM_[A-Z0-9_]+_INICIO===/.test(txt)
+}
+
 // Mapa de rótulos para cada bloco ALIM
 const ALIM_LABELS = {
   'ALIM_CAMPO3':   { titulo: 'Campo 3 — Matéria Tributável (Fato Gerador)', campo: 'Campo 3' },
@@ -2229,10 +2255,17 @@ export default function Home() {
   }
 
   const copiarTexto = (texto, msgIdx) => {
-    const inicio = texto.indexOf('===MATERIA_INICIO===')
-    const fim = texto.indexOf('===MATERIA_FIM===')
-    const eMateria = inicio !== -1 && fim !== -1
-    let textoCopiar = eMateria ? texto.substring(inicio + 20, fim).trim() : texto
+    let textoCopiar
+
+    if (temBlocosALIM(texto)) {
+      // Resposta ALIM: extrai blocos limpos sem delimitadores
+      textoCopiar = extrairTextoBlocosALIM(texto)
+    } else {
+      const inicio = texto.indexOf('===MATERIA_INICIO===')
+      const fim = texto.indexOf('===MATERIA_FIM===')
+      const eMateria = inicio !== -1 && fim !== -1
+      textoCopiar = eMateria ? texto.substring(inicio + 20, fim).trim() : texto
+    }
 
     // Remove markdown do texto copiado
     textoCopiar = textoCopiar
@@ -2240,6 +2273,8 @@ export default function Home() {
       .replace(/\*(.+?)\*/g, '$1')       // itálico
       .replace(/^#{1,3}\s+/gm, '')       // títulos
       .replace(/^[-*]\s+/gm, '')         // listas
+      // Remove aviso de atenção final
+      .replace(/⚠️ ATENÇÃO[\s\S]*$/m, '')
       .trim()
 
     // Detecta tipo: usa modoOrigem (contexto do formulário) se disponível
@@ -2279,20 +2314,41 @@ export default function Home() {
     if (fiscal) {
       const tipo = tipoEscolhido || detectarTipoDocumento(textoCopiar) || 'TVF'
       const ehDefesa = ['DESK', 'CONTESTACAO'].includes(tipo)
+      const ehALIM = tipo === 'ALIM'
+
       // Fonte primária: sujeito digitado no formulário; fallback: extração do texto
       const sujeitoForm = modoOrigem === 'tvf' ? formTVF.sujeito
         : modoOrigem === 'ta' ? formTA.sujeito
-        : modoOrigem === 'alim' ? (formALIM.fluxo === 'difcon' ? formALIM.difcon_sujeito : '')
+        : modoOrigem === 'alim'
+          ? (formALIM.fluxo === 'difcon'
+              ? formALIM.difcon_sujeito
+              : extrairAutuado(formALIM.materia_original) || '')
         : modoOrigem === 'contestacao' || modoOrigem === 'desk' ? formContestacao.contribuinte
         : ''
       const autuadoFinal = ehDefesa
         ? (labelSalvar || sujeitoForm || popupSalvar.autuado || null)
         : (sujeitoForm || popupSalvar.autuado || null)
+
+      // Para ALIM: infracao vem do tipo de lançamento (ex: "Nota Fiscal Vencida")
+      // Para TVF/TA: infracao vem do label digitado pelo fiscal
+      // Para defesas: sem infracao
+      let infracaoFinal = null
+      if (!ehDefesa) {
+        if (ehALIM && labelSalvar) {
+          infracaoFinal = labelSalvar
+        } else if (ehALIM && formALIM.fluxo === 'difcon') {
+          infracaoFinal = 'DIFCON'
+        } else if (!ehALIM) {
+          infracaoFinal = labelSalvar.replace(tipo, '').replace(/^[\s\-]+|[\s\-]+$/g, '') || null
+        }
+      }
+
+      // textoCopiar já está limpo (sem delimitadores, sem aviso) — salvar direto
       await supabase.from('historico_documentos').upsert({
         fiscal_id: fiscal.id,
         tipo,
         autuado: autuadoFinal,
-        infracao: ehDefesa ? null : (labelSalvar.replace(tipo, '').replace(/^[\s\-]+|[\s\-]+$/g, '') || null),
+        infracao: infracaoFinal,
         materia_tributaria: textoCopiar,
         conversa: historico.slice(-10)
       })
@@ -3022,13 +3078,23 @@ export default function Home() {
 
             {/* Identificação */}
             <p style={{ fontFamily: "'DM Sans', sans-serif", color: '#7a8a9a', fontSize: '0.78rem', marginBottom: '8px' }}>
-              Identificação no histórico (opcional):
+              {tipoEscolhido === 'ALIM'
+                ? 'Tipo de infração (ex: Nota Fiscal Vencida, Falta de MDF-e):'
+                : ['DESK','CONTESTACAO'].includes(tipoEscolhido)
+                  ? 'Identificação no histórico (contribuinte):'
+                  : 'Identificação no histórico (opcional):'}
             </p>
             <input
               type="text"
               value={labelSalvar}
               onChange={e => setLabelSalvar(e.target.value)}
-              placeholder="Ex: Fato 593 · Meyer Ltda"
+              placeholder={
+                tipoEscolhido === 'ALIM'
+                  ? 'Ex: Nota Fiscal Vencida'
+                  : ['DESK','CONTESTACAO'].includes(tipoEscolhido)
+                    ? 'Ex: Meyer Ltda'
+                    : 'Ex: Fato 593 · Meyer Ltda'
+              }
               autoFocus
               style={{
                 width: '100%', padding: '11px 14px',
