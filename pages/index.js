@@ -1426,17 +1426,38 @@ function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
           </div>
 
           {/* Campos extras para MDF-e */}
-          {form.tipo_infracao === 'mdfe' && (
+          {form.tipo_infracao === 'mdfe' && (() => {
+            const tipoTrajeto = (form.mdfe_uf_origem || 'MS') === 'MS' && (form.mdfe_uf_destino || 'MS') === 'MS' ? 'intermunicipal' : 'interestadual'
+            const ufsOpts = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO']
+            const selectStyle = { ...inputStyle, cursor: 'pointer' }
+            return (
             <div style={secStyle}>
-              <div style={{ ...labelStyle, marginBottom: '12px' }}>◆ Trajeto e UFERMS</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+              <div style={{ ...labelStyle, marginBottom: '4px' }}>◆ Trajeto e UFERMS</div>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#4a5a6a', marginBottom: '14px' }}>
+                Tipo de trajeto detectado: <strong style={{ color: '#c9a84c' }}>{tipoTrajeto === 'intermunicipal' ? '🔵 Intermunicipal (dentro do MS)' : '🟠 Interestadual'}</strong>
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', marginBottom: '12px', alignItems: 'end' }}>
                 <div>
                   <div style={labelStyle}>Município de origem</div>
                   <InputComFocus style={inputStyle} value={form.mdfe_origem} onChange={setE('mdfe_origem')} placeholder="Ex: Campo Grande" />
                 </div>
+                <div style={{ minWidth: '80px' }}>
+                  <div style={labelStyle}>UF</div>
+                  <select style={selectStyle} value={form.mdfe_uf_origem || 'MS'} onChange={e => setForm(f => ({ ...f, mdfe_uf_origem: e.target.value }))}>
+                    {ufsOpts.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', marginBottom: '12px', alignItems: 'end' }}>
                 <div>
                   <div style={labelStyle}>Município de destino</div>
                   <InputComFocus style={inputStyle} value={form.mdfe_destino} onChange={setE('mdfe_destino')} placeholder="Ex: Sidrolândia" />
+                </div>
+                <div style={{ minWidth: '80px' }}>
+                  <div style={labelStyle}>UF</div>
+                  <select style={selectStyle} value={form.mdfe_uf_destino || 'MS'} onChange={e => setForm(f => ({ ...f, mdfe_uf_destino: e.target.value }))}>
+                    {ufsOpts.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+                  </select>
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -1456,7 +1477,8 @@ function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
                 </div>
               </div>
             </div>
-          )}
+            )
+          })()}
 
           {/* Valores calculados — só para não-MDF-e */}
           {form.tipo_infracao !== 'mdfe' && (
@@ -1717,7 +1739,10 @@ Use os delimitadores ===ALIM_CAMPO3_INICIO=== / ===ALIM_CAMPO3_FIM===, ===ALIM_C
 
   if (ehMdfe) {
     if (form.mdfe_origem && form.mdfe_destino) {
-      valoresLinhas.push('TRAJETO: ' + form.mdfe_origem + '/MS x ' + form.mdfe_destino + '/MS (trajeto intermunicipal)')
+      const ufOri = form.mdfe_uf_origem || 'MS'
+      const ufDest = form.mdfe_uf_destino || 'MS'
+      const tipoTrajeto = ufOri === 'MS' && ufDest === 'MS' ? 'intermunicipal' : 'interestadual'
+      valoresLinhas.push('TRAJETO: ' + form.mdfe_origem + '/' + ufOri + ' x ' + form.mdfe_destino + '/' + ufDest + ' (trajeto ' + tipoTrajeto + ')')
     }
     if (form.val_uferms_qtd) valoresLinhas.push('QUANTIDADE DE UFERMS: ' + form.val_uferms_qtd + ' UFERMS')
     if (form.val_uferms_valor) {
@@ -1984,7 +2009,9 @@ export default function Home() {
     val_uferms_qtd: '',
     val_uferms_valor: '',
     mdfe_origem: '',
+    mdfe_uf_origem: 'MS',
     mdfe_destino: '',
+    mdfe_uf_destino: 'MS',
     difcon_sujeito: '', difcon_ie: '', difcon_cnpj: '', difcon_uf: '',
     difcon_periodo_inicio: '', difcon_periodo_fim: '',
     difcon_valor_tributavel: '', difcon_icms: '', difcon_referencias: ''
