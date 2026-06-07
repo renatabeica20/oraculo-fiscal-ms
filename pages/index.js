@@ -175,10 +175,22 @@ function processarBlocosALIM(txt) {
   // Regex que captura qualquer bloco ===ALIM_XXXXX_INICIO=== ... ===ALIM_XXXXX_FIM===
   const re = /===([A-Z0-9_]+)_INICIO===\n?([\s\S]*?)===\1_FIM===/g
   resultado = resultado.replace(re, (match, chave, conteudo) => {
-    const label = ALIM_LABELS[chave]
-    if (!label) return match // bloco desconhecido — deixa como estava
+    const labelBase = ALIM_LABELS[chave]
+    if (!labelBase) return match // bloco desconhecido — deixa como estava
     const idx = blocos.length
     const textoLimpo = conteudo.trim()
+
+    // Campo 4.1: ajusta título conforme o conteúdo
+    // Se menciona UFERMS → obrigação acessória (MDF-e, embaraço)
+    // Se menciona ICMS ou imposto → obrigação principal (11%)
+    let label = { ...labelBase }
+    if (chave === 'ALIM_CAMPO4_1') {
+      const t = textoLimpo.toUpperCase()
+      if (t.includes('UFERMS')) {
+        label = { titulo: 'Campo 4.1 — Descrição da Infração — Acessória (UFERMS)', campo: 'Campo 4.1' }
+      }
+    }
+
     blocos.push({ chave, label, texto: textoLimpo })
     return `__ALIM_BLOCO_${idx}__`
   })
