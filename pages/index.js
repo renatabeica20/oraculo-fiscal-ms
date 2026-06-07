@@ -1421,12 +1421,7 @@ function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
                 <InputComFocus style={inputStyle} value={form.val_multa} onChange={e => setForm(f => ({ ...f, val_multa: mascaraValorBR(e.target.value) }))} placeholder="Ex: 538,73" inputMode="decimal" />
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-              <div>
-                <div style={labelStyle}>Multa de mora (R$)</div>
-                <InputComFocus style={inputStyle} value={form.val_mora} onChange={e => setForm(f => ({ ...f, val_mora: mascaraValorBR(e.target.value) }))} placeholder="Ex: 80,84" inputMode="decimal" />
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Deixe vazio se não há mora</p>
-              </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
                 <div style={labelStyle}>FECOMP (R$)</div>
                 <InputComFocus style={inputStyle} value={form.val_fecomp} onChange={e => setForm(f => ({ ...f, val_fecomp: mascaraValorBR(e.target.value) }))} placeholder="Ex: 243,90" inputMode="decimal" />
@@ -1436,23 +1431,6 @@ function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
                 <div style={labelStyle}>Qtd. UFERMS</div>
                 <InputComFocus style={inputStyle} value={form.val_uferms_qtd} onChange={e => setForm(f => ({ ...f, val_uferms_qtd: e.target.value.replace(/\D/g, '') }))} placeholder="Ex: 25" inputMode="numeric" />
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Só MDF-e e embaraço</p>
-              </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div>
-                <div style={labelStyle}>Valor da UFERMS vigente (R$)</div>
-                <InputComFocus style={inputStyle} value={form.valor_uferms} onChange={e => setForm(f => ({ ...f, valor_uferms: mascaraValorBR(e.target.value) }))} placeholder="Ex: 52,73" inputMode="decimal" />
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Para calcular o valor em reais da multa UFERMS</p>
-              </div>
-              <div>
-                <div style={labelStyle}>Multa de mora?</div>
-                <div style={{ display: 'flex', gap: '8px', marginTop: '2px' }}>
-                  {[{ val: 'nao', label: 'Não' }, { val: 'sim', label: 'Sim (art. 119, VI)' }].map(op => (
-                    <button key={op.val} onClick={() => set('tem_mora')(op.val)} style={{ flex: 1, background: form.tem_mora === op.val ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.02)', border: `1px solid ${form.tem_mora === op.val ? 'rgba(201,168,76,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '8px', padding: '10px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: '0.78rem', color: '#e8e0d0', transition: 'all 0.2s' }}>
-                      {op.label}
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
           </div>
@@ -1674,15 +1652,8 @@ Use os delimitadores ===ALIM_CAMPO3_INICIO=== / ===ALIM_CAMPO3_FIM===, ===ALIM_C
   if (form.val_aliquota)   valoresLinhas.push('ALÍQUOTA: ' + form.val_aliquota + '%')
   if (form.val_icms)       valoresLinhas.push('ICMS DEVIDO: R$ ' + form.val_icms)
   if (form.val_multa)      valoresLinhas.push('MULTA PRINCIPAL (100%): R$ ' + form.val_multa)
-  if (form.val_mora)       valoresLinhas.push('MULTA DE MORA (11%): R$ ' + form.val_mora)
   if (form.val_fecomp)     valoresLinhas.push('FECOMP (2%): R$ ' + form.val_fecomp)
   if (form.val_uferms_qtd) valoresLinhas.push('QUANTIDADE DE UFERMS: ' + form.val_uferms_qtd + ' UFERMS')
-  if (form.valor_uferms) {
-    const totalUferms = form.val_uferms_qtd
-      ? ' (total: R$ ' + (parseFloat(form.val_uferms_qtd) * parseFloat(form.valor_uferms.replace(',','.'))).toFixed(2).replace('.',',') + ')'
-      : ''
-    valoresLinhas.push('VALOR DA UFERMS VIGENTE: R$ ' + form.valor_uferms + totalUferms)
-  }
   const blocoValores = valoresLinhas.length > 0
     ? '\n\nVALORES CALCULADOS (USE EXATAMENTE ESTES — NÃO RECALCULE, NÃO ALTERE):\n' + valoresLinhas.join('\n')
     : ''
@@ -1694,13 +1665,12 @@ Com base na matéria tributária abaixo, extraída do TVF ou TA original, elabor
 MATÉRIA ORIGINAL DO TVF/TA:
 ${form.materia_original}
 
-MULTA DE MORA (art. 119, VI): ${form.tem_mora === 'sim' ? 'SIM — incluir bloco de multa de mora' : 'NÃO'}
-
 Elabore os seguintes blocos separados para os campos do ALIM:
-1. MATÉRIA TRIBUTÁVEL — campo 3
-2. DESCRIÇÃO DA INFRAÇÃO — campo 4.1
-3. ENQUADRAMENTO DA INFRAÇÃO — campo 4.2
-${form.tem_mora === 'sim' ? '4. MULTA DE MORA — campo separado (art. 119, VI, 11%)' : ''}
+1. MATÉRIA TRIBUTÁVEL — campo 3.1
+2. FUNDAMENTAÇÃO LEGAL — campo 3.2
+3. DESCRIÇÃO DA INFRAÇÃO 1 — campo 4.1
+4. ENQUADRAMENTO DA INFRAÇÃO 1 — campo 4.2
+5. DESCRIÇÃO DA INFRAÇÃO 2 — campo 4.4 (somente se for tipo com 2 infrações)
 
 Use os delimitadores ===ALIM_CAMPO3_INICIO=== / ===ALIM_CAMPO3_FIM===, ===ALIM_CAMPO4_1_INICIO=== / ===ALIM_CAMPO4_1_FIM===, ===ALIM_CAMPO4_2_INICIO=== / ===ALIM_CAMPO4_2_FIM=== em cada bloco. Use os valores fornecidos acima exatamente como estão — não calcule, não altere.`
 }
@@ -1922,13 +1892,10 @@ export default function Home() {
   const FORM_ALIM_INICIAL = {
     fluxo: 'tvf_ta',
     materia_original: '',
-    valor_uferms: '',
-    tem_mora: 'nao',
     val_operacao: '',
     val_icms: '',
     val_aliquota: '',
     val_multa: '',
-    val_mora: '',
     val_fecomp: '',
     val_uferms_qtd: '',
     difcon_sujeito: '', difcon_ie: '', difcon_cnpj: '', difcon_uf: '',
