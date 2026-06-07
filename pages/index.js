@@ -1359,12 +1359,52 @@ function FormularioALIM({ form, setForm, onVoltar, onGerar }) {
             />
           </div>
           <div style={secStyle}>
-            <div style={{ ...labelStyle, marginBottom: '12px' }}>◆ Dados complementares</div>
+            <div style={{ ...labelStyle, marginBottom: '4px' }}>◆ Valores calculados</div>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.72rem', color: '#4a5a6a', marginBottom: '14px' }}>
+              Preencha os valores do campo 10 do TVF ou do demonstrativo do TA. Deixe em branco o que não se aplicar.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <div style={labelStyle}>Valor total da operação (R$)</div>
+                <InputComFocus style={inputStyle} value={form.val_operacao} onChange={setE('val_operacao')} placeholder="Ex: 3.169,00" inputMode="decimal" />
+              </div>
+              <div>
+                <div style={labelStyle}>Alíquota (%)</div>
+                <InputComFocus style={inputStyle} value={form.val_aliquota} onChange={setE('val_aliquota')} placeholder="Ex: 17" inputMode="decimal" />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <div style={labelStyle}>ICMS devido (R$)</div>
+                <InputComFocus style={inputStyle} value={form.val_icms} onChange={setE('val_icms')} placeholder="Ex: 538,73" inputMode="decimal" />
+              </div>
+              <div>
+                <div style={labelStyle}>Multa principal (R$)</div>
+                <InputComFocus style={inputStyle} value={form.val_multa} onChange={setE('val_multa')} placeholder="Ex: 538,73" inputMode="decimal" />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <div style={labelStyle}>Multa de mora (R$)</div>
+                <InputComFocus style={inputStyle} value={form.val_mora} onChange={setE('val_mora')} placeholder="Ex: 80,84" inputMode="decimal" />
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Deixe vazio se não há mora</p>
+              </div>
+              <div>
+                <div style={labelStyle}>FECOMP (R$)</div>
+                <InputComFocus style={inputStyle} value={form.val_fecomp} onChange={setE('val_fecomp')} placeholder="Ex: 243,90" inputMode="decimal" />
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Só bebidas alcoólicas (art. 41-A)</p>
+              </div>
+              <div>
+                <div style={labelStyle}>Qtd. UFERMS</div>
+                <InputComFocus style={inputStyle} value={form.val_uferms_qtd} onChange={setE('val_uferms_qtd')} placeholder="Ex: 25" inputMode="numeric" />
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Só MDF-e e embaraço</p>
+              </div>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
                 <div style={labelStyle}>Valor da UFERMS vigente (R$)</div>
                 <InputComFocus style={inputStyle} value={form.valor_uferms} onChange={setE('valor_uferms')} placeholder="Ex: 52,73" inputMode="decimal" />
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.68rem', color: '#3a4a5a', marginTop: '4px' }}>Necessário para infrações com multa em UFERMS (MDF-e, embaraço)</p>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.67rem', color: '#3a4a5a', marginTop: '4px' }}>Para calcular o valor em reais da multa UFERMS</p>
               </div>
               <div>
                 <div style={labelStyle}>Multa de mora?</div>
@@ -1590,23 +1630,41 @@ Por favor, elabore a matéria tributária do ALIM com os seguintes blocos separa
 Use os delimitadores ===ALIM_CAMPO3_INICIO=== / ===ALIM_CAMPO3_FIM===, ===ALIM_CAMPO4_1_INICIO=== / ===ALIM_CAMPO4_1_FIM===, ===ALIM_CAMPO4_2_INICIO=== / ===ALIM_CAMPO4_2_FIM=== em cada bloco, identificando-os claramente.`
   }
 
+  // Monta bloco de valores calculados para passar ao agente
+  const valoresLinhas = []
+  if (form.val_operacao)   valoresLinhas.push('VALOR TOTAL DA OPERAÇÃO: R$ ' + form.val_operacao)
+  if (form.val_aliquota)   valoresLinhas.push('ALÍQUOTA: ' + form.val_aliquota + '%')
+  if (form.val_icms)       valoresLinhas.push('ICMS DEVIDO: R$ ' + form.val_icms)
+  if (form.val_multa)      valoresLinhas.push('MULTA PRINCIPAL (100%): R$ ' + form.val_multa)
+  if (form.val_mora)       valoresLinhas.push('MULTA DE MORA (11%): R$ ' + form.val_mora)
+  if (form.val_fecomp)     valoresLinhas.push('FECOMP (2%): R$ ' + form.val_fecomp)
+  if (form.val_uferms_qtd) valoresLinhas.push('QUANTIDADE DE UFERMS: ' + form.val_uferms_qtd + ' UFERMS')
+  if (form.valor_uferms) {
+    const totalUferms = form.val_uferms_qtd
+      ? ' (total: R$ ' + (parseFloat(form.val_uferms_qtd) * parseFloat(form.valor_uferms.replace(',','.'))).toFixed(2).replace('.',',') + ')'
+      : ''
+    valoresLinhas.push('VALOR DA UFERMS VIGENTE: R$ ' + form.valor_uferms + totalUferms)
+  }
+  const blocoValores = valoresLinhas.length > 0
+    ? '\n\nVALORES CALCULADOS (USE EXATAMENTE ESTES — NÃO RECALCULE, NÃO ALTERE):\n' + valoresLinhas.join('\n')
+    : ''
+
   return `GERAR MATÉRIA TRIBUTÁRIA DO ALIM
 
-Com base na matéria tributária abaixo, extraída do TVF ou TA original, elabore os blocos de texto prontos para inserção no sistema SEFAZ-MS:
+Com base na matéria tributária abaixo, extraída do TVF ou TA original, elabore os blocos de texto prontos para inserção no sistema SEFAZ-MS.${blocoValores}
 
 MATÉRIA ORIGINAL DO TVF/TA:
 ${form.materia_original}
 
-${form.valor_uferms ? 'VALOR DA UFERMS VIGENTE: R$ ' + form.valor_uferms : ''}
 MULTA DE MORA (art. 119, VI): ${form.tem_mora === 'sim' ? 'SIM — incluir bloco de multa de mora' : 'NÃO'}
 
-Por favor, elabore os seguintes blocos separados para os campos do ALIM:
-1. MATÉRIA TRIBUTÁVEL — campo 3 do ALIM (narrativa do fato gerador, adaptada do TVF/TA)
-2. DESCRIÇÃO DA INFRAÇÃO — campo 4.1 (texto da infração principal)
-3. ENQUADRAMENTO DA INFRAÇÃO — campo 4.2 (artigos aplicáveis)
-${form.tem_mora === 'sim' ? '4. MULTA DE MORA — campo separado (enquadramento art. 119, VI, com percentual de 11%)' : ''}
+Elabore os seguintes blocos separados para os campos do ALIM:
+1. MATÉRIA TRIBUTÁVEL — campo 3
+2. DESCRIÇÃO DA INFRAÇÃO — campo 4.1
+3. ENQUADRAMENTO DA INFRAÇÃO — campo 4.2
+${form.tem_mora === 'sim' ? '4. MULTA DE MORA — campo separado (art. 119, VI, 11%)' : ''}
 
-Use os delimitadores ===ALIM_CAMPO3_INICIO=== / ===ALIM_CAMPO3_FIM===, ===ALIM_CAMPO4_1_INICIO=== / ===ALIM_CAMPO4_1_FIM===, ===ALIM_CAMPO4_2_INICIO=== / ===ALIM_CAMPO4_2_FIM=== em cada bloco. Não calcule valores — apenas redija os textos com as informações já presentes na matéria original.`
+Use os delimitadores ===ALIM_CAMPO3_INICIO=== / ===ALIM_CAMPO3_FIM===, ===ALIM_CAMPO4_1_INICIO=== / ===ALIM_CAMPO4_1_FIM===, ===ALIM_CAMPO4_2_INICIO=== / ===ALIM_CAMPO4_2_FIM=== em cada bloco. Use os valores fornecidos acima exatamente como estão — não calcule, não altere.`
 }
 
 function montarMensagemTVF(form) {
@@ -1823,15 +1881,23 @@ export default function Home() {
     texto_tvf: '', // texto extraído do PDF do TVF/TA
     texto_contribuinte: ''
   })
-  const [formALIM, setFormALIM] = useState({
-    fluxo: 'tvf_ta', // 'tvf_ta' | 'difcon'
+  const FORM_ALIM_INICIAL = {
+    fluxo: 'tvf_ta',
     materia_original: '',
     valor_uferms: '',
     tem_mora: 'nao',
+    val_operacao: '',
+    val_icms: '',
+    val_aliquota: '',
+    val_multa: '',
+    val_mora: '',
+    val_fecomp: '',
+    val_uferms_qtd: '',
     difcon_sujeito: '', difcon_ie: '', difcon_cnpj: '', difcon_uf: '',
     difcon_periodo_inicio: '', difcon_periodo_fim: '',
     difcon_valor_tributavel: '', difcon_icms: '', difcon_referencias: ''
-  })
+  }
+  const [formALIM, setFormALIM] = useState(FORM_ALIM_INICIAL)
 
   const [historicoDocumentos, setHistoricoDocumentos] = useState([])
   const [carregandoHistorico, setCarregandoHistorico] = useState(false)
@@ -2233,7 +2299,7 @@ export default function Home() {
       setFormContestacao({ tipo: 'contestacao', numero_doc: '', contribuinte: '', ie_contrib: '', cnpj_contrib: '', destinatario: '', texto_tvf: '', texto_contribuinte: '' })
       setFormTVF({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', mercadoria: [{ descricao: '', quantidade: '', unidade: '', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', tipo_mdfe: 'falta_emissao', chaves_nf: [{ chave: '', valor: '' }], danfes: [{ chave: '', emissao: '', saida: '', valor: '' }], origem_municipio: '', origem_uf: 'MS', destino_municipio: '', destino_uf: '', chave_mdfe: '', mdfe_emissao_data: '', mdfe_emissao_hora: '', mdfe_ativo: false, mdfe_confirmacao_data: '', mdfe_confirmacao_hora: '', mdfe_encerramento_data: '', mdfe_encerramento_hora: '', obs: '' })
       setFormTA({ data: '', hora: '', endereco: '', cidade: 'Campo Grande', placas: [''], motorista: '', cpf: '', telefone: '', sujeito: '', ie: '', cnpj: '', documentos: '', mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }], infracao: 'sem_documento', motivo_inidonia: '', responsavel: 'transportador', obs: '' })
-      setFormALIM({ fluxo: 'tvf_ta', materia_original: '', valor_uferms: '', tem_mora: 'nao', difcon_sujeito: '', difcon_ie: '', difcon_cnpj: '', difcon_uf: '', difcon_periodo_inicio: '', difcon_periodo_fim: '', difcon_valor_tributavel: '', difcon_icms: '', difcon_referencias: '' })
+      setFormALIM(FORM_ALIM_INICIAL)
       if (sessaoIdRef.current) {
         supabase
           .from('sessoes_chat')
