@@ -909,7 +909,7 @@ const INCISOS = [
   { value: 'fora do prazo de validade (art. 93, VII)', label: 'VII — Documento vencido' },
 ]
 
-function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar }) {
+function FormularioDocumento({ tipo, form, setForm, onVoltar, onGerar, setScannerAberto }) {
   const set = (campo) => (e) => setForm(f => ({ ...f, [campo]: e.target.value }))
 
   const addMerc = () => setForm(f => ({ ...f, mercadoria: [{ descricao: '', quantidade: '', unidade: 'unidades', valor: '' }, ...f.mercadoria] }))
@@ -2498,6 +2498,7 @@ export default function Home() {
               setModoAtivo('consulta')
               enviar(msg)
             }}
+            setScannerAberto={setScannerAberto}
           />
         )}
 
@@ -2514,6 +2515,7 @@ export default function Home() {
               setModoAtivo('consulta')
               enviar(msg)
             }}
+            setScannerAberto={setScannerAberto}
           />
         )}
 
