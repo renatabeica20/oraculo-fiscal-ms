@@ -729,39 +729,36 @@ REGRA CRÍTICA: cada bloco DEVE ter seu delimitador de abertura e fechamento em 
 
 ORDEM EXATA DOS BLOCOS — siga sempre esta sequência:
 
-BLOCO 1 — MATÉRIA TRIBUTÁVEL (campo 3) — SEMPRE:
+BLOCO 1 — MATÉRIA TRIBUTÁVEL (campo 3.1) — SEMPRE:
 ===ALIM_CAMPO3_INICIO===
 [texto]
 ===ALIM_CAMPO3_FIM===
 
-BLOCO 2 — DESCRIÇÃO DA INFRAÇÃO 1 (campo 4.1) — SEMPRE:
+BLOCO 2 — FUNDAMENTAÇÃO LEGAL DO CAMPO 3 (campo 3.2) — SEMPRE:
+===ALIM_CAMPO3_2_INICIO===
+[apenas artigos da fundamentação legal do fato gerador]
+===ALIM_CAMPO3_2_FIM===
+
+BLOCO 3 — DESCRIÇÃO DA INFRAÇÃO 1 (campo 4.1) — SEMPRE:
 ===ALIM_CAMPO4_1_INICIO===
 [texto]
 ===ALIM_CAMPO4_1_FIM===
 
-BLOCO 3 — ENQUADRAMENTO DA INFRAÇÃO 1 (campo 4.2) — SEMPRE:
+BLOCO 4 — ENQUADRAMENTO DA INFRAÇÃO 1 (campo 4.2) — SEMPRE:
 ===ALIM_CAMPO4_2_INICIO===
 [apenas artigos]
 ===ALIM_CAMPO4_2_FIM===
-
-BLOCO 4 — MULTA DE MORA (campo 4.3) — SOMENTE quando há ICMS exigido (tipos 3, 5 e 6):
-===ALIM_MORA_INICIO===
-Art. 119, VI, da Lei n. 1.810/97. (Percentual de 11,00%)
-===ALIM_MORA_FIM===
 
 BLOCO 5 — DESCRIÇÃO DA INFRAÇÃO 2 (campo 4.4) — SOMENTE tipos com 2 infrações (tipos 3, 5 e 6):
 ===ALIM_CAMPO4_4_INICIO===
 [texto]
 ===ALIM_CAMPO4_4_FIM===
 
-BLOCO 6 — ENQUADRAMENTO DA INFRAÇÃO 2 (campo 4.5) — SOMENTE tipos com 2 infrações (tipos 3, 5 e 6):
-===ALIM_CAMPO4_5_INICIO===
-[apenas artigos]
-===ALIM_CAMPO4_5_FIM===
-
-ATENÇÃO: os tipos 1 (MDF-e), 2 (embaraço) e 7 (DIFCON) têm apenas 1 infração — gere somente os BLOCOS 1, 2 e 3.
-Os tipos 3 (sem nota), 5 (destinatário diverso) e 6 (quantidade divergente) têm 2 infrações — gere os BLOCOS 1, 2, 3, 4, 5 e 6.
-O tipo 4 (NF vencida) tem apenas 1 infração sem ICMS — gere somente os BLOCOS 1, 2 e 3, SEM mora.
+ATENÇÃO:
+- Os campos 4.3 (enquadramento da mora) e 4.5 (enquadramento da infração 2) são preenchidos automaticamente pelo sistema da SEFAZ — NÃO os gere.
+- Os tipos 1 (MDF-e), 2 (embaraço) e 7 (DIFCON) têm apenas 1 infração — gere somente os BLOCOS 1, 2, 3 e 4.
+- Os tipos 3 (sem nota), 5 (destinatário diverso) e 6 (quantidade divergente) têm 2 infrações — gere os BLOCOS 1, 2, 3, 4 e 5.
+- O tipo 4 (NF vencida) tem apenas 1 infração — gere somente os BLOCOS 1, 2, 3 e 4.
 
 ════════════════════════════════════════
 TEMPLATES POR TIPO DE INFRAÇÃO
@@ -779,6 +776,9 @@ CAMPO 4.1 — template (copiar literalmente, substituindo apenas os valores entr
 "Deixou de emitir o Manifesto Eletrônico de Documentos Fiscais (MDF-e) obrigatório para o transporte de mercadorias, conforme demonstrado no campo 5 do presente ALIM.
 Multa de [N] UFERMS imposta pela falta de emissão do Manifesto Eletrônico de Documentos Fiscais (MDF-e) no valor original de R$ [valor em reais], conforme previsão no art. 117, IV, "x", da Lei 1.810/97.
 No momento do pagamento do tributo caberá a redução prevista no art. 118 da Lei 1.810/97."
+
+CAMPO 3.2:
+"Art. 90, I; Art. 92, § 1° da Lei 1810/97 c/c Art. 124 do Anexo XV ao Regulamento do ICMS/MS e Art. 2°; Art.3° e Art. 4°, Inciso IV, do Subanexo XVII ao Anexo XV do Regulamento do ICMS/MS."
 
 CAMPO 4.2:
 "Art. 90, I; Art. 92, §, 1° e Art. 94, § 1°, I da Lei 1810/97 c.c. Art. 124 do Anexo XV e do RICMS Dec.9.203/98."
@@ -803,6 +803,9 @@ Tal conduta caracteriza desobediência ao agente do fisco, tipificada nos termos
 A infração foi devidamente registrada e, em conformidade com os dispositivos legais, impôs-se a penalidade pecuniária no valor de [N] UFERMS, nos termos do art. 232 da Lei nº 1.810/97, valor correspondente a R$ [valor] na data da lavratura do presente termo.
 Ressalta-se que, nos termos da legislação vigente, [reforço da obrigação, ex: a liberação das mercadorias retidas somente pode ocorrer após conferência e despacho autorizativo pelo Fisco Estadual]. A liberação indevida sem essa autorização configura ato de desobediência e compromete a segurança jurídica das ações de controle e fiscalização tributária."
 
+CAMPO 3.2:
+"Art. 38º, § 1º, I da Lei 2.315/2001; Art. 90, §§ 3º e 4º; Art. 92, caput; e Art. 219, § 4º; Art. 117, IX, 'a': Art. 232 da Lei 1.810/1997."
+
 CAMPO 4.2:
 "Art. 38, § 1.º, I, II e III da Lei n.º 1.810/97."
 
@@ -824,10 +827,11 @@ A infração decorreu da circulação de mercadorias desacompanhadas de document
 [listagem da mercadoria]
 Considerou-se realizada a operação de circulação de mercadorias desacompanhadas de documentação fiscal em função do flagrante de trânsito, conforme descrito na matéria tributável."
 
+CAMPO 3.2:
+"Lei nº 1.810/1997: art. 5°, § 2°, III; art. 13, XVII; art. 14, I, b; art. 30; art. 45, II; art. 84, I; art. 90, I; e art. 119, VI."
+
 CAMPO 4.2:
 "Art. 5°, §2°, III e art. 117, §13 da Lei 1.810/97."
-
-Multa de mora: SIM — gere o bloco MORA (Art. 119, VI, 11%).
 
 CAMPO 4.4 — Infração 2 (remessa sem nota + multa 100%) — template (5 parágrafos):
 "O sujeito passivo realizou a remessa das mercadorias listadas, com valor tributável de R$ [valor], desacompanhadas de documentação fiscal.
@@ -836,8 +840,6 @@ O imposto devido foi calculado no valor original de R$ [ICMS], à alíquota de [
 Considerou-se realizada a operação de circulação de mercadorias, nos termos do art. 5º, §2º, inciso III, em função do flagrante de trânsito.
 No momento do pagamento, será aplicada a redução prevista no art. 118 da Lei nº 1.810/1997."
 
-Enquadramento Infração 2 (campo 4.5):
-"Lei nº 1.810/1997: art. 45, inciso II; art. 46, inciso I, b; art. 61; art. 62; art. 84, inciso I; art. 90, inciso I; art. 117, § 2º, e art. 117, inciso III, a, combinado com o § 13."
 
 ──────────────────────────────────────
 TIPO 4 — DOCUMENTAÇÃO FISCAL VENCIDA (art. 93, VII) — 1 infração, SÓ MULTA
@@ -854,6 +856,9 @@ CAMPO 4.1 — template (4 parágrafos curtos):
 Ocorrência em [data], às [hora], no município de [município]/MS, na [logradouro].
 Penalidade devida no valor original de R$ [valor multa], calculada à alíquota de 100% sobre o valor do imposto devido.
 No momento do pagamento será aplicada a redução prevista no Art. 118 da Lei 1.810/97."
+
+CAMPO 3.2:
+"Art. 1°, §2°, I do Subanexo V ao Anexo XV do RICMS; Art. 93, VII da Lei 1810/1997."
 
 CAMPO 4.2:
 "Art. 5°, §2° e §6°; Art. 45, II; Art. 46, I; Art. 93, VII e §Único, todos da Lei 1810/97, c.c. Art. 2°, §2° e Art. 13 do Anexo XV e Art. 1° e Art. 3°, §1° do Subanexo V ao Anexo XV do RICMS (Dec. 9.203/98)."
@@ -873,18 +878,17 @@ CAMPO 4.1 — Infração 1 (ICMS + mora) — template (2 parágrafos):
 "Deixou de pagar o imposto em [data], no valor original de R$ [ICMS], calculado à alíquota de [alíquota]%[, bem como o adicional de R$ [valor FECOMP], correspondente ao FECOMP – Fundo Estadual de Combate e Erradicação da Pobreza, calculado à alíquota de 2%], ambos apurados conforme demonstrativo fiscal constante do campo [X], em razão de ter promovido a circulação de mercadorias acompanhada de documentação fiscal inidônea, referente a [quantidade e descrição].
 Em decorrência da utilização de documentação fiscal inidônea, deixou o sujeito passivo de proceder à correta apuração e recolhimento do imposto devido, considerando-se realizada a operação relativa à circulação de mercadorias por ficção legal, em virtude do trânsito das mercadorias desacompanhadas de documentação fiscal idônea, conforme flagrante fiscal ocorrido e devidamente descrito na descrição da matéria tributável constante do campo 5."
 
+CAMPO 3.2:
+"Art. 5°, § 2°, III, c.c. Art. 117, § 13; Art. 13, XVII; Art. 14, I, b; Art. 41-A; Art. 84, I; Art. 90, I; Art. 93, IV, c.c Art. 2°, §2° do Anexo XV ao RICMS e Art. 119, VI da Lei 1.810/1997."
+
 CAMPO 4.2:
 "Art. 5°, §2°, III e art. 117, §13 da Lei 1.810/97."
-
-Multa de mora: SIM — gere o bloco MORA (Art. 119, VI, 11%).
 
 CAMPO 4.4 — Infração 2 (circulação com doc inidônea + multa 100%) — template (3 parágrafos):
 "Promoveu a remessa de [quantidade e descrição], acompanhada de documentação fiscal inidônea, com valor tributável de R$ [valor], em [data], às [hora], na [logradouro], no município de [município]/MS, com imposto devido no valor original de R$ [ICMS], calculado à alíquota de [alíquota]%[, e adicional de R$ [valor FECOMP] correspondente ao FECOMP – Fundo Estadual de Combate e Erradicação da Pobreza, apurado à alíquota de 2%, conforme art. 41-A da Lei nº 1.810/1997].
 Considerou-se realizada a operação relativa à circulação de mercadorias por ficção legal, em razão do trânsito das mercadorias acompanhadas de documentação fiscal inidônea, conforme flagrante fiscal ocorrido e descrito no campo 5.
 No momento do pagamento será aplicada a redução prevista no art. 118 da Lei nº 1.810/1997, desde que atendidas as condições legais."
 
-Enquadramento Infração 2 (campo 4.5):
-"Art. 45, II; Art. 46, I, b; Art. 61; Art. 62; Art. 84, I; Art. 90, I; Art. 93, IV, c.c Art. 2º, §2º do Anexo XV ao RICMS Art. 117, §2°, e Art. 117, III, a, c.c Art. 117, §13 da Lei nº 1.810/1997."
 
 ──────────────────────────────────────
 TIPO 6 — DOCUMENTAÇÃO FISCAL INIDÔNEA — DIVERGÊNCIA DE QUANTIDADE (art. 93, VI) — 2 infrações
@@ -900,10 +904,11 @@ CAMPO 4.1 — Infração 1 (ICMS + mora) — template (3 parágrafos):
 A ocorrência configura o fato gerador do imposto por ficção legal, nos termos do art. 5º, §2º, III c/c art. 117, §13 da Lei n. 1.810/1997.
 Aplica-se, ainda, a penalidade de 11% sobre o valor do imposto devido, prevista no art. 119, VI da Lei n. 1.810/1997, resultando em multa de R$ [valor mora]."
 
+CAMPO 3.2:
+"Arts. 5°, § 2°, III; 13, XVII; 14, I, 'b'; 30; 41, III; 45, II; 84, I; 90, I; 93, VI; 117, § 13; 119, VI, todos da Lei n. 1.810/1997; art. 2°, § 2°, I e III, do Anexo XV do RICMS/MS."
+
 CAMPO 4.2:
 "Art. 5°, §2°, III e art. 117, §13 da Lei 1.810/97."
-
-Multa de mora: SIM — gere o bloco MORA (Art. 119, VI, 11%).
 
 CAMPO 4.4 — Infração 2 (doc inidônea + multa 100%) — template (4 parágrafos):
 "Promoveu a circulação de mercadoria tributada internamente, no valor de R$ [valor total], com imposto devido de R$ [ICMS], acompanhada de documento fiscal inidôneo, conforme verificado em [data] [local].
@@ -911,8 +916,6 @@ A documentação fiscal apresentou divergência substancial entre a quantidade d
 Diante disso, aplica-se a penalidade acessória correspondente a 100% do valor do imposto, nos termos do art. 117, §16, inciso II, alínea 'b' da Lei n. 1.810/1997, totalizando R$ [valor multa 100%].
 O valor poderá ser reduzido conforme previsto no art. 118 da referida lei."
 
-Enquadramento Infração 2 (campo 4.5):
-"Art. 45, II; art. 46, I, 'b'; art. 61; art. 62; art. 84, I; art. 90, I e art. 117, III, 'a', 1, c.c. Art. 117, §13 da Lei nº 1.810/97."
 
 ──────────────────────────────────────
 TIPO 7 — DIFCON — DIFERENCIAL DE ALÍQUOTAS CONSUMIDOR FINAL
@@ -925,6 +928,9 @@ Os demonstrativos apresentados informam os dados dos Documentos Fiscais eletrôn
 CAMPO 4.1 — template (2 parágrafos):
 "Deixou de recolher, no prazo regulamentar, o ICMS no valor original de R$ [ICMS], conforme apurado no Demonstrativo de Cálculo e na relação de Termos de Verificação Fiscal anexos, valor este devido a título de Diferencial de Alíquotas, em decorrência da saída de bens com destino a consumidor final não contribuinte deste Estado, tendo como remetente empresa localizada em outra unidade da Federação.
 Nos termos da legislação vigente, caso o crédito tributário seja liquidado integralmente, as multas previstas no art. 117 da Lei nº 1.810/1997 poderão ser reduzidas, conforme dispõe o art. 118 do mesmo diploma legal."
+
+CAMPO 3.2:
+"Art. 5°, VIII; art. 13, XIX; art. 14, I, 'a'; art. 20, I (base de cálculo), combinado com o art. 42 (alíquota), todos da Lei nº 1.810/1997; arts. 2°, 5° e 6°, II, todos do Decreto nº 14.365/2015; art. 44, § 5°, da Lei nº 1.810/1997."
 
 CAMPO 4.2:
 "Art. 5°, VIII; Art. 13, XIX; Art. 14, I; Art. 20, I, (base de cálculo); Art. 42 (alíquota) e Art. 44, §5° todos da Lei nº 1.810/97; Arts. 2°, 5° e 6°, II, todos do Decreto nº 14.365/2015 (Anexo XXIV ao RICMS)."
