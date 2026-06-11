@@ -189,6 +189,8 @@ export default function Admin() {
     setSalvando(false)
   }
 
+  const [confirmarExclusao, setConfirmarExclusao] = useState(null)
+
   const alternarAtivo = async (fiscal) => {
     const { data: { session } } = await supabase.auth.getSession()
     await fetch('/api/fiscais', {
@@ -197,6 +199,26 @@ export default function Admin() {
       body: JSON.stringify({ id: fiscal.id, ativo: !fiscal.ativo })
     })
     carregarFiscais()
+  }
+
+  const excluirFiscal = async (fiscal) => {
+    const { data: { session } } = await supabase.auth.getSession()
+    try {
+      // Apaga dados dependentes via service_role na API
+      const resp = await fetch('/api/fiscais', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ id: fiscal.id })
+      })
+      const data = await resp.json()
+      if (!resp.ok) throw new Error(data.error || 'Erro ao excluir')
+      setSucesso(`${fiscal.nome} excluído com sucesso.`)
+      setConfirmarExclusao(null)
+      carregarFiscais()
+    } catch (e) {
+      setErro(e.message)
+      setConfirmarExclusao(null)
+    }
   }
 
   const sair = async () => {
@@ -282,7 +304,7 @@ export default function Admin() {
       </header>
 
       <div className={styles.conteudo}>
-        <div className={styles.abas}>
+        <div className={styles.abas} style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", display: "flex", flexWrap: "nowrap" }}>
           <button className={`${styles.aba} ${aba === 'fiscais' ? styles.abaAtiva : ''}`} onClick={() => setAba('fiscais')}>
             Fiscais cadastrados ({fiscais.length})
           </button>
@@ -298,9 +320,7 @@ export default function Admin() {
           <button className={`${styles.aba} ${aba === 'uso' ? styles.abaAtiva : ''}`} onClick={() => { setAba('uso'); carregarLogs('7'); setErro(''); setSucesso('') }}>
             📊 Uso
           </button>
-          <button className={`${styles.aba} ${aba === 'gemini' ? styles.abaAtiva : ''}`} onClick={() => { setAba('gemini'); carregarGeminiIndexados(); setErro(''); setSucesso('') }}>
-            🤖 Gemini
-          </button>
+
         </div>
 
         {/* ── Fiscais cadastrados ── */}
@@ -329,6 +349,13 @@ export default function Admin() {
                       <td>
                         <button className={`${styles.btnAcao} ${f.ativo ? styles.btnDesativar : styles.btnAtivar}`} onClick={() => alternarAtivo(f)}>
                           {f.ativo ? 'Desativar' : 'Ativar'}
+                        </button>
+                        <button
+                          className={styles.btnAcao}
+                          onClick={() => setConfirmarExclusao(f)}
+                          style={{ marginLeft: '6px', background: 'rgba(220,50,50,0.15)', color: '#f87171', border: '1px solid rgba(220,50,50,0.3)', borderRadius: '6px', padding: '5px 10px', cursor: 'pointer', fontSize: '0.78rem', fontFamily: "'DM Sans', sans-serif" }}
+                        >
+                          🗑 Excluir
                         </button>
                       </td>
                     </tr>
@@ -956,118 +983,64 @@ export default function Admin() {
         }
       `}</style>
 
-        {/* ── Gemini — Upload de documentos ── */}
-        {aba === 'gemini' && (
-          <div className={styles.card}>
-            <h2 className={styles.cardTitulo}>📡 Documentos no Gemini</h2>
-            <p style={{ color: '#aaa', marginBottom: '16px', fontSize: '14px' }}>
-              Os documentos aqui ficam disponíveis por 48h. Faça o upload novamente quando expirar.
-              As consultas legislativas usarão o Gemini com os documentos completos — muito mais preciso que o RAG.
-            </p>
-
-            <div style={{ marginBottom: '20px' }}>
-              <input
-                ref={geminiInputRef}
-                type="file"
-                accept=".docx,.doc"
-                multiple
-                style={{ display: 'none' }}
-                onChange={geminiSelecionarArquivos}
-              />
-              <button className={styles.btnSalvar} onClick={() => geminiInputRef.current?.click()} disabled={geminiIndexando}>
-                Selecionar arquivos .docx
-              </button>
-              {geminiArquivos.length > 0 && (
-                <span style={{ marginLeft: '12px', color: '#c9a84c', fontSize: '14px' }}>
-                  {geminiArquivos.length} arquivo(s) selecionado(s)
-                </span>
-              )}
-            </div>
-
-            {geminiArquivos.length > 0 && (
-              <button className={styles.btnSalvar} onClick={geminiSubirArquivos} disabled={geminiIndexando} style={{ marginBottom: '20px' }}>
-                {geminiIndexando ? 'Subindo...' : `Subir ${geminiArquivos.length} arquivo(s) para o Gemini`}
-              </button>
-            )}
-
-            {geminiProgresso.length > 0 && (
-              <div style={{ marginBottom: '20px' }}>
-                <h3 style={{ color: '#c9a84c', fontSize: '14px', marginBottom: '8px' }}>Progresso do upload:</h3>
-                {geminiProgresso.map((p, i) => (
-                  <div key={i} style={{ fontSize: '13px', color: p.status === 'ok' ? '#4caf50' : p.status === 'erro' ? '#f44336' : '#aaa', marginBottom: '4px' }}>
-                    {p.status === 'ok' ? '✅' : p.status === 'erro' ? '❌' : '⏳'} {p.nome}
-                    {p.erro && <span style={{ marginLeft: '8px', color: '#f44336' }}>{p.erro}</span>}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div style={{ borderTop: '1px solid rgba(201,168,76,0.2)', marginTop: '24px', paddingTop: '24px' }}>
-              <h3 style={{ color: '#c9a84c', fontSize: '14px', marginBottom: '8px' }}>📦 Storage permanente (base para reupload automático)</h3>
-              <p style={{ color: '#aaa', fontSize: '13px', marginBottom: '16px' }}>
-                Suba os documentos aqui uma vez. O sistema fará o reupload para o Gemini automaticamente a cada 47h.
-              </p>
-              <input
-                ref={storageInputRef}
-                type="file"
-                accept=".docx,.doc"
-                multiple
-                style={{ display: 'none' }}
-                onChange={e => { setStorageArquivos(Array.from(e.target.files || [])); setStorageProgresso([]) }}
-              />
-              <button className={styles.btnSalvar} onClick={() => storageInputRef.current?.click()} disabled={storageIndexando} style={{ marginBottom: '12px' }}>
-                Selecionar arquivos para o Storage
-              </button>
-              {storageArquivos.length > 0 && (
-                <button className={styles.btnSalvar} onClick={storageSubirArquivos} disabled={storageIndexando} style={{ marginLeft: '12px', marginBottom: '12px' }}>
-                  {storageIndexando ? 'Subindo...' : `Subir ${storageArquivos.length} arquivo(s)`}
-                </button>
-              )}
-              {storageProgresso.length > 0 && (
-                <div style={{ marginTop: '12px' }}>
-                  {storageProgresso.map((p, i) => (
-                    <div key={i} style={{ fontSize: '12px', color: p.status === 'ok' ? '#4caf50' : p.status === 'erro' ? '#f44336' : '#aaa', marginBottom: '3px' }}>
-                      {p.status === 'ok' ? '✅' : p.status === 'erro' ? '❌' : '⏳'} {p.nome}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <h3 style={{ color: '#c9a84c', fontSize: '14px', marginBottom: '12px', marginTop: '24px' }}>
-              Documentos atualmente no Gemini ({geminiIndexados.filter(a => new Date(a.expira_em) > new Date()).length} válidos):
-            </h3>
-            {geminiIndexados.length === 0 ? (
-              <p style={{ color: '#666', fontSize: '14px' }}>Nenhum documento indexado ainda.</p>
-            ) : (
-              <table className={styles.tabela}>
-                <thead>
-                  <tr><th>Documento</th><th>Expira em</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                  {geminiIndexados.map((a, i) => {
-                    const expirado = new Date(a.expira_em) < new Date()
-                    return (
-                      <tr key={i} style={{ opacity: expirado ? 0.5 : 1 }}>
-                        <td style={{ fontSize: '13px' }}>{a.nome_arquivo}</td>
-                        <td style={{ fontSize: '12px', color: expirado ? '#f44336' : '#aaa' }}>
-                          {new Date(a.expira_em).toLocaleString('pt-BR')}
-                        </td>
-                        <td>
-                          <span style={{ fontSize: '12px', color: expirado ? '#f44336' : '#4caf50' }}>
-                            {expirado ? '❌ Expirado' : '✅ Válido'}
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            )}
-          </div>
-        )}
 
       </div>
+
+      {/* POP-UP CONFIRMAÇÃO DE EXCLUSÃO */}
+      {confirmarExclusao && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+        }} onClick={() => setConfirmarExclusao(null)}>
+          <div style={{
+            background: '#0e1620', borderRadius: '16px', padding: '32px 28px',
+            maxWidth: '420px', width: '100%', textAlign: 'center',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.6)',
+            border: '1px solid rgba(220,50,50,0.3)',
+            borderTop: '3px solid #ef4444'
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🗑</div>
+            <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", color: '#f87171', fontSize: '1.2rem', fontWeight: 700, marginBottom: '8px' }}>
+              Excluir fiscal?
+            </h3>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.88rem', color: '#8a9aab', marginBottom: '6px' }}>
+              <strong style={{ color: '#c8c0b0' }}>{confirmarExclusao.nome}</strong>
+            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', color: '#8a9aab', marginBottom: '20px' }}>
+              {confirmarExclusao.email}
+            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.78rem', color: '#ef4444', marginBottom: '24px' }}>
+              Esta ação é irreversível. O usuário será removido do sistema e do Supabase.
+            </p>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={() => excluirFiscal(confirmarExclusao)}
+                style={{
+                  flex: 1, background: '#ef4444', color: '#fff',
+                  border: 'none', borderRadius: '9px', padding: '13px',
+                  fontFamily: "'DM Sans', sans-serif", fontSize: '0.88rem',
+                  fontWeight: 700, cursor: 'pointer'
+                }}
+              >
+                Confirmar exclusão
+              </button>
+              <button
+                onClick={() => setConfirmarExclusao(null)}
+                style={{
+                  background: 'rgba(255,255,255,0.04)', color: '#5a6a7a',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: '9px', padding: '13px 16px',
+                  fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
