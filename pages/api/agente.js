@@ -364,6 +364,7 @@ Art. 3º — ISENÇÃO: operações INTERESTADUAIS com produtos em estado natura
   // ─── RAG — busca híbrida (vetorial + textual) ────────────────────────────
   let contextoRAG = ''
   let ragStatus   = 'desabilitado'
+  let documentosRelevantes = []
 
   // Extrai termos de busca textual da mensagem (artigos, parágrafos, palavras-chave)
   function extrairTermosBusca(texto) {
@@ -523,6 +524,9 @@ Art. 3º — ISENÇÃO: operações INTERESTADUAIS com produtos em estado natura
               const label = t.fonte === 'textual' ? 'busca exata' : `similaridade ${(t.similarity * 100).toFixed(0)}%`
               return `[TRECHO ${i + 1} — ${t.nome_documento} — ${label}]\n${t.trecho}`
             }).join('\n\n---\n\n')
+
+        // Extrair nomes únicos dos documentos relevantes para filtrar URIs do Gemini
+        documentosRelevantes = [...new Set(trechosCombinados.slice(0, 20).map(t => t.nome_documento).filter(Boolean))]
       }
 
     } catch (e) {
@@ -1025,12 +1029,29 @@ REGRAS FINAIS INVIOLÁVEIS
           process.env.SUPABASE_SERVICE_ROLE_KEY,
           { auth: { autoRefreshToken: false, persistSession: false } }
         )
-        const { data: arquivos, error: geminiDbError } = await supabaseGemini
+        // Busca todos os arquivos válidos
+        const { data: todosArquivos, error: geminiDbError } = await supabaseGemini
           .from('gemini_arquivos')
           .select('nome_arquivo, gemini_uri')
           .gt('expira_em', new Date().toISOString())
           .order('nome_arquivo')
-        console.log('[GEMINI DB]', { count: arquivos?.length, error: geminiDbError?.message })
+
+        // Filtra pelos documentos que o RAG identificou como relevantes
+        // Se não há documentos relevantes identificados, usa todos (até 15)
+        let arquivos = todosArquivos
+        if (documentosRelevantes.length > 0 && todosArquivos?.length > 0) {
+          const relevantes = todosArquivos.filter(a =>
+            documentosRelevantes.some(nome =>
+              a.nome_arquivo.toLowerCase().includes(nome.toLowerCase().substring(0, 20)) ||
+              nome.toLowerCase().includes(a.nome_arquivo.toLowerCase().substring(0, 20))
+            )
+          )
+          // Sempre inclui pelo menos 5 arquivos — se filtro retornar menos, complementa com os primeiros
+          arquivos = relevantes.length >= 3 ? relevantes : (todosArquivos || []).slice(0, 10)
+        } else {
+          arquivos = (todosArquivos || []).slice(0, 15)
+        }
+        console.log('[GEMINI DB]', { total: todosArquivos?.length, filtrados: arquivos?.length, relevantes: documentosRelevantes.length, error: geminiDbError?.message })
 
         if (arquivos && arquivos.length > 0) {
           const partes = []
