@@ -1057,7 +1057,7 @@ ${contextoRAG}`
   // Haiku para consultas legislativas (20x mais barato), Sonnet para geração de documentos
   const isGeracaoDocumento = !!(mensagem?.match(/\b(TVF|TA\b|ALIM|gerar mat|termo de apreensão|termo de verifica|===MATERIA|GERAR MAT)/i) ||
     (historico && historico.slice(-2).some(m => m?.content?.toString().includes('===MATERIA_INICIO==='))))
-  const modeloEscolhido = isGeracaoDocumento ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001'
+  const modeloEscolhido = 'claude-sonnet-4-6' // Sonnet para todos os modos — Haiku fraco demais para raciocínio jurídico
 
   try {
     const antResp = await fetch('https://api.anthropic.com/v1/messages', {
