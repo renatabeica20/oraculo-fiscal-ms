@@ -432,7 +432,38 @@ Art. 3º — ISENÇÃO: operações INTERESTADUAIS com produtos em estado natura
         }
       }
 
-      // ── 2. BUSCA TEXTUAL (por artigo/palavra-chave exata) ───────────────
+      // ── 2. BUSCA POR ARTIGO ESPECÍFICO (via metadata) ──────────────────
+      let trechosArtigo = []
+      const artigoMatch = textoConsulta.match(/\bart\.?\s*(\d+[\wº°]?(?:-[A-Z])?)\b/i)
+      const anexoMatchNum = textoConsulta.match(/\banexo\s+(\d{1,3}|[IVXLCDM]+)\b/i)
+
+      if (artigoMatch) {
+        const numeroArtigo = artigoMatch[1].replace(/[º°]/g, '')
+        let numeroAnexo = null
+        if (anexoMatchNum) {
+          const v = anexoMatchNum[1]
+          // Converte romano para arábico com zero-padding
+          const romanMap = {'I':'1','II':'2','III':'3','IV':'4','V':'5','VI':'6','VII':'7',
+            'VIII':'8','IX':'9','X':'10','XI':'11','XII':'12','XIII':'13','XIV':'14','XV':'15',
+            'XVI':'16','XVII':'17','XVIII':'18','XIX':'19','XX':'20'}
+          const arab = romanMap[v.toUpperCase()] || v
+          numeroAnexo = arab.padStart(3, '0')
+        }
+
+        const artigoResp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/buscar_legislacao_artigo`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
+          body: JSON.stringify({ p_artigo: numeroArtigo, p_anexo: numeroAnexo, p_max_results: 10 })
+        })
+        if (artigoResp.ok) {
+          const artigoData = await artigoResp.json()
+          if (Array.isArray(artigoData) && artigoData.length > 0) {
+            trechosArtigo = artigoData.map(t => ({ ...t, similarity: 1.0, fonte: 'artigo' }))
+          }
+        }
+      }
+
+      // ── 3. BUSCA TEXTUAL (por artigo/palavra-chave exata) ───────────────
       let trechosTextuais = []
       const termos = extrairTermosBusca(textoConsulta)
 
@@ -450,11 +481,19 @@ Art. 3º — ISENÇÃO: operações INTERESTADUAIS com produtos em estado natura
         }
       }
 
-      // ── 3. COMBINAR E DEDUPLICAR ────────────────────────────────────────
+      // ── 4. COMBINAR E DEDUPLICAR ────────────────────────────────────────
       const vistos = new Set()
       const trechosCombinados = []
 
-      // Textuais primeiro — são mais precisos para artigos específicos
+      // Artigo específico primeiro — máxima precisão por metadata
+      for (const t of trechosArtigo) {
+        const chave = t.trecho?.substring(0, 80)
+        if (chave && !vistos.has(chave)) {
+          vistos.add(chave)
+          trechosCombinados.push({ ...t, fonte: 'artigo' })
+        }
+      }
+      // Textuais depois
       for (const t of trechosTextuais) {
         const chave = t.trecho?.substring(0, 80)
         if (chave && !vistos.has(chave)) {
@@ -462,7 +501,7 @@ Art. 3º — ISENÇÃO: operações INTERESTADUAIS com produtos em estado natura
           trechosCombinados.push({ ...t, fonte: 'textual' })
         }
       }
-      // Depois os vetoriais
+      // Vetoriais por último
       for (const t of trechosVetoriais) {
         const chave = t.trecho?.substring(0, 80)
         if (chave && !vistos.has(chave)) {
@@ -1005,8 +1044,13 @@ REGRAS FINAIS INVIOLÁVEIS
         'x-api-key': ANTHROPIC_KEY,
         'anthropic-version': '2023-06-01'
       },
+      // Haiku para consultas legislativas (20x mais barato), Sonnet para geração de documentos
+      const isGeracaoDocumento = !!(mensagem?.match(/\b(TVF|TA\b|ALIM|gerar mat|termo de apreensão|termo de verifica|===MATERIA|GERAR MAT)/i) ||
+        (historico && historico.slice(-2).some(m => m?.content?.toString().includes('===MATERIA_INICIO==='))))
+      const modeloEscolhido = isGeracaoDocumento ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001'
+
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: modeloEscolhido,
         max_tokens: 2000,
         system: SYSTEM_PROMPT,
         messages: [
@@ -1026,8 +1070,10 @@ REGRAS FINAIS INVIOLÁVEIS
     // Registra uso no banco
     const tokensEntrada = antData.usage?.input_tokens || 0
     const tokensSaida = antData.usage?.output_tokens || 0
-    // Preço claude-sonnet-4-6: $3/M input, $15/M output
-    const custoEstimado = (tokensEntrada * 0.000003) + (tokensSaida * 0.000015)
+    // Preço estimado por modelo
+    const precoInput = isGeracaoDocumento ? 0.000003 : 0.0000008  // Sonnet $3/M | Haiku $0.80/M
+    const precoOutput = isGeracaoDocumento ? 0.000015 : 0.000004  // Sonnet $15/M | Haiku $4/M
+    const custoEstimado = (tokensEntrada * precoInput) + (tokensSaida * precoOutput)
 
     const { error: logError } = await supabaseAdmin.from('logs_uso').insert({
       fiscal_id: user.id,
