@@ -1005,6 +1005,24 @@ REGRAS FINAIS INVIOLÁVEIS
 - Quando o produto tiver alíquota ou BC diferenciada (GLP, ovos, cesta básica, ST, FECOMP), aplique o tratamento correto
 - Se a base vetorial estiver indisponível, sinalize ao fiscal`
 
+  // ─── SYSTEM PROMPT MINIMALISTA — MODO CONSULTA LEGISLATIVA ───────────────
+  // Usado quando a pergunta é sobre legislação pura, sem geração de documento.
+  // Responde EXCLUSIVAMENTE pelo texto legal recuperado — sem BASE_LEI interferindo.
+  const SYSTEM_PROMPT_CONSULTA = `Você é um consultor de legislação tributária do Estado de Mato Grosso do Sul.
+
+REGRA ABSOLUTA: responda exclusivamente com base nos trechos legislativos fornecidos abaixo.
+
+Proibições estritas:
+- NUNCA aplique condição, restrição ou requisito que não esteja EXPRESSAMENTE escrito no dispositivo consultado
+- NUNCA use regras gerais de outros artigos para qualificar um benefício que não faz remissão a eles
+- NUNCA invente dispositivos legais
+- Se o texto não mencionar uma condição, essa condição não existe para aquele dispositivo
+
+Quando o texto for claro: responda diretamente, cite o dispositivo, explique o que ele diz.
+Quando o texto for insuficiente: informe que o trecho recuperado não contém a informação e sugira consultar o documento original.
+
+${contextoRAG}`
+
   // ─── MONTAR MENSAGEM DO USUÁRIO (com ou sem imagens) ────────────────────
   let conteudoUsuario
   if (imagens && imagens.length > 0) {
@@ -1052,7 +1070,7 @@ REGRAS FINAIS INVIOLÁVEIS
       body: JSON.stringify({
         model: modeloEscolhido,
         max_tokens: 2000,
-        system: SYSTEM_PROMPT,
+        system: isGeracaoDocumento ? SYSTEM_PROMPT : SYSTEM_PROMPT_CONSULTA,
         messages: [
           ...historicoTratado,
           { role: 'user', content: conteudoUsuario }
