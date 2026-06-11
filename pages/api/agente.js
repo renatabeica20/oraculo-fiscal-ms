@@ -1010,13 +1010,7 @@ REGRAS FINAIS INVIOLÁVEIS
   // Se o Gemini não tiver arquivos disponíveis, cai no RAG do Supabase como fallback.
   if (!isGeracaoDocumento) {
     try {
-      const geminiResp = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('supabase.co', 'vercel.app') || ''}/api/gemini-consulta`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pergunta: mensagem, historico })
-      })
-
-      // Fallback interno — chama diretamente a lógica do gemini-consulta
+      // Chama Gemini diretamente — sem fetch para rota intermediária
       const GEMINI_KEY = process.env.GEMINI_API_KEY
       if (GEMINI_KEY) {
         const { data: arquivos } = await supabaseAdmin
