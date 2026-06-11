@@ -2789,7 +2789,7 @@ export default function Home() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
               {[
-                { id: 'consulta', icone: '🔍', titulo: 'Consultar legislação', desc: 'Tire dúvidas sobre a legislação tributária estadual, enquadramentos e procedimentos', cor: '#3a6aaa' },
+                { id: 'consulta', icone: '🔍', titulo: 'Consultar legislação', desc: 'Abre o NotebookLM com a legislação tributária estadual completa', cor: '#3a6aaa' },
                 { id: 'tvf', icone: '📋', titulo: 'Gerar TVF / TA', desc: 'Termo de Verificação Fiscal ou Termo de Apreensão — escolha o tipo dentro', cor: '#c9a84c' },
                 { id: 'alim', icone: '📝', titulo: 'Gerar ALIM', desc: 'Auto de Lançamento e Imposição de Multa — matéria tributária pronta para o sistema', cor: '#c87050' },
                 { id: 'contestacao', icone: '⚖️', titulo: 'Contestação / DESK', desc: 'Resposta a impugnação de ALIM ou reclamação de contribuinte via DESK', cor: '#6a9a6a' },
@@ -2798,7 +2798,7 @@ export default function Home() {
                   key={modo.id}
                   onClick={() => {
                     if (modo.id === 'consulta') {
-                      setModoAtivo('consulta')
+                      window.open('https://notebooklm.google.com/notebook/6fd0f39b-84b8-4cc2-a242-55d41daae5e6', '_blank')
                     } else {
                       setModoAtivo(modo.id)
                     }
@@ -2885,7 +2885,7 @@ export default function Home() {
                 {/* Grid de funções */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '1.5rem' }}>
                   {[
-                    { icone: '🔍', titulo: 'Consultar legislação', texto: 'Tire dúvidas sobre a legislação tributária estadual — alíquotas, enquadramentos, prazos e procedimentos, com fundamento legal.' },
+                    { icone: '🔍', titulo: 'Consultar legislação', texto: 'Abre o NotebookLM com a legislação tributária estadual completa — alíquotas, enquadramentos, prazos e procedimentos.' },
                     { icone: '📋', titulo: 'Gerar TVF ou TA', texto: 'Preencha o formulário da abordagem e o Oráculo gera a matéria tributária completa, pronta para copiar no sistema da SEFAZ.' },
                     { icone: '⚖️', titulo: 'Contestação / DESK', texto: 'Cole o texto do contribuinte e o Oráculo gera a resposta em defesa do fisco, rebatendo os argumentos com base na legislação estadual.' },
                     { icone: '📋', titulo: 'Histórico', texto: 'Acesse documentos anteriores pelo ícone no topo. TVF/TA e Contestação/DESK ficam em abas separadas. Clique no nome para editar.' }
@@ -2941,17 +2941,7 @@ export default function Home() {
         </div>
         )}
 
-        {/* MODO CONSULTA — ativa chat direto */}
-        {mensagens.length === 0 && modoAtivo === 'consulta' && (
-          <div style={{ maxWidth: '820px', margin: '24px auto', padding: '0 24px' }}>
-            <button onClick={() => setModoAtivo(null)} style={{ background: 'none', border: 'none', color: '#c9a84c', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: '0.8rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              ← Voltar
-            </button>
-            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.88rem', color: '#5a6a7a', textAlign: 'center', marginTop: '40px' }}>
-              💬 Digite sua dúvida abaixo — legislação, enquadramento, procedimento.
-            </div>
-          </div>
-        )}
+
 
         {/* FORMULÁRIO TVF */}
         {mensagens.length === 0 && modoAtivo === 'tvf' && (
