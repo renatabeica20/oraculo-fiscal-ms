@@ -50,19 +50,31 @@ export default async function handler(req, res) {
   try {
     const buffer = fs.readFileSync(arquivo.filepath)
 
+    // Sanitiza nome do arquivo — remove caracteres especiais que causam erro no Storage
+    const nomeSanitizado = nomeArquivo
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos
+      .replace(/[^a-zA-Z0-9._\-() ]/g, '_')             // substitui especiais por _
+      .trim()
+
+    console.log('[STORAGE UPLOAD] arquivo:', nomeSanitizado, '| tamanho:', buffer.length)
+
     const { error } = await supabaseAdmin.storage
       .from('legislacao')
-      .upload(nomeArquivo, buffer, {
+      .upload(nomeSanitizado, buffer, {
         contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         upsert: true
       })
 
-    if (error) throw new Error('Erro no Storage: ' + error.message)
+    if (error) {
+      console.error('[STORAGE ERROR]', error.message, JSON.stringify(error))
+      throw new Error('Erro no Storage: ' + error.message)
+    }
 
     try { fs.unlinkSync(arquivo.filepath) } catch (_) {}
 
-    return res.status(200).json({ ok: true, nome: nomeArquivo })
+    return res.status(200).json({ ok: true, nome: nomeSanitizado })
   } catch (err) {
+    console.error('[STORAGE CATCH]', err.message)
     try { fs.unlinkSync(arquivo.filepath) } catch (_) {}
     return res.status(500).json({ error: err.message })
   }
