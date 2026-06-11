@@ -434,7 +434,7 @@ Art. 3º — ISENÇÃO: operações INTERESTADUAIS com produtos em estado natura
 
       // ── 2. BUSCA POR ARTIGO ESPECÍFICO (via metadata) ──────────────────
       let trechosArtigo = []
-      const artigoMatch = textoConsulta.match(/\bart\.?\s*(\d+[\wº°]?(?:-[A-Z])?)\b/i)
+      const artigoMatch = textoConsulta.match(/\b(?:art(?:igo)?\.?)\s*(\d+[\wº°]?(?:-[A-Z])?)\b/i)
       const anexoMatchNum = textoConsulta.match(/\banexo\s+(\d{1,3}|[IVXLCDM]+)\b/i)
 
       if (artigoMatch) {
