@@ -525,7 +525,7 @@ Art. 3º — ISENÇÃO: operações INTERESTADUAIS com produtos em estado natura
               return `[TRECHO ${i + 1} — ${t.nome_documento} — ${label}]\n${t.trecho}`
             }).join('\n\n---\n\n')
 
-        // Extrair nomes únicos dos documentos relevantes para filtrar URIs do Gemini
+        // Extrair nomes únicos dos documentos relevantes (mantido para logging — não usado no filtro Gemini)
         documentosRelevantes = [...new Set(trechosCombinados.slice(0, 20).map(t => t.nome_documento).filter(Boolean))]
       }
 
@@ -1014,46 +1014,34 @@ REGRAS FINAIS INVIOLÁVEIS
     (historico && historico.slice(-2).some(m => m?.content?.toString().includes('===MATERIA_INICIO==='))))
 
   // ─── CONSULTA GEMINI (modo consulta legislativa) ─────────────────────────
-  // Se não for geração de documento, tenta primeiro o Gemini com documentos completos.
-  // Se o Gemini não tiver arquivos disponíveis, cai no RAG do Supabase como fallback.
+  // Se não for geração de documento, usa o Gemini com TODOS os arquivos disponíveis.
+  // O contexto longo do Gemini (1M tokens) comporta os 72 documentos sem necessidade de filtro.
+  // Se o Gemini falhar ou não tiver arquivos, cai no RAG do Supabase como fallback.
   if (!isGeracaoDocumento) {
     try {
-      // Chama Gemini diretamente — sem fetch para rota intermediária
       const GEMINI_KEY = process.env.GEMINI_API_KEY
       console.log('[GEMINI CHECK] KEY presente:', !!GEMINI_KEY, '| isGeracaoDocumento:', isGeracaoDocumento)
       if (GEMINI_KEY) {
-        // Cliente dedicado para gemini_arquivos — bypassa RLS com service_role
         const { createClient: createClientGemini } = await import('@supabase/supabase-js')
         const supabaseGemini = createClientGemini(
           process.env.NEXT_PUBLIC_SUPABASE_URL,
           process.env.SUPABASE_SERVICE_ROLE_KEY,
           { auth: { autoRefreshToken: false, persistSession: false } }
         )
-        // Busca todos os arquivos válidos
+
+        // Busca TODOS os arquivos válidos — sem filtro por relevância
         const { data: todosArquivos, error: geminiDbError } = await supabaseGemini
           .from('gemini_arquivos')
           .select('nome_arquivo, gemini_uri')
           .gt('expira_em', new Date().toISOString())
           .order('nome_arquivo')
 
-        // Filtra pelos documentos que o RAG identificou como relevantes
-        // Se não há documentos relevantes identificados, usa todos (até 15)
-        let arquivos = todosArquivos
-        if (documentosRelevantes.length > 0 && todosArquivos?.length > 0) {
-          const relevantes = todosArquivos.filter(a =>
-            documentosRelevantes.some(nome =>
-              a.nome_arquivo.toLowerCase().includes(nome.toLowerCase().substring(0, 20)) ||
-              nome.toLowerCase().includes(a.nome_arquivo.toLowerCase().substring(0, 20))
-            )
-          )
-          // Sempre inclui pelo menos 5 arquivos — se filtro retornar menos, complementa com os primeiros
-          arquivos = relevantes.length >= 3 ? relevantes : (todosArquivos || []).slice(0, 10)
-        } else {
-          arquivos = (todosArquivos || []).slice(0, 15)
-        }
-        console.log('[GEMINI DB]', { total: todosArquivos?.length, filtrados: arquivos?.length, relevantes: documentosRelevantes.length, error: geminiDbError?.message })
+        // Passa todos os arquivos para o Gemini — 72 docs cabem no contexto de 1M tokens
+        const arquivos = todosArquivos || []
 
-        if (arquivos && arquivos.length > 0) {
+        console.log('[GEMINI DB]', { total: todosArquivos?.length, enviados: arquivos.length, error: geminiDbError?.message })
+
+        if (arquivos.length > 0) {
           const partes = []
           for (const arq of arquivos) {
             partes.push({ file_data: { mime_type: 'text/plain', file_uri: arq.gemini_uri } })
@@ -1088,7 +1076,6 @@ REGRAS FINAIS INVIOLÁVEIS
             const gData = JSON.parse(gRespText)
             const respostaGemini = gData.candidates?.[0]?.content?.parts?.[0]?.text
             if (respostaGemini) {
-              // Registra uso sem custo Anthropic
               await supabaseAdmin.from('logs_uso').insert({
                 fiscal_id: user.id,
                 fiscal_nome: perfil?.nome || user.email,
@@ -1133,7 +1120,6 @@ ${contextoRAG}`
   // ─── MONTAR MENSAGEM DO USUÁRIO (com ou sem imagens) ────────────────────
   let conteudoUsuario
   if (imagens && imagens.length > 0) {
-    // Mensagem multimodal: busca cada arquivo pela URL assinada e monta o conteúdo
     const partes = []
     for (const img of imagens) {
       try {
@@ -1189,12 +1175,10 @@ ${contextoRAG}`
 
     const antData = await antResp.json()
 
-    // Registra uso no banco
     const tokensEntrada = antData.usage?.input_tokens || 0
     const tokensSaida = antData.usage?.output_tokens || 0
-    // Preço estimado por modelo
-    const precoInput = isGeracaoDocumento ? 0.000003 : 0.0000008  // Sonnet $3/M | Haiku $0.80/M
-    const precoOutput = isGeracaoDocumento ? 0.000015 : 0.000004  // Sonnet $15/M | Haiku $4/M
+    const precoInput = isGeracaoDocumento ? 0.000003 : 0.0000008
+    const precoOutput = isGeracaoDocumento ? 0.000015 : 0.000004
     const custoEstimado = (tokensEntrada * precoInput) + (tokensSaida * precoOutput)
 
     const { error: logError } = await supabaseAdmin.from('logs_uso').insert({
