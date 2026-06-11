@@ -1211,6 +1211,7 @@ ${contextoRAG}`
       trechosConsultados: ragStatus === 'ok' ? RAG_MATCH_COUNT : 0
     })
 
+
   } catch (err) {
     console.error('Erro no agente:', err)
     return res.status(500).json({ error: err.message })
