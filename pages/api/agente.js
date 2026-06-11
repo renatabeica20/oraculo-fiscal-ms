@@ -1052,8 +1052,10 @@ REGRAS FINAIS INVIOLÁVEIS
             }
           )
 
+          const gRespText = await gResp.text()
+          console.log('[GEMINI STATUS]', gResp.status, gRespText.substring(0, 500))
           if (gResp.ok) {
-            const gData = await gResp.json()
+            const gData = JSON.parse(gRespText)
             const respostaGemini = gData.candidates?.[0]?.content?.parts?.[0]?.text
             if (respostaGemini) {
               // Registra uso sem custo Anthropic
@@ -1075,7 +1077,7 @@ REGRAS FINAIS INVIOLÁVEIS
         }
       }
     } catch (geminiErr) {
-      console.log('Gemini indisponível, usando RAG:', geminiErr.message)
+      console.error('[GEMINI ERROR]', geminiErr.message, geminiErr.stack)
       // Continua para o RAG abaixo
     }
   }
