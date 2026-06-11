@@ -1005,6 +1005,83 @@ REGRAS FINAIS INVIOLÁVEIS
 - Quando o produto tiver alíquota ou BC diferenciada (GLP, ovos, cesta básica, ST, FECOMP), aplique o tratamento correto
 - Se a base vetorial estiver indisponível, sinalize ao fiscal`
 
+  // ─── CONSULTA GEMINI (modo consulta legislativa) ─────────────────────────
+  // Se não for geração de documento, tenta primeiro o Gemini com documentos completos.
+  // Se o Gemini não tiver arquivos disponíveis, cai no RAG do Supabase como fallback.
+  if (!isGeracaoDocumento) {
+    try {
+      const geminiResp = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('supabase.co', 'vercel.app') || ''}/api/gemini-consulta`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pergunta: mensagem, historico })
+      })
+
+      // Fallback interno — chama diretamente a lógica do gemini-consulta
+      const GEMINI_KEY = process.env.GEMINI_API_KEY
+      if (GEMINI_KEY) {
+        const { data: arquivos } = await supabaseAdmin
+          .from('gemini_arquivos')
+          .select('nome_arquivo, gemini_uri')
+          .gt('expira_em', new Date().toISOString())
+          .order('nome_arquivo')
+
+        if (arquivos && arquivos.length > 0) {
+          const partes = []
+          for (const arq of arquivos) {
+            partes.push({ file_data: { mime_type: 'text/plain', file_uri: arq.gemini_uri } })
+          }
+
+          let contextoHistorico = ''
+          if (historico && historico.length > 0) {
+            const ultimos = historico.slice(-4)
+            contextoHistorico = '\n\nCONTEXTO DA CONVERSA ANTERIOR:\n' +
+              ultimos.map(m => `${m.role === 'user' ? 'Fiscal' : 'Oráculo'}: ${typeof m.content === 'string' ? m.content.substring(0, 300) : ''}`).join('\n')
+          }
+          partes.push({ text: `${contextoHistorico}\n\nPERGUNTA DO FISCAL: ${mensagem}` })
+
+          const gResp = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                system_instruction: {
+                  parts: [{ text: `Você é um consultor especializado na legislação tributária do Estado de Mato Grosso do Sul. Você tem acesso aos documentos legislativos completos: RICMS/MS, Anexos, Subanexos, Lei 1.810/97, Lei 2.315/2001, Decretos e demais normas estaduais. REGRAS: Responda com base EXCLUSIVAMENTE nos documentos fornecidos. Cite sempre o artigo, parágrafo e lei de origem. Seja objetivo e prático — o usuário é auditor fiscal experiente. Se a resposta exigir interpretação, explicite que é interpretação e não texto expresso. NUNCA invente dispositivos legais. Responda em português formal.` }]
+                },
+                contents: [{ role: 'user', parts: partes }],
+                generationConfig: { temperature: 0.1, maxOutputTokens: 2000 }
+              })
+            }
+          )
+
+          if (gResp.ok) {
+            const gData = await gResp.json()
+            const respostaGemini = gData.candidates?.[0]?.content?.parts?.[0]?.text
+            if (respostaGemini) {
+              // Registra uso sem custo Anthropic
+              await supabaseAdmin.from('logs_uso').insert({
+                fiscal_id: user.id,
+                fiscal_nome: perfil?.nome || user.email,
+                tokens_entrada: 0,
+                tokens_saida: 0,
+                custo_estimado: 0
+              }).catch(() => {})
+
+              return res.status(200).json({
+                resposta: respostaGemini,
+                trechosConsultados: arquivos.length,
+                fonte: 'gemini'
+              })
+            }
+          }
+        }
+      }
+    } catch (geminiErr) {
+      console.log('Gemini indisponível, usando RAG:', geminiErr.message)
+      // Continua para o RAG abaixo
+    }
+  }
+
   // ─── SYSTEM PROMPT MINIMALISTA — MODO CONSULTA LEGISLATIVA ───────────────
   // Usado quando a pergunta é sobre legislação pura, sem geração de documento.
   // Responde EXCLUSIVAMENTE pelo texto legal recuperado — sem BASE_LEI interferindo.
