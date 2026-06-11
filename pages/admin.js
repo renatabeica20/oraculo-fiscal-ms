@@ -23,6 +23,13 @@ export default function Admin() {
   const [periodoLogs, setPeriodoLogs] = useState('7')
   const inputRef = useRef(null)
 
+  // Estado da aba Gemini
+  const [geminiArquivos, setGeminiArquivos] = useState([])
+  const [geminiIndexados, setGeminiIndexados] = useState([])
+  const [geminiIndexando, setGeminiIndexando] = useState(false)
+  const [geminiProgresso, setGeminiProgresso] = useState([])
+  const geminiInputRef = useRef(null)
+
   useEffect(() => { verificarAdmin() }, [])
 
   const verificarAdmin = async () => {
@@ -63,6 +70,47 @@ export default function Admin() {
     })
     const data = await resp.json()
     setPendentes(data.pendentes || [])
+  }
+
+  const carregarGeminiIndexados = async () => {
+    const { data } = await supabase
+      .from('gemini_arquivos')
+      .select('nome_arquivo, expira_em, criado_em')
+      .order('nome_arquivo')
+    setGeminiIndexados(data || [])
+  }
+
+  const geminiSelecionarArquivos = (e) => {
+    const lista = Array.from(e.target.files || [])
+    setGeminiArquivos(lista)
+    setGeminiProgresso([])
+  }
+
+  const geminiSubirArquivos = async () => {
+    if (!geminiArquivos.length) return
+    setGeminiIndexando(true)
+    const { data: { session } } = await supabase.auth.getSession()
+    const token = session?.access_token
+
+    for (const arq of geminiArquivos) {
+      setGeminiProgresso(prev => [...prev, { nome: arq.name, status: 'subindo' }])
+      const formData = new FormData()
+      formData.append('arquivo', arq)
+      try {
+        const resp = await fetch('/api/gemini-upload', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
+        })
+        const data = await resp.json()
+        if (!resp.ok) throw new Error(data.error || 'Erro desconhecido')
+        setGeminiProgresso(prev => prev.map(p => p.nome === arq.name ? { ...p, status: 'ok' } : p))
+      } catch (err) {
+        setGeminiProgresso(prev => prev.map(p => p.nome === arq.name ? { ...p, status: 'erro', erro: err.message } : p))
+      }
+    }
+    setGeminiIndexando(false)
+    carregarGeminiIndexados()
   }
 
   const aprovar = async (fiscal) => {
@@ -218,6 +266,9 @@ export default function Admin() {
           </button>
           <button className={`${styles.aba} ${aba === 'uso' ? styles.abaAtiva : ''}`} onClick={() => { setAba('uso'); carregarLogs('7'); setErro(''); setSucesso('') }}>
             📊 Uso
+          </button>
+          <button className={`${styles.aba} ${aba === 'gemini' ? styles.abaAtiva : ''}`} onClick={() => { setAba('gemini'); carregarGeminiIndexados(); setErro(''); setSucesso('') }}>
+            🤖 Gemini
           </button>
         </div>
 
@@ -873,6 +924,87 @@ export default function Admin() {
           border-radius: 6px !important;
         }
       `}</style>
+
+      </div>
+
+        {/* ── Gemini — Upload de documentos ── */}
+        {aba === 'gemini' && (
+          <div className={styles.card}>
+            <h2 className={styles.cardTitulo}>📡 Documentos no Gemini</h2>
+            <p style={{ color: '#aaa', marginBottom: '16px', fontSize: '14px' }}>
+              Os documentos aqui ficam disponíveis por 48h. Faça o upload novamente quando expirar.
+              As consultas legislativas usarão o Gemini com os documentos completos — muito mais preciso que o RAG.
+            </p>
+
+            <div style={{ marginBottom: '20px' }}>
+              <input
+                ref={geminiInputRef}
+                type="file"
+                accept=".docx,.doc"
+                multiple
+                style={{ display: 'none' }}
+                onChange={geminiSelecionarArquivos}
+              />
+              <button className={styles.btnSalvar} onClick={() => geminiInputRef.current?.click()} disabled={geminiIndexando}>
+                Selecionar arquivos .docx
+              </button>
+              {geminiArquivos.length > 0 && (
+                <span style={{ marginLeft: '12px', color: '#c9a84c', fontSize: '14px' }}>
+                  {geminiArquivos.length} arquivo(s) selecionado(s)
+                </span>
+              )}
+            </div>
+
+            {geminiArquivos.length > 0 && (
+              <button className={styles.btnSalvar} onClick={geminiSubirArquivos} disabled={geminiIndexando} style={{ marginBottom: '20px' }}>
+                {geminiIndexando ? 'Subindo...' : `Subir ${geminiArquivos.length} arquivo(s) para o Gemini`}
+              </button>
+            )}
+
+            {geminiProgresso.length > 0 && (
+              <div style={{ marginBottom: '20px' }}>
+                <h3 style={{ color: '#c9a84c', fontSize: '14px', marginBottom: '8px' }}>Progresso do upload:</h3>
+                {geminiProgresso.map((p, i) => (
+                  <div key={i} style={{ fontSize: '13px', color: p.status === 'ok' ? '#4caf50' : p.status === 'erro' ? '#f44336' : '#aaa', marginBottom: '4px' }}>
+                    {p.status === 'ok' ? '✅' : p.status === 'erro' ? '❌' : '⏳'} {p.nome}
+                    {p.erro && <span style={{ marginLeft: '8px', color: '#f44336' }}>{p.erro}</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <h3 style={{ color: '#c9a84c', fontSize: '14px', marginBottom: '12px' }}>
+              Documentos atualmente no Gemini ({geminiIndexados.filter(a => new Date(a.expira_em) > new Date()).length} válidos):
+            </h3>
+            {geminiIndexados.length === 0 ? (
+              <p style={{ color: '#666', fontSize: '14px' }}>Nenhum documento indexado ainda.</p>
+            ) : (
+              <table className={styles.tabela}>
+                <thead>
+                  <tr><th>Documento</th><th>Expira em</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  {geminiIndexados.map((a, i) => {
+                    const expirado = new Date(a.expira_em) < new Date()
+                    return (
+                      <tr key={i} style={{ opacity: expirado ? 0.5 : 1 }}>
+                        <td style={{ fontSize: '13px' }}>{a.nome_arquivo}</td>
+                        <td style={{ fontSize: '12px', color: expirado ? '#f44336' : '#aaa' }}>
+                          {new Date(a.expira_em).toLocaleString('pt-BR')}
+                        </td>
+                        <td>
+                          <span style={{ fontSize: '12px', color: expirado ? '#f44336' : '#4caf50' }}>
+                            {expirado ? '❌ Expirado' : '✅ Válido'}
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
 
       </div>
     </div>
