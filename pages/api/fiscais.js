@@ -38,5 +38,22 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true })
   }
 
+  // DELETE — exclui fiscal completamente (dados dependentes + auth)
+  if (req.method === 'DELETE') {
+    const { id } = req.body
+    if (!id) return res.status(400).json({ error: 'ID obrigatório' })
+
+    // Apaga dados dependentes na ordem correta
+    await supabaseAdmin.from('logs_uso').delete().eq('fiscal_id', id)
+    await supabaseAdmin.from('sessoes_chat').delete().eq('fiscal_id', id)
+    await supabaseAdmin.from('perfis').delete().eq('id', id)
+
+    // Apaga o usuário do Auth (requer service_role)
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(id)
+    if (error) return res.status(500).json({ error: error.message })
+
+    return res.status(200).json({ ok: true })
+  }
+
   return res.status(405).json({ error: 'Método não permitido' })
 }
