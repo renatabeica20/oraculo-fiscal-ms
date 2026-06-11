@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron-gemini",
-      "schedule": "0 */47 * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }
