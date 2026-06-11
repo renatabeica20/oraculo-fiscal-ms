@@ -25,6 +25,10 @@ export default function Admin() {
 
   // Estado da aba Gemini
   const [geminiArquivos, setGeminiArquivos] = useState([])
+  const [storageArquivos, setStorageArquivos] = useState([])
+  const [storageIndexando, setStorageIndexando] = useState(false)
+  const [storageProgresso, setStorageProgresso] = useState([])
+  const storageInputRef = useRef(null)
   const [geminiIndexados, setGeminiIndexados] = useState([])
   const [geminiIndexando, setGeminiIndexando] = useState(false)
   const [geminiProgresso, setGeminiProgresso] = useState([])
@@ -70,6 +74,33 @@ export default function Admin() {
     })
     const data = await resp.json()
     setPendentes(data.pendentes || [])
+  }
+
+  const storageSubirArquivos = async () => {
+    if (!storageArquivos.length) return
+    setStorageIndexando(true)
+    const { data: { session } } = await supabase.auth.getSession()
+    const token = session?.access_token
+
+    for (const arq of storageArquivos) {
+      setStorageProgresso(prev => [...prev, { nome: arq.name, status: 'subindo' }])
+      const formData = new FormData()
+      formData.append('arquivo', arq)
+      try {
+        const resp = await fetch('/api/storage-upload', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
+        })
+        const data = await resp.json()
+        if (!resp.ok) throw new Error(data.error || 'Erro desconhecido')
+        setStorageProgresso(prev => prev.map(p => p.nome === arq.name ? { ...p, status: 'ok' } : p))
+      } catch (err) {
+        setStorageProgresso(prev => prev.map(p => p.nome === arq.name ? { ...p, status: 'erro', erro: err.message } : p))
+      }
+    }
+    setStorageIndexando(false)
+    setSucesso('Upload para Storage concluído! O cron job fará o reupload para o Gemini automaticamente a cada 47h.')
   }
 
   const carregarGeminiIndexados = async () => {
@@ -971,7 +1002,39 @@ export default function Admin() {
               </div>
             )}
 
-            <h3 style={{ color: '#c9a84c', fontSize: '14px', marginBottom: '12px' }}>
+            <div style={{ borderTop: '1px solid rgba(201,168,76,0.2)', marginTop: '24px', paddingTop: '24px' }}>
+              <h3 style={{ color: '#c9a84c', fontSize: '14px', marginBottom: '8px' }}>📦 Storage permanente (base para reupload automático)</h3>
+              <p style={{ color: '#aaa', fontSize: '13px', marginBottom: '16px' }}>
+                Suba os documentos aqui uma vez. O sistema fará o reupload para o Gemini automaticamente a cada 47h.
+              </p>
+              <input
+                ref={storageInputRef}
+                type="file"
+                accept=".docx,.doc"
+                multiple
+                style={{ display: 'none' }}
+                onChange={e => { setStorageArquivos(Array.from(e.target.files || [])); setStorageProgresso([]) }}
+              />
+              <button className={styles.btnSalvar} onClick={() => storageInputRef.current?.click()} disabled={storageIndexando} style={{ marginBottom: '12px' }}>
+                Selecionar arquivos para o Storage
+              </button>
+              {storageArquivos.length > 0 && (
+                <button className={styles.btnSalvar} onClick={storageSubirArquivos} disabled={storageIndexando} style={{ marginLeft: '12px', marginBottom: '12px' }}>
+                  {storageIndexando ? 'Subindo...' : `Subir ${storageArquivos.length} arquivo(s)`}
+                </button>
+              )}
+              {storageProgresso.length > 0 && (
+                <div style={{ marginTop: '12px' }}>
+                  {storageProgresso.map((p, i) => (
+                    <div key={i} style={{ fontSize: '12px', color: p.status === 'ok' ? '#4caf50' : p.status === 'erro' ? '#f44336' : '#aaa', marginBottom: '3px' }}>
+                      {p.status === 'ok' ? '✅' : p.status === 'erro' ? '❌' : '⏳'} {p.nome}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <h3 style={{ color: '#c9a84c', fontSize: '14px', marginBottom: '12px', marginTop: '24px' }}>
               Documentos atualmente no Gemini ({geminiIndexados.filter(a => new Date(a.expira_em) > new Date()).length} válidos):
             </h3>
             {geminiIndexados.length === 0 ? (
