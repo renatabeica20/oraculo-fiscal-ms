@@ -1960,6 +1960,7 @@ export default function Home() {
   const [tipoEscolhido, setTipoEscolhido] = useState('')
   const [msgCopiada, setMsgCopiada] = useState(null) // índice da mensagem copiada
   const [modoAtivo, setModoAtivo] = useState(null) // null | 'consulta' | 'tvf' | 'ta' | 'contestacao' | 'alim'
+  const [popupNotebook, setPopupNotebook] = useState(false)
   const [modoOrigem, setModoOrigem] = useState(null) // guarda o modo do formulário original
   const [bannerFechado, setBannerFechado] = useState(true)
   const [formTVF, setFormTVF] = useState({
@@ -2798,7 +2799,7 @@ export default function Home() {
                   key={modo.id}
                   onClick={() => {
                     if (modo.id === 'consulta') {
-                      window.open('https://notebooklm.google.com/notebook/6fd0f39b-84b8-4cc2-a242-55d41daae5e6', '_blank')
+                      setPopupNotebook(true)
                     } else {
                       setModoAtivo(modo.id)
                     }
@@ -3273,6 +3274,84 @@ export default function Home() {
               border: 'none', borderRadius: '9px', padding: '11px 32px',
               fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer'
             }}>ENTENDIDO</button>
+          </div>
+        </div>
+      )}
+
+      {/* POP-UP ACESSO AO NOTEBOOKLM */}
+      {popupNotebook && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+        }} onClick={() => setPopupNotebook(false)}>
+          <div style={{
+            background: '#0e1620', borderRadius: '16px', padding: '32px 28px',
+            maxWidth: '480px', width: '100%', textAlign: 'center',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.6)',
+            border: '1px solid rgba(201,168,76,0.2)',
+            borderTop: '3px solid #c9a84c'
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔍</div>
+            <h3 style={{
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              color: '#c9a84c', fontSize: '1.3rem', fontWeight: 700, marginBottom: '12px'
+            }}>
+              Consultar Legislação
+            </h3>
+            <p style={{
+              fontFamily: "'DM Sans', sans-serif", fontSize: '0.88rem',
+              color: '#8a9aab', lineHeight: 1.7, marginBottom: '20px'
+            }}>
+              A consulta à legislação é feita pelo <strong style={{ color: '#c8c0b0' }}>NotebookLM</strong>, uma ferramenta do Google com acesso à legislação tributária completa do MS.
+            </p>
+            <div style={{
+              background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.2)',
+              borderRadius: '10px', padding: '16px 20px', marginBottom: '24px', textAlign: 'left'
+            }}>
+              <p style={{
+                fontFamily: "'DM Sans', sans-serif", fontSize: '0.8rem',
+                color: '#c9a84c', fontWeight: 700, marginBottom: '8px',
+                textTransform: 'uppercase', letterSpacing: '0.08em'
+              }}>
+                Não tem acesso ainda?
+              </p>
+              <p style={{
+                fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+                color: '#8a9aab', lineHeight: 1.65
+              }}>
+                Envie seu <strong style={{ color: '#c8c0b0' }}>e-mail Gmail</strong> para o administrador do sistema para receber o convite de acesso.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={() => {
+                  setPopupNotebook(false)
+                  window.open('https://notebooklm.google.com/notebook/6fd0f39b-84b8-4cc2-a242-55d41daae5e6', '_blank')
+                }}
+                style={{
+                  flex: 1,
+                  background: 'linear-gradient(135deg, #b8902a, #c9a84c)',
+                  color: '#0d0f12', border: 'none', borderRadius: '9px', padding: '13px',
+                  fontFamily: "'DM Sans', sans-serif", fontSize: '0.88rem', fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                Acessar NotebookLM
+              </button>
+              <button
+                onClick={() => setPopupNotebook(false)}
+                style={{
+                  background: 'rgba(255,255,255,0.04)', color: '#5a6a7a',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: '9px', padding: '13px 16px',
+                  fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}
