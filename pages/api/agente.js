@@ -71,7 +71,7 @@ export default async function handler(req, res) {
   if (!ANTHROPIC_KEY) return res.status(500).json({ error: 'Chave Anthropic não configurada' })
 
   // ─── CONFIGURAÇÕES ────────────────────────────────────────────────────────
-  const RAG_MATCH_COUNT   = 20   // trechos recuperados antes do filtro
+  const RAG_MATCH_COUNT   = 40   // trechos recuperados antes do filtro
   const RAG_THRESHOLD     = 0.35 // similaridade mínima (0 a 1) — abaixo disso descarta
   const RAG_MIN_RESULTS   = 8    // se menos que isso passar no threshold, aceita os melhores mesmo assim
   const MAX_HISTORICO     = 6    // máximo de turnos do histórico para não estourar contexto
@@ -519,7 +519,7 @@ Art. 3º — ISENÇÃO: operações INTERESTADUAIS com produtos em estado natura
         ragStatus = `ok:${trechosCombinados.length}_trechos(${trechosTextuais.length}txt+${trechosVetoriais.length}vec)`
         contextoRAG = '\n\n## LEGISLAÇÃO RECUPERADA DA BASE\n'
           + '(Fonte primária. Cite apenas o que estiver aqui ou na BASE_LEI acima.)\n\n'
-          + trechosCombinados.slice(0, 12).map((t, i) => {
+          + trechosCombinados.slice(0, 20).map((t, i) => {
               const label = t.fonte === 'textual' ? 'busca exata' : `similaridade ${(t.similarity * 100).toFixed(0)}%`
               return `[TRECHO ${i + 1} — ${t.nome_documento} — ${label}]\n${t.trecho}`
             }).join('\n\n---\n\n')
