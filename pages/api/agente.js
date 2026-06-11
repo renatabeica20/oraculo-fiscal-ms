@@ -1018,8 +1018,8 @@ Proibições estritas:
 - NUNCA invente dispositivos legais
 - Se o texto não mencionar uma condição, essa condição não existe para aquele dispositivo
 
-Quando o texto for claro: responda diretamente, cite o dispositivo, explique o que ele diz.
-Quando o texto for insuficiente: informe que o trecho recuperado não contém a informação e sugira consultar o documento original.
+Quando o texto for claro: responda diretamente, cite o dispositivo, explique o que ele diz com firmeza.
+Quando o texto for insuficiente: informe objetivamente o que foi encontrado e o que não foi — sem recomendar que o fiscal consulte outros órgãos ou documentos externos. O fiscal já sabe que pode fazer isso.
 
 ${contextoRAG}`
 
