@@ -925,8 +925,6 @@ export default function Admin() {
         }
       `}</style>
 
-      </div>
-
         {/* ── Gemini — Upload de documentos ── */}
         {aba === 'gemini' && (
           <div className={styles.card}>
