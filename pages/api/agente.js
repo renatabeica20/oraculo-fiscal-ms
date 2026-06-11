@@ -1017,11 +1017,19 @@ REGRAS FINAIS INVIOLÁVEIS
       // Chama Gemini diretamente — sem fetch para rota intermediária
       const GEMINI_KEY = process.env.GEMINI_API_KEY
       if (GEMINI_KEY) {
-        const { data: arquivos } = await supabaseAdmin
+        // Cliente dedicado para gemini_arquivos — bypassa RLS com service_role
+        const { createClient: createClientGemini } = await import('@supabase/supabase-js')
+        const supabaseGemini = createClientGemini(
+          process.env.NEXT_PUBLIC_SUPABASE_URL,
+          process.env.SUPABASE_SERVICE_ROLE_KEY,
+          { auth: { autoRefreshToken: false, persistSession: false } }
+        )
+        const { data: arquivos, error: geminiDbError } = await supabaseGemini
           .from('gemini_arquivos')
           .select('nome_arquivo, gemini_uri')
           .gt('expira_em', new Date().toISOString())
           .order('nome_arquivo')
+        console.log('[GEMINI DB]', { count: arquivos?.length, error: geminiDbError?.message })
 
         if (arquivos && arquivos.length > 0) {
           const partes = []
