@@ -1005,6 +1005,10 @@ REGRAS FINAIS INVIOLÁVEIS
 - Quando o produto tiver alíquota ou BC diferenciada (GLP, ovos, cesta básica, ST, FECOMP), aplique o tratamento correto
 - Se a base vetorial estiver indisponível, sinalize ao fiscal`
 
+  // ─── DEFINIR MODO (geração de documento vs consulta legislativa) ──────────
+  const isGeracaoDocumento = !!(mensagem?.match(/\b(TVF|TA\b|ALIM|gerar mat|termo de apreensão|termo de verifica|===MATERIA|GERAR MAT)/i) ||
+    (historico && historico.slice(-2).some(m => m?.content?.toString().includes('===MATERIA_INICIO==='))))
+
   // ─── CONSULTA GEMINI (modo consulta legislativa) ─────────────────────────
   // Se não for geração de documento, tenta primeiro o Gemini com documentos completos.
   // Se o Gemini não tiver arquivos disponíveis, cai no RAG do Supabase como fallback.
@@ -1125,10 +1129,7 @@ ${contextoRAG}`
   }
 
   // ─── CHAMADA ANTHROPIC ────────────────────────────────────────────────────
-  // Haiku para consultas legislativas (20x mais barato), Sonnet para geração de documentos
-  const isGeracaoDocumento = !!(mensagem?.match(/\b(TVF|TA\b|ALIM|gerar mat|termo de apreensão|termo de verifica|===MATERIA|GERAR MAT)/i) ||
-    (historico && historico.slice(-2).some(m => m?.content?.toString().includes('===MATERIA_INICIO==='))))
-  const modeloEscolhido = 'claude-sonnet-4-6' // Sonnet para todos os modos — Haiku fraco demais para raciocínio jurídico
+  const modeloEscolhido = 'claude-sonnet-4-6'
 
   try {
     const antResp = await fetch('https://api.anthropic.com/v1/messages', {
