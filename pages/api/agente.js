@@ -1016,6 +1016,7 @@ REGRAS FINAIS INVIOLÁVEIS
     try {
       // Chama Gemini diretamente — sem fetch para rota intermediária
       const GEMINI_KEY = process.env.GEMINI_API_KEY
+      console.log('[GEMINI CHECK] KEY presente:', !!GEMINI_KEY, '| isGeracaoDocumento:', isGeracaoDocumento)
       if (GEMINI_KEY) {
         // Cliente dedicado para gemini_arquivos — bypassa RLS com service_role
         const { createClient: createClientGemini } = await import('@supabase/supabase-js')
